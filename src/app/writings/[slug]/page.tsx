@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Container from "@/components/site/Container";
@@ -7,6 +8,7 @@ import WritingCard from "@/components/writings/WritingCard";
 import CategoryBadge from "@/components/writings/CategoryBadge";
 import { siteFeatures } from "@/lib/features";
 import { prisma } from "@/lib/prisma";
+import { absoluteUrl, resolveSocialImage } from "@/lib/site";
 import { getPostPreview } from "@/lib/writings";
 
 type Props = {
@@ -15,10 +17,8 @@ type Props = {
   }>;
 };
 
-export default async function WritingPage({ params }: Props) {
-  const { slug } = await params;
-
-  const post = await prisma.post.findFirst({
+async function getPublicPostBySlug(slug: string) {
+  return prisma.post.findFirst({
     where: {
       slug,
       status: "published",
@@ -28,6 +28,58 @@ export default async function WritingPage({ params }: Props) {
       category: true,
     },
   });
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPublicPostBySlug(slug);
+
+  if (!post) {
+    return {
+      title: "Writings",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  const description = getPostPreview(post.excerpt, post.content);
+  const title = post.title;
+  const url = absoluteUrl(`/writings/${post.slug}`);
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title,
+      description,
+      url,
+      type: "article",
+      publishedTime: (post.publishedAt ?? post.createdAt).toISOString(),
+      images: [
+        {
+          url: resolveSocialImage(post.coverImage),
+          alt: post.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [resolveSocialImage(post.coverImage)],
+    },
+  };
+}
+
+export default async function WritingPage({ params }: Props) {
+  const { slug } = await params;
+
+  const post = await getPublicPostBySlug(slug);
 
   if (!post) {
     notFound();

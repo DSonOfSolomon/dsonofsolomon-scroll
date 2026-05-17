@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Container from "@/components/site/Container";
 import FollowButton from "@/components/follow/FollowButton";
 import SiteFooter from "@/components/site/SiteFooter";
@@ -7,7 +8,44 @@ import Link from "next/link";
 import { getPrimaryCreator } from "@/lib/admin";
 import { siteFeatures } from "@/lib/features";
 import { prisma } from "@/lib/prisma";
+import { absoluteUrl, resolveSocialImage } from "@/lib/site";
 import { getPostPreview } from "@/lib/writings";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const creator = await getPrimaryCreator();
+  const title = creator.heroTitle?.trim() || creator.name;
+  const description =
+    creator.heroSubtitle?.trim() ||
+    creator.bio?.trim() ||
+    "Essays, ideas, observations and systems.";
+  const image = resolveSocialImage(creator.heroImage);
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: absoluteUrl("/"),
+    },
+    openGraph: {
+      title,
+      description,
+      url: absoluteUrl("/"),
+      type: "website",
+      images: [
+        {
+          url: image,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
+    },
+  };
+}
 
 export default async function HomePage() {
   const [creator, featuredWritings, followerCount] = await Promise.all([
@@ -120,7 +158,7 @@ export default async function HomePage() {
                 href="/writings"
                 className="inline-flex h-[2.5rem] items-center justify-center rounded-full bg-[#0a192f] px-5 text-sm font-medium !text-white no-underline transition-colors hover:bg-[#13294b]"
               >
-                Enter writings
+                Go deeper
               </Link>
             </div>
 

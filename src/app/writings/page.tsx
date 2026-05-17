@@ -5,10 +5,36 @@ import CategoryBadge from "@/components/writings/CategoryBadge";
 import EmptyState from "@/components/site/EmptyState";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { absoluteUrl, resolveSocialImage } from "@/lib/site";
 import { getPostPreview } from "@/lib/writings";
 
 export const metadata: Metadata = {
   title: "Writings",
+  description:
+    "Public writings from D•sonofSolomon on love, life, laughter and systems.",
+  alternates: {
+    canonical: absoluteUrl("/writings"),
+  },
+  openGraph: {
+    title: "Writings",
+    description:
+      "Public writings from D•sonofSolomon on love, life, laughter and systems.",
+    url: absoluteUrl("/writings"),
+    type: "website",
+    images: [
+      {
+        url: resolveSocialImage(),
+        alt: "Writings",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Writings",
+    description:
+      "Public writings from D•sonofSolomon on love, life, laughter and systems.",
+    images: [resolveSocialImage()],
+  },
 };
 
 const PAGE_SIZE = 5;

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import Container from "@/components/site/Container";
 import FollowButton from "@/components/follow/FollowButton";
 import PageWrapper from "@/components/site/PageWrapper";
@@ -166,37 +167,39 @@ export default async function WritingPage({ params }: Props) {
           </div>
 
           {post.coverImage ? (
-            <div
-              className="relative overflow-hidden rounded-[2rem] border border-gray-200 bg-[#0a192f]"
-              style={{
-                backgroundImage: `linear-gradient(180deg, rgba(7,17,31,0.18) 0%, rgba(7,17,31,0.34) 42%, rgba(7,17,31,0.82) 100%), url("${post.coverImage}")`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            >
-              <div className="min-h-[22rem] p-8 md:min-h-[26rem] md:p-10">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(247,245,239,0.12),transparent_28%)]" />
-                <div className="relative flex min-h-[16rem] flex-col justify-end">
-                  <CategoryBadge label={post.category?.name ?? "Writing"} />
+            <div className="space-y-8 border-b border-gray-200 pb-10">
+              <div>
+                <CategoryBadge label={post.category?.name ?? "Writing"} />
 
-                  {post.chapterLabel && (
-                    <p className="mt-4 text-xs uppercase tracking-[0.22em] text-white/72">
-                      {post.chapterLabel}
-                    </p>
-                  )}
+                {post.chapterLabel && (
+                  <p className="mt-4 text-xs uppercase tracking-[0.22em] text-gray-500">
+                    {post.chapterLabel}
+                  </p>
+                )}
 
-                  <h1 className="mt-4 max-w-xl text-4xl font-bold tracking-tight text-white md:text-5xl">
-                    {post.title}
-                  </h1>
+                <h1 className="mt-4 max-w-[40rem] text-4xl font-bold tracking-tight text-gray-950 md:text-5xl">
+                  {post.title}
+                </h1>
 
-                  <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-white/72">
-                    <span>D•sonofSolomon</span>
-                    <span>•</span>
-                    <span>{formattedDate}</span>
-                    <span>•</span>
-                    <span>{readingTime} min read</span>
-                  </div>
+                <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                  <span>D•sonofSolomon</span>
+                  <span>•</span>
+                  <span>{formattedDate}</span>
+                  <span>•</span>
+                  <span>{readingTime} min read</span>
                 </div>
+              </div>
+
+              <div className="overflow-hidden rounded-[2rem] border border-gray-200 bg-[#f7f5ef]">
+                <Image
+                  src={post.coverImage}
+                  alt={post.title}
+                  width={1600}
+                  height={1000}
+                  className="h-auto w-full object-cover"
+                  sizes="(max-width: 768px) 100vw, 44rem"
+                  priority
+                />
               </div>
             </div>
           ) : (

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Container from "@/components/site/Container";
 import FollowButton from "@/components/follow/FollowButton";
 import SiteFooter from "@/components/site/SiteFooter";
@@ -83,16 +84,17 @@ export default async function HomePage() {
               className={`relative min-h-[24rem] overflow-hidden rounded-[2rem] md:min-h-[28rem] ${
                 creator.heroImage ? "" : "hero-cover-blend"
               }`}
-              style={
-                creator.heroImage
-                  ? {
-                      backgroundImage: `linear-gradient(180deg, rgba(7,17,31,0.05) 0%, rgba(7,17,31,0.12) 42%, rgba(7,17,31,0.62) 100%), url("${creator.heroImage}")`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                    }
-                  : undefined
-              }
             >
+              {creator.heroImage && (
+                <Image
+                  src={creator.heroImage}
+                  alt={creator.heroImageAlt?.trim() || heroTitle}
+                  fill
+                  priority
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 80rem"
+                />
+              )}
               <div
                 className={
                   creator.heroImage

@@ -74,7 +74,7 @@ export default async function AdminDashboardPage() {
           Hero image, copy and footer status
         </h2>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-gray-600">
-          Use a public path like <code>/admin-hero-sample.svg</code> or a full image URL.
+          Upload an image directly or use a public path like <code>/admin-hero-sample.svg</code>.
         </p>
 
         <form action={updateCreatorBranding} className="mt-6 grid gap-4">
@@ -102,6 +102,15 @@ export default async function AdminDashboardPage() {
             placeholder="/admin-hero-sample.svg"
             className="rounded-2xl border border-gray-300 px-4 py-3 outline-none transition-colors focus:border-[#0a192f]"
           />
+          <label className="block">
+            <span className="text-sm font-medium text-gray-900">Upload hero image</span>
+            <input
+              type="file"
+              name="heroImageFile"
+              accept="image/*"
+              className="mt-2 block w-full rounded-2xl border border-gray-300 px-4 py-3 text-sm text-gray-700 file:mr-4 file:rounded-full file:border-0 file:bg-[#0a192f] file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
+            />
+          </label>
           <input
             name="heroImageAlt"
             defaultValue={creator.heroImageAlt ?? ""}

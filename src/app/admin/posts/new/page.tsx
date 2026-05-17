@@ -103,6 +103,16 @@ export default async function NewPostPage() {
         </div>
 
         <label className="block">
+          <span className="text-sm font-medium text-gray-900">Upload cover image</span>
+          <input
+            type="file"
+            name="coverImageFile"
+            accept="image/*"
+            className="mt-2 block w-full rounded-2xl border border-gray-300 px-4 py-3 text-sm text-gray-700 file:mr-4 file:rounded-full file:border-0 file:bg-[#0a192f] file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
+          />
+        </label>
+
+        <label className="block">
           <span className="text-sm font-medium text-gray-900">Excerpt</span>
           <textarea
             name="excerpt"

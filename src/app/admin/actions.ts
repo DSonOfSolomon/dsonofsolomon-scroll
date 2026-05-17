@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { saveUploadedImage } from "@/lib/media";
 import { notifyFollowersOfPublishedPost } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 import {
@@ -44,7 +45,12 @@ export async function createPost(formData: FormData) {
   const universe = normalizeRequired(formData.get("universe")) || "public";
   const chapterLabel = normalizeOptional(formData.get("chapterLabel"));
   const categoryId = normalizeOptional(formData.get("categoryId"));
-  const coverImage = normalizeOptional(formData.get("coverImage"));
+  const coverImageInput = normalizeOptional(formData.get("coverImage"));
+  const coverImageUpload = await saveUploadedImage(
+    formData.get("coverImageFile"),
+    "post-cover",
+  );
+  const coverImage = coverImageUpload ?? coverImageInput;
 
   if (!title || !excerpt || !content) {
     throw new Error("Title, excerpt, and content are required.");
@@ -96,7 +102,12 @@ export async function updatePost(formData: FormData) {
   const universe = normalizeRequired(formData.get("universe")) || "public";
   const chapterLabel = normalizeOptional(formData.get("chapterLabel"));
   const categoryId = normalizeOptional(formData.get("categoryId"));
-  const coverImage = normalizeOptional(formData.get("coverImage"));
+  const coverImageInput = normalizeOptional(formData.get("coverImage"));
+  const coverImageUpload = await saveUploadedImage(
+    formData.get("coverImageFile"),
+    "post-cover",
+  );
+  const coverImage = coverImageUpload ?? coverImageInput;
 
   const existing = await prisma.post.findUnique({
     where: { id },
@@ -359,7 +370,12 @@ export async function subscribeToLetters(formData: FormData) {
 
 export async function updateCreatorBranding(formData: FormData) {
   const creator = await getPrimaryCreator();
-  const heroImage = normalizeOptional(formData.get("heroImage"));
+  const heroImageInput = normalizeOptional(formData.get("heroImage"));
+  const heroImageUpload = await saveUploadedImage(
+    formData.get("heroImageFile"),
+    "hero",
+  );
+  const heroImage = heroImageUpload ?? heroImageInput;
   const heroImageAlt = normalizeOptional(formData.get("heroImageAlt"));
   const heroEyebrow = normalizeOptional(formData.get("heroEyebrow"));
   const heroTitle = normalizeOptional(formData.get("heroTitle"));

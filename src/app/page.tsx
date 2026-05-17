@@ -103,19 +103,24 @@ export default async function HomePage() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
-                  Featured
+                  Public universe
                 </p>
 
                 <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-950 md:text-3xl">
                   Latest writings
                 </h2>
+
+                <p className="mt-3 max-w-2xl text-base leading-7 text-gray-600">
+                  Begin with the latest chapter, or move deeper into the
+                  writings as the universe keeps unfolding.
+                </p>
               </div>
 
               <Link
                 href="/writings"
                 className="inline-flex h-[2.5rem] items-center justify-center rounded-full bg-[#0a192f] px-5 text-sm font-medium !text-white no-underline transition-colors hover:bg-[#13294b]"
               >
-                View all writings
+                Enter writings
               </Link>
             </div>
 

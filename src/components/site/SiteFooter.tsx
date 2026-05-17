@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FiInstagram } from "react-icons/fi";
 import { BsTwitterX } from "react-icons/bs";
 import { FaTiktok } from "react-icons/fa6";
+import { FaFacebookF } from "react-icons/fa";
 import { getPrimaryCreator } from "@/lib/admin";
 
 export default async function SiteFooter() {
@@ -22,12 +23,12 @@ export default async function SiteFooter() {
               perspective.
             </p>
 
-            <div className="flex items-center gap-2 text-gray-500">
+            <div className="flex items-center gap-1.5 text-gray-950">
               <a
                 href="https://x.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full text-gray-600 transition-colors hover:text-gray-950"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-gray-950 transition-colors hover:bg-black/5"
                 aria-label="X"
               >
                 <BsTwitterX size={16} />
@@ -37,17 +38,27 @@ export default async function SiteFooter() {
                 href="https://instagram.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full text-gray-600 transition-colors hover:text-gray-950"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-gray-950 transition-colors hover:bg-black/5"
                 aria-label="Instagram"
               >
                 <FiInstagram size={16} />
               </a>
 
               <a
+                href="https://facebook.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-gray-950 transition-colors hover:bg-black/5"
+                aria-label="Facebook"
+              >
+                <FaFacebookF size={15} />
+              </a>
+
+              <a
                 href="https://tiktok.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full text-gray-600 transition-colors hover:text-gray-950"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-gray-950 transition-colors hover:bg-black/5"
                 aria-label="TikTok"
               >
                 <FaTiktok size={15} />

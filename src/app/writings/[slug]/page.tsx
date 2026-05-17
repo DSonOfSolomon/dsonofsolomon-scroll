@@ -104,6 +104,15 @@ export default async function WritingPage({ params }: Props) {
     <PageWrapper>
       <Container className="max-w-[44rem]">
         <article>
+          <div className="mb-8">
+            <Link
+              href="/writings"
+              className="inline-flex text-sm font-medium text-[#0a192f] transition-colors hover:text-[#13294b]"
+            >
+              Public universe / Writings
+            </Link>
+          </div>
+
           {post.coverImage ? (
             <div
               className="relative overflow-hidden rounded-[2rem] border border-gray-200 bg-[#0a192f]"

@@ -78,7 +78,7 @@ export default async function WritingsPage({
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
-                Archive
+                Public universe
               </p>
 
               <h1 className="mt-4 text-4xl font-bold tracking-tight text-gray-950 md:text-5xl">
@@ -86,9 +86,16 @@ export default async function WritingsPage({
               </h1>
 
               <p className="mt-5 max-w-2xl text-lg leading-8 text-gray-600">
-                A growing collection of thoughts on love, life, laughter and
-                systems.
+                Move from the latest chapter into a wider body of thoughts on
+                love, life, laughter and systems.
               </p>
+
+              <Link
+                href="/"
+                className="mt-5 inline-flex text-sm font-medium text-[#0a192f] transition-colors hover:text-[#13294b]"
+              >
+                Return to the front of the universe
+              </Link>
             </div>
 
             <div className="inline-flex h-[2.7rem] items-center rounded-full border border-gray-200 px-4 text-sm text-gray-500">
@@ -108,7 +115,9 @@ export default async function WritingsPage({
                   <article className="grid gap-8 lg:grid-cols-[minmax(0,1.5fr)_minmax(18rem,0.95fr)] lg:items-end">
                     <div>
                       <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
-                        {currentPage === 1 ? "Latest chapter" : "From the archive"}
+                        {currentPage === 1
+                          ? "Latest chapter in the universe"
+                          : "More writings in the universe"}
                       </p>
 
                       <div className="mt-5">
@@ -141,7 +150,7 @@ export default async function WritingsPage({
                       </div>
 
                       <p className="mt-6 inline-flex text-sm font-medium text-[#0a192f] transition-colors hover:text-[#13294b]">
-                        Enter the piece
+                        Enter this chapter
                       </p>
                     </div>
                   </article>
@@ -177,7 +186,7 @@ export default async function WritingsPage({
                           </p>
 
                           <p className="mt-5 inline-flex text-sm font-medium text-[#0a192f] transition-colors group-hover:text-[#13294b]">
-                            Continue reading
+                            Enter this chapter
                           </p>
                         </Link>
                       </div>

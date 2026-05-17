@@ -173,6 +173,23 @@ export default async function WritingPage({ params }: Props) {
           </div>
         </article>
 
+        {siteFeatures.followEnabled && (
+          <section className="mt-16 border-t border-gray-200 pt-10">
+            <div className="max-w-[22rem] rounded-[1.2rem] border border-gray-200 bg-[#f7f5ef] px-4 py-3.5">
+              <p className="text-base leading-7 text-gray-700">
+                If this resonated with you, hit the follow 
+                <br />
+                button to stay updated on future writings.
+              </p>
+              <FollowButton
+                className="mt-3 inline-flex rounded-full bg-[#0a192f] px-3.5 py-2 text-sm font-medium !text-white no-underline transition-colors hover:bg-[#13294b]"
+              >
+                Follow
+              </FollowButton>
+            </div>
+          </section>
+        )}
+
         {(primaryContinuation || continuationWritings.length > 0) && (
           <section className="mt-16 border-t border-gray-200 pt-10">
             <div className="mb-8">
@@ -240,23 +257,6 @@ export default async function WritingPage({ params }: Props) {
                 ))}
               </div>
             )}
-          </section>
-        )}
-
-        {siteFeatures.followEnabled && (
-          <section className="mt-16 border-t border-gray-200 pt-10">
-            <div className="max-w-[22rem] rounded-[1.2rem] border border-gray-200 bg-[#f7f5ef] px-4 py-3.5">
-              <p className="text-base leading-7 text-gray-700">
-                If this resonated with you, hit the follow 
-                <br />
-                button to stay updated on future writings.
-              </p>
-              <FollowButton
-                className="mt-3 inline-flex rounded-full bg-[#0a192f] px-3.5 py-2 text-sm font-medium !text-white no-underline transition-colors hover:bg-[#13294b]"
-              >
-                Follow
-              </FollowButton>
-            </div>
           </section>
         )}
       </Container>

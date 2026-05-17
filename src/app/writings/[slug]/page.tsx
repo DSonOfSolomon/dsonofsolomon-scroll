@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import Container from "@/components/site/Container";
 import FollowButton from "@/components/follow/FollowButton";
 import PageWrapper from "@/components/site/PageWrapper";
@@ -49,15 +50,46 @@ export default async function WritingPage({ params }: Props) {
     .split(/\n\s*\n+/)
     .map((paragraph) => paragraph.replace(/\n+/g, " ").trim())
     .filter(Boolean);
+  const primaryContinuation =
+    (await prisma.post.findFirst({
+      where: {
+        status: "published",
+        universe: "public",
+        slug: {
+          not: post.slug,
+        },
+        ...(post.categoryId ? { categoryId: post.categoryId } : {}),
+      },
+      include: {
+        category: true,
+      },
+      orderBy: {
+        publishedAt: "desc",
+      },
+    })) ??
+    (await prisma.post.findFirst({
+      where: {
+        status: "published",
+        universe: "public",
+        slug: {
+          not: post.slug,
+        },
+      },
+      include: {
+        category: true,
+      },
+      orderBy: {
+        publishedAt: "desc",
+      },
+    }));
 
-  const relatedWritings = await prisma.post.findMany({
+  const continuationWritings = await prisma.post.findMany({
     where: {
       status: "published",
       universe: "public",
       slug: {
-        not: post.slug,
+        notIn: [post.slug, primaryContinuation?.slug ?? ""],
       },
-      ...(post.categoryId ? { categoryId: post.categoryId } : {}),
     },
     include: {
       category: true,
@@ -141,30 +173,73 @@ export default async function WritingPage({ params }: Props) {
           </div>
         </article>
 
-        {relatedWritings.length > 0 && (
+        {(primaryContinuation || continuationWritings.length > 0) && (
           <section className="mt-16 border-t border-gray-200 pt-10">
             <div className="mb-8">
               <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
-                Keep reading
+                Continue the universe
               </p>
 
               <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-950">
-                Related writings
+                Where to go next
               </h2>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
-              {relatedWritings.map((writing) => (
-                <WritingCard
-                  key={writing.slug}
-                  title={writing.title}
-                  excerpt={getPostPreview(writing.excerpt, writing.content)}
-                  slug={writing.slug}
-                  category={writing.category?.name ?? "Writing"}
-                  chapterLabel={writing.chapterLabel ?? undefined}
-                />
-              ))}
-            </div>
+            {primaryContinuation && (
+              <Link
+                href={`/writings/${primaryContinuation.slug}`}
+                className="block rounded-[1.8rem] border border-gray-200 bg-[#f7f5ef] p-6 no-underline transition-colors hover:border-gray-400 md:p-7"
+              >
+                <article className="max-w-[36rem]">
+                  <p className="text-xs font-medium uppercase tracking-[0.22em] text-gray-500">
+                    Next recommended reading
+                  </p>
+
+                  <div className="mt-4">
+                    <CategoryBadge
+                      label={primaryContinuation.category?.name ?? "Writing"}
+                    />
+                  </div>
+
+                  {primaryContinuation.chapterLabel && (
+                    <p className="mt-4 text-xs uppercase tracking-[0.22em] text-gray-500">
+                      {primaryContinuation.chapterLabel}
+                    </p>
+                  )}
+
+                  <h3 className="mt-4 text-2xl font-semibold tracking-tight text-gray-950 md:text-[2rem]">
+                    {primaryContinuation.title}
+                  </h3>
+
+                  <p className="mt-4 max-w-[34rem] text-base leading-8 text-gray-600">
+                    {getPostPreview(
+                      primaryContinuation.excerpt,
+                      primaryContinuation.content,
+                    )}
+                    <span className="text-gray-400">...</span>
+                  </p>
+
+                  <p className="mt-6 inline-flex text-sm font-medium text-[#0a192f] transition-colors hover:text-[#13294b]">
+                    Read next
+                  </p>
+                </article>
+              </Link>
+            )}
+
+            {continuationWritings.length > 0 && (
+              <div className="mt-6 grid gap-6 md:grid-cols-2">
+                {continuationWritings.map((writing) => (
+                  <WritingCard
+                    key={writing.slug}
+                    title={writing.title}
+                    excerpt={getPostPreview(writing.excerpt, writing.content)}
+                    slug={writing.slug}
+                    category={writing.category?.name ?? "Writing"}
+                    chapterLabel={writing.chapterLabel ?? undefined}
+                  />
+                ))}
+              </div>
+            )}
           </section>
         )}
 

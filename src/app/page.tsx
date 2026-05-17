@@ -31,6 +31,10 @@ export default async function HomePage() {
       },
     }),
   ]);
+  const heroEyebrow = creator.heroEyebrow?.trim() || "Personal Writing System";
+  const heroTitle = creator.heroTitle?.trim() || creator.name;
+  const heroSubtitle =
+    creator.heroSubtitle?.trim() || creator.bio?.trim() || "Love, life, laughter and systems.";
 
   return (
     <PageWrapper>
@@ -60,15 +64,15 @@ export default async function HomePage() {
               />
               <div className="absolute inset-x-0 bottom-0 p-8 md:p-10">
                 <p className="text-xs font-medium uppercase tracking-[0.28em] text-white/70">
-                  Personal Writing System
+                  {heroEyebrow}
                 </p>
 
                 <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight text-white md:text-6xl">
-                  D•sonofSolomon
+                  {heroTitle}
                 </h1>
 
                 <p className="mt-5 max-w-2xl text-lg leading-8 text-white/78 md:text-xl md:leading-9">
-                  Love, life, laughter and systems.
+                  {heroSubtitle}
                 </p>
               </div>
             </div>

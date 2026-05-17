@@ -1,5 +1,6 @@
 export const PUSH_PUBLIC_KEY =
-  "BGgREEECcENJg1gTSNxhFtfbTq9-_2kj2iZZ5kK4Og38kS93EMvXEDuf4J2XZswWUopgaWnXLt_zX-34uwKR7Ls";
+  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
+  "BD3T-gnMA_C6wPMPSFypmeTw4Xz4g0Ey2PX9B3XzYG2Ye1yxQ7kfN3JJeqnrWpPrTH7GE96CtRwJILfalVYy6yg";
 
 export function getPushSubscriptionOptions() {
   return {

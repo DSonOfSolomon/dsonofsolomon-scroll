@@ -16,10 +16,10 @@ export default async function SubscribePage({
   searchParams: Promise<{ success?: string; plan?: string; next?: string }>;
 }) {
   const { success, plan, next } = await searchParams;
-  const selectedPlan = plan === "premium" ? "premium" : "free";
+  const selectedPlan = "premium";
   const premiumEnabled = isPremiumExperienceEnabled();
 
-  if (!premiumEnabled || selectedPlan !== "premium") {
+  if (!premiumEnabled || plan !== "premium") {
     notFound();
   }
 
@@ -27,13 +27,12 @@ export default async function SubscribePage({
     <PageWrapper>
       <Container>
         <h1 className="text-3xl font-bold tracking-tight">
-          {selectedPlan === "premium" ? "Unlock premium" : "Subscribe"}
+          Unlock premium
         </h1>
 
         <p className="mt-4 max-w-2xl leading-8 text-gray-700">
-          {selectedPlan === "premium"
-            ? "Upgrade into the premium layer to access D•sonofSolomon Unfiltered and request a personal letter."
-            : "Join the subscriber list for future updates, letters, and new writing announcements."}
+          Upgrade into the premium layer to access D•sonofSolomon Unfiltered
+          and request a personal letter.
         </p>
 
         <form
@@ -62,14 +61,12 @@ export default async function SubscribePage({
             type="submit"
             className="inline-flex rounded-full bg-[#0a192f] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#13294b]"
           >
-            {selectedPlan === "premium" ? "Subscribe to premium" : "Subscribe"}
+            Subscribe to premium
           </button>
 
           {success === "1" && (
             <p className="text-sm text-green-700">
-              {selectedPlan === "premium"
-                ? "Premium subscription saved."
-                : "Subscription saved."}
+              Premium subscription saved.
             </p>
           )}
         </form>

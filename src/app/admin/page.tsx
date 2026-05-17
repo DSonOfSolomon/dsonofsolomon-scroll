@@ -71,13 +71,31 @@ export default async function AdminDashboardPage() {
           Homepage and Footer
         </p>
         <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950">
-          Hero image and footer status
+          Hero image, copy and footer status
         </h2>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-gray-600">
           Use a public path like <code>/admin-hero-sample.svg</code> or a full image URL.
         </p>
 
         <form action={updateCreatorBranding} className="mt-6 grid gap-4">
+          <input
+            name="heroEyebrow"
+            defaultValue={creator.heroEyebrow ?? ""}
+            placeholder="Personal Writing System"
+            className="rounded-2xl border border-gray-300 px-4 py-3 outline-none transition-colors focus:border-[#0a192f]"
+          />
+          <input
+            name="heroTitle"
+            defaultValue={creator.heroTitle ?? ""}
+            placeholder="D•sonofSolomon"
+            className="rounded-2xl border border-gray-300 px-4 py-3 outline-none transition-colors focus:border-[#0a192f]"
+          />
+          <input
+            name="heroSubtitle"
+            defaultValue={creator.heroSubtitle ?? ""}
+            placeholder="Love, life, laughter and systems."
+            className="rounded-2xl border border-gray-300 px-4 py-3 outline-none transition-colors focus:border-[#0a192f]"
+          />
           <input
             name="heroImage"
             defaultValue={creator.heroImage ?? ""}
@@ -117,7 +135,7 @@ export default async function AdminDashboardPage() {
         <StatCard label="Followers" value={followerCount} note="Active push notification followers" />
         <StatCard label="Premium" value={premiumCount} note="Reserved for the later premium layer" />
         <StatCard label="Letters" value={letterRequestCount} note="Dormant premium request queue" />
-        <StatCard label="Audience" value={followerCount + premiumCount} note="Total stored email audience" />
+        <StatCard label="Audience" value={followerCount + premiumCount} note="Combined reach across followers and premium members" />
       </section>
 
       <section className="rounded-3xl border border-gray-200 bg-white p-6">

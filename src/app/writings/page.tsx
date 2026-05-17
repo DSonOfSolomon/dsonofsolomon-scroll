@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: "Writings",
 };
 
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 5;
 
 function normalizePage(page: string | undefined) {
   const value = Number(page);

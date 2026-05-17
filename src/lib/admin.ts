@@ -30,6 +30,9 @@ export async function getPrimaryCreator() {
       bio: "Love, life, laughter and systems.",
       heroImage: "/admin-hero-sample.svg",
       heroImageAlt: "D•sonofSolomon hero cover",
+      heroEyebrow: "Personal Writing System",
+      heroTitle: "D•sonofSolomon",
+      heroSubtitle: "Love, life, laughter and systems.",
       currentWorkingOn: "The D•sonofSolomon writing system.",
     },
   });

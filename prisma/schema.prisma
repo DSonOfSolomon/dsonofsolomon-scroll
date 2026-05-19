@@ -31,6 +31,8 @@ model Creator {
   subscribers    Subscriber[]
   followers      Follower[]
   letterRequests LetterRequest[]
+  pageViews      PageView[]
+  readingEvents  ReadingEvent[]
 }
 
 model Category {
@@ -68,6 +70,9 @@ model Post {
 
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  pageViews     PageView[]
+  readingEvents ReadingEvent[]
 
   @@unique([creatorId, slug])
 }
@@ -118,4 +123,42 @@ model Follower {
   creator   Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   @@index([creatorId, createdAt])
+}
+
+model PageView {
+  id        String   @id @default(cuid())
+  path      String
+  sessionId String
+  visitorId String
+  referrer  String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  creatorId String
+  creator   Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  postId String?
+  post   Post? @relation(fields: [postId], references: [id], onDelete: SetNull)
+
+  @@index([creatorId, createdAt])
+  @@index([path, createdAt])
+  @@index([postId, createdAt])
+}
+
+model ReadingEvent {
+  id        String   @id @default(cuid())
+  sessionId String
+  visitorId String
+  milestone Int
+  createdAt DateTime @default(now())
+
+  creatorId String
+  creator   Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  postId String
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, sessionId, milestone])
+  @@index([creatorId, createdAt])
+  @@index([postId, createdAt])
 }

@@ -29,7 +29,7 @@ export default async function AdminDashboardPage() {
   await ensureDefaultCategories();
   const creator = await getPrimaryCreator();
 
-  const [postCount, publishedCount, draftCount, publicCount, unfilteredCount, categoryCount, followerCount, premiumCount, letterRequestCount, recentPosts] =
+  const [postCount, publishedCount, draftCount, publicCount, unfilteredCount, categoryCount, followerCount, premiumCount, letterRequestCount, totalPageViews, writingPageViews, completedReads, recentPosts] =
     await Promise.all([
       prisma.post.count(),
       prisma.post.count({ where: { status: "published" } }),
@@ -40,6 +40,21 @@ export default async function AdminDashboardPage() {
       prisma.follower.count({ where: { status: "active" } }),
       prisma.subscriber.count({ where: { tier: "premium" } }),
       prisma.letterRequest.count(),
+      prisma.pageView.count({ where: { creatorId: creator.id } }),
+      prisma.pageView.count({
+        where: {
+          creatorId: creator.id,
+          postId: {
+            not: null,
+          },
+        },
+      }),
+      prisma.readingEvent.count({
+        where: {
+          creatorId: creator.id,
+          milestone: 100,
+        },
+      }),
       prisma.post.findMany({
         orderBy: { updatedAt: "desc" },
         take: 5,
@@ -145,6 +160,9 @@ export default async function AdminDashboardPage() {
         <StatCard label="Premium" value={premiumCount} note="Reserved for the later premium layer" />
         <StatCard label="Letters" value={letterRequestCount} note="Dormant premium request queue" />
         <StatCard label="Audience" value={followerCount + premiumCount} note="Combined reach across followers and premium members" />
+        <StatCard label="Site views" value={totalPageViews} note="Tracked visits across public pages" />
+        <StatCard label="Writing views" value={writingPageViews} note="Visits to published writing pages" />
+        <StatCard label="Completed reads" value={completedReads} note="Reached the end of a piece" />
       </section>
 
       <section className="rounded-3xl border border-gray-200 bg-white p-6">

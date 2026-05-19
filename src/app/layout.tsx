@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import PageViewTracker from "@/components/analytics/PageViewTracker";
 import { Geist, Geist_Mono } from "next/font/google";
 import FollowerNotifications from "@/components/follow/FollowerNotifications";
 import SiteHeader from "@/components/site/SiteHeader";
@@ -52,6 +53,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <SiteHeader />
+        <PageViewTracker />
         <FollowerNotifications />
         {children}
       </body>

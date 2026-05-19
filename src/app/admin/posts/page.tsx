@@ -4,14 +4,47 @@ import BackToDashboardLink from "@/components/admin/BackToDashboardLink";
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminPostsPage() {
-  const posts = await prisma.post.findMany({
-    include: {
-      category: true,
-    },
-    orderBy: {
-      updatedAt: "desc",
-    },
-  });
+  const [posts, viewCounts, completedReadCounts] = await Promise.all([
+    prisma.post.findMany({
+      include: {
+        category: true,
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+    }),
+    prisma.pageView.groupBy({
+      by: ["postId"],
+      where: {
+        postId: {
+          not: null,
+        },
+      },
+      _count: {
+        _all: true,
+      },
+    }),
+    prisma.readingEvent.groupBy({
+      by: ["postId"],
+      where: {
+        milestone: 100,
+      },
+      _count: {
+        _all: true,
+      },
+    }),
+  ]);
+
+  const viewsByPostId = new Map(
+    viewCounts
+      .filter((entry) => entry.postId)
+      .map((entry) => [entry.postId as string, entry._count._all]),
+  );
+  const completedByPostId = new Map(
+    completedReadCounts
+      .filter((entry) => entry.postId)
+      .map((entry) => [entry.postId as string, entry._count._all]),
+  );
 
   return (
     <div className="space-y-4">
@@ -38,6 +71,8 @@ export default async function AdminPostsPage() {
                 <th className="px-3 py-3">Category</th>
                 <th className="px-3 py-3">Status</th>
                 <th className="px-3 py-3">Universe</th>
+                <th className="px-3 py-3">Views</th>
+                <th className="px-3 py-3">Completed</th>
                 <th className="px-3 py-3">Updated</th>
                 <th className="px-3 py-3">Actions</th>
               </tr>
@@ -50,6 +85,8 @@ export default async function AdminPostsPage() {
                   <td className="px-3 py-4">{post.category?.name ?? "Unassigned"}</td>
                   <td className="px-3 py-4 capitalize">{post.status}</td>
                   <td className="px-3 py-4 capitalize">{post.universe}</td>
+                  <td className="px-3 py-4">{viewsByPostId.get(post.id) ?? 0}</td>
+                  <td className="px-3 py-4">{completedByPostId.get(post.id) ?? 0}</td>
                   <td className="px-3 py-4">
                     {post.updatedAt.toLocaleDateString("en-GB", {
                       day: "numeric",

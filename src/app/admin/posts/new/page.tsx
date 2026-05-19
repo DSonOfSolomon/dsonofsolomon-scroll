@@ -93,13 +93,9 @@ export default async function NewPostPage() {
             </select>
           </label>
 
-          <label className="block">
-            <span className="text-sm font-medium text-gray-900">Cover image URL</span>
-            <input
-              name="coverImage"
-              className="mt-2 w-full rounded-2xl border border-gray-300 px-4 py-3 outline-none transition-colors focus:border-[#0a192f]"
-            />
-          </label>
+          <div className="rounded-2xl border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600">
+            Upload a cover image directly, or use the advanced path field only if you need a manual file path.
+          </div>
         </div>
 
         <label className="block">
@@ -111,6 +107,17 @@ export default async function NewPostPage() {
             className="mt-2 block w-full rounded-2xl border border-gray-300 px-4 py-3 text-sm text-gray-700 file:mr-4 file:rounded-full file:border-0 file:bg-[#0a192f] file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
           />
         </label>
+
+        <details className="rounded-2xl border border-gray-200 px-4 py-3">
+          <summary className="cursor-pointer text-sm font-medium text-gray-700">
+            Advanced: use a manual cover image path
+          </summary>
+          <input
+            name="coverImageOverride"
+            placeholder="/uploads/cover-image.jpg"
+            className="mt-3 w-full rounded-2xl border border-gray-300 px-4 py-3 outline-none transition-colors focus:border-[#0a192f]"
+          />
+        </details>
 
         <label className="block">
           <span className="text-sm font-medium text-gray-900">Excerpt</span>

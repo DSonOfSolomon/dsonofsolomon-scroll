@@ -5,7 +5,7 @@ import { randomUUID } from "node:crypto";
 const UPLOADS_DIR = path.join(process.cwd(), "public", "uploads");
 
 function getFileExtension(file: File) {
-  const fromType = file.type.split("/")[1]?.toLowerCase();
+  const fromType = file.type.split("/")[1]?.toLowerCase().split("+")[0];
 
   if (fromType === "jpeg") {
     return "jpg";

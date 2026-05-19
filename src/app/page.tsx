@@ -74,6 +74,10 @@ export default async function HomePage() {
   const heroTitle = creator.heroTitle?.trim() || creator.name;
   const heroSubtitle =
     creator.heroSubtitle?.trim() || creator.bio?.trim() || "Love, life, laughter and systems.";
+  const heroImageSrc = creator.heroImage
+    ? `${creator.heroImage}?v=${creator.updatedAt.getTime()}`
+    : null;
+  const heroImageIsSvg = creator.heroImage?.toLowerCase().endsWith(".svg");
 
   return (
     <PageWrapper>
@@ -81,39 +85,45 @@ export default async function HomePage() {
         <Container>
           <section>
             <div
-              className={`relative min-h-[24rem] overflow-hidden rounded-[2rem] md:min-h-[28rem] ${
-                creator.heroImage ? "" : "hero-cover-blend"
+              className={`relative overflow-hidden rounded-[2rem] ${
+                creator.heroImage
+                  ? ""
+                  : "hero-cover-blend min-h-[24rem] md:min-h-[28rem]"
               }`}
             >
-              {creator.heroImage && (
+              {heroImageSrc ? (
                 <Image
-                  src={creator.heroImage}
+                  src={heroImageSrc}
                   alt={creator.heroImageAlt?.trim() || heroTitle}
-                  fill
+                  width={2000}
+                  height={1200}
                   priority
-                  className="object-cover"
+                  unoptimized={heroImageIsSvg}
+                  className="block h-auto w-full"
                   sizes="(max-width: 768px) 100vw, 80rem"
                 />
-              )}
+              ) : null}
               <div
                 className={
                   creator.heroImage
-                    ? "absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(164,120,63,0.18),transparent_28%),linear-gradient(140deg,rgba(7,17,31,0.52)_8%,rgba(7,17,31,0.16)_44%,rgba(247,245,239,0.02)_74%)]"
+                    ? "absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(164,120,63,0.18),transparent_28%),linear-gradient(90deg,rgba(7,17,31,0.56)_0%,rgba(7,17,31,0.28)_24%,rgba(7,17,31,0.1)_46%,rgba(7,17,31,0.02)_72%)]"
                     : "absolute inset-0 bg-[linear-gradient(180deg,rgba(7,17,31,0.05)_0%,rgba(7,17,31,0.12)_42%,rgba(7,17,31,0.62)_100%)]"
                 }
               />
-              <div className="absolute inset-x-0 bottom-0 p-8 md:p-10">
-                <p className="text-xs font-medium uppercase tracking-[0.28em] text-white/70">
-                  {heroEyebrow}
-                </p>
+              <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7 md:p-10">
+                <div className="max-w-[18rem] sm:max-w-[24rem] md:max-w-3xl">
+                  <p className="pl-2 text-[11px] font-medium uppercase tracking-[0.22em] text-white/70 sm:pl-0 sm:text-xs sm:tracking-[0.28em]">
+                    {heroEyebrow}
+                  </p>
 
-                <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight text-white md:text-6xl">
-                  {heroTitle}
-                </h1>
+                  <h1 className="mt-3 text-3xl font-bold tracking-tight text-white sm:mt-4 sm:text-5xl md:text-6xl">
+                    {heroTitle}
+                  </h1>
 
-                <p className="mt-5 max-w-2xl text-lg leading-8 text-white/78 md:text-xl md:leading-9">
-                  {heroSubtitle}
-                </p>
+                  <p className="mt-3 max-w-[17rem] pl-2 text-base leading-6 text-white/78 sm:mt-5 sm:max-w-xl sm:pl-0 sm:text-lg sm:leading-8 md:max-w-2xl md:text-xl md:leading-9">
+                    {heroSubtitle}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -183,3 +193,4 @@ export default async function HomePage() {
     </PageWrapper>
   );
 }
+      

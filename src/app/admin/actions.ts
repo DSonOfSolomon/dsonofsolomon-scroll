@@ -22,17 +22,26 @@ function normalizeRequired(value: FormDataEntryValue | null) {
 }
 
 async function refreshAdminViews() {
-  revalidatePath("/admin");
-  revalidatePath("/admin/posts");
-  revalidatePath("/admin/categories");
+  revalidatePath("/admin", "page");
+  revalidatePath("/admin/posts", "page");
   revalidatePath("/admin/subscribers");
   revalidatePath("/admin/letter-requests");
-  revalidatePath("/");
+  revalidatePath("/", "page");
   revalidatePath("/follow");
   revalidatePath("/subscribe");
-  revalidatePath("/writings");
+  revalidatePath("/writings", "page");
   revalidatePath("/unfiltered");
   revalidatePath("/request-a-letter");
+}
+
+async function safeNotifyFollowersOfPublishedPost(
+  post: Parameters<typeof notifyFollowersOfPublishedPost>[0],
+) {
+  try {
+    await notifyFollowersOfPublishedPost(post);
+  } catch (error) {
+    console.error("Follower notification failed", error);
+  }
 }
 
 export async function createPost(formData: FormData) {
@@ -45,7 +54,9 @@ export async function createPost(formData: FormData) {
   const universe = normalizeRequired(formData.get("universe")) || "public";
   const chapterLabel = normalizeOptional(formData.get("chapterLabel"));
   const categoryId = normalizeOptional(formData.get("categoryId"));
-  const coverImageInput = normalizeOptional(formData.get("coverImage"));
+  const coverImageInput =
+    normalizeOptional(formData.get("coverImageOverride")) ??
+    normalizeOptional(formData.get("coverImage"));
   const coverImageUpload = await saveUploadedImage(
     formData.get("coverImageFile"),
     "post-cover",
@@ -75,7 +86,7 @@ export async function createPost(formData: FormData) {
   });
 
   if (post.status === "published" && post.universe === "public") {
-    await notifyFollowersOfPublishedPost({
+    await safeNotifyFollowersOfPublishedPost({
       id: post.id,
       title: post.title,
       slug: post.slug,
@@ -88,6 +99,9 @@ export async function createPost(formData: FormData) {
   }
 
   await refreshAdminViews();
+  revalidatePath(
+    post.universe === "public" ? `/writings/${post.slug}` : `/unfiltered/${post.slug}`,
+  );
   redirect("/admin/posts");
 }
 
@@ -156,7 +170,7 @@ export async function updatePost(formData: FormData) {
     (existing.status !== "published" || existing.universe !== "public");
 
   if (shouldNotifyFollowers) {
-    await notifyFollowersOfPublishedPost({
+    await safeNotifyFollowersOfPublishedPost({
       id: updatedPost.id,
       title: updatedPost.title,
       slug: updatedPost.slug,
@@ -169,6 +183,16 @@ export async function updatePost(formData: FormData) {
   }
 
   await refreshAdminViews();
+  revalidatePath(
+    existing.universe === "public"
+      ? `/writings/${existing.slug}`
+      : `/unfiltered/${existing.slug}`,
+  );
+  revalidatePath(
+    updatedPost.universe === "public"
+      ? `/writings/${updatedPost.slug}`
+      : `/unfiltered/${updatedPost.slug}`,
+  );
   redirect("/admin/posts");
 }
 
@@ -217,7 +241,7 @@ export async function togglePostStatus(formData: FormData) {
     updatedPost.status === "published" &&
     existing.universe === "public"
   ) {
-    await notifyFollowersOfPublishedPost({
+    await safeNotifyFollowersOfPublishedPost({
       id: existing.id,
       title: existing.title,
       slug: existing.slug,
@@ -230,6 +254,11 @@ export async function togglePostStatus(formData: FormData) {
   }
 
   await refreshAdminViews();
+  revalidatePath(
+    existing.universe === "public"
+      ? `/writings/${existing.slug}`
+      : `/unfiltered/${existing.slug}`,
+  );
 }
 
 export async function createSubscriber(formData: FormData) {
@@ -370,7 +399,9 @@ export async function subscribeToLetters(formData: FormData) {
 
 export async function updateCreatorBranding(formData: FormData) {
   const creator = await getPrimaryCreator();
-  const heroImageInput = normalizeOptional(formData.get("heroImage"));
+  const heroImageInput =
+    normalizeOptional(formData.get("heroImageOverride")) ??
+    normalizeOptional(formData.get("heroImage"));
   const heroImageUpload = await saveUploadedImage(
     formData.get("heroImageFile"),
     "hero",

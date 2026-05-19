@@ -28,8 +28,11 @@ function StatCard({
 export default async function AdminDashboardPage() {
   await ensureDefaultCategories();
   const creator = await getPrimaryCreator();
+  const heroPreviewSrc = creator.heroImage
+    ? `${creator.heroImage}?v=${creator.updatedAt.getTime()}`
+    : null;
 
-  const [postCount, publishedCount, draftCount, publicCount, unfilteredCount, categoryCount, followerCount, premiumCount, letterRequestCount, totalPageViews, writingPageViews, completedReads, recentPosts] =
+  const [postCount, publishedCount, draftCount, publicCount, unfilteredCount, categoryCount, followerCount, premiumCount, letterRequestCount, recentPosts] =
     await Promise.all([
       prisma.post.count(),
       prisma.post.count({ where: { status: "published" } }),
@@ -40,21 +43,6 @@ export default async function AdminDashboardPage() {
       prisma.follower.count({ where: { status: "active" } }),
       prisma.subscriber.count({ where: { tier: "premium" } }),
       prisma.letterRequest.count(),
-      prisma.pageView.count({ where: { creatorId: creator.id } }),
-      prisma.pageView.count({
-        where: {
-          creatorId: creator.id,
-          postId: {
-            not: null,
-          },
-        },
-      }),
-      prisma.readingEvent.count({
-        where: {
-          creatorId: creator.id,
-          milestone: 100,
-        },
-      }),
       prisma.post.findMany({
         orderBy: { updatedAt: "desc" },
         take: 5,
@@ -111,12 +99,28 @@ export default async function AdminDashboardPage() {
             placeholder="Love, life, laughter and systems."
             className="rounded-2xl border border-gray-300 px-4 py-3 outline-none transition-colors focus:border-[#0a192f]"
           />
-          <input
-            name="heroImage"
-            defaultValue={creator.heroImage ?? ""}
-            placeholder="/admin-hero-sample.svg"
-            className="rounded-2xl border border-gray-300 px-4 py-3 outline-none transition-colors focus:border-[#0a192f]"
-          />
+          <input type="hidden" name="heroImage" value={creator.heroImage ?? ""} />
+          {heroPreviewSrc ? (
+            <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-[#f7f5ef] px-3 py-2">
+              <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+                <div className="relative h-10 w-14">
+                  <img
+                    src={heroPreviewSrc}
+                    alt={creator.heroImageAlt ?? "Current hero image"}
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-medium uppercase tracking-[0.16em] text-gray-900">
+                  Hero image
+                </p>
+                <p className="text-xs text-gray-500">
+                  Active on the public homepage.
+                </p>
+              </div>
+            </div>
+          ) : null}
           <label className="block">
             <span className="text-sm font-medium text-gray-900">Upload hero image</span>
             <input
@@ -126,6 +130,17 @@ export default async function AdminDashboardPage() {
               className="mt-2 block w-full rounded-2xl border border-gray-300 px-4 py-3 text-sm text-gray-700 file:mr-4 file:rounded-full file:border-0 file:bg-[#0a192f] file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
             />
           </label>
+          <details className="rounded-2xl border border-gray-200 px-4 py-3">
+            <summary className="cursor-pointer text-sm font-medium text-gray-700">
+              Advanced: use a manual image path
+            </summary>
+            <input
+              name="heroImageOverride"
+              defaultValue={creator.heroImage ?? ""}
+              placeholder="/admin-hero-sample.svg"
+              className="mt-3 w-full rounded-2xl border border-gray-300 px-4 py-3 outline-none transition-colors focus:border-[#0a192f]"
+            />
+          </details>
           <input
             name="heroImageAlt"
             defaultValue={creator.heroImageAlt ?? ""}
@@ -160,9 +175,6 @@ export default async function AdminDashboardPage() {
         <StatCard label="Premium" value={premiumCount} note="Reserved for the later premium layer" />
         <StatCard label="Letters" value={letterRequestCount} note="Dormant premium request queue" />
         <StatCard label="Audience" value={followerCount + premiumCount} note="Combined reach across followers and premium members" />
-        <StatCard label="Site views" value={totalPageViews} note="Tracked visits across public pages" />
-        <StatCard label="Writing views" value={writingPageViews} note="Visits to published writing pages" />
-        <StatCard label="Completed reads" value={completedReads} note="Reached the end of a piece" />
       </section>
 
       <section className="rounded-3xl border border-gray-200 bg-white p-6">

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import ReadingTracker from "@/components/analytics/ReadingTracker";
 import Container from "@/components/site/Container";
 import FollowButton from "@/components/follow/FollowButton";
 import PageWrapper from "@/components/site/PageWrapper";
@@ -98,6 +97,7 @@ export default async function WritingPage({ params }: Props) {
 
   const wordCount = post.content.trim().split(/\s+/).length;
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+  const coverImageIsSvg = post.coverImage?.toLowerCase().endsWith(".svg");
   const paragraphs = post.content
     .replace(/\r\n/g, "\n")
     .trim()
@@ -157,14 +157,13 @@ export default async function WritingPage({ params }: Props) {
   return (
     <PageWrapper>
       <Container className="max-w-[44rem]">
-        <article data-reading-article>
-          <ReadingTracker postId={post.id} />
+        <article>
           <div className="mb-8">
             <Link
               href="/writings"
               className="inline-flex text-sm font-medium text-[#0a192f] transition-colors hover:text-[#13294b]"
             >
-              Public universe / Writings
+              ← Back
             </Link>
           </div>
 
@@ -201,6 +200,7 @@ export default async function WritingPage({ params }: Props) {
                   className="h-auto w-full object-cover"
                   sizes="(max-width: 768px) 100vw, 44rem"
                   priority
+                  unoptimized={coverImageIsSvg}
                 />
               </div>
             </div>

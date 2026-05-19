@@ -8,7 +8,7 @@ export default function PageWrapper({
   children,
 }: PageWrapperProps) {
   return (
-    <main className="min-h-screen py-16 md:py-24">
+    <main className="min-h-screen pt-16 md:pt-24">
       {children}
     </main>
   );

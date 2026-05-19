@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <PageWrapper>
-      <>
+    <>
+      <PageWrapper>
         <Container>
           <h1 className="text-3xl font-bold tracking-tight">
             About
@@ -21,8 +21,8 @@ export default function AboutPage() {
             Welcome to my writing system.
           </p>
         </Container>
-        <SiteFooter />
-      </>
-    </PageWrapper>
+      </PageWrapper>
+      <SiteFooter />
+    </>
   );
 }

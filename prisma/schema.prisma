@@ -13,24 +13,28 @@ datasource db {
 }
 
 model Creator {
-  id           String   @id @default(cuid())
-  name         String
-  slug         String   @unique
-  bio          String?
-  heroImage    String?
-  heroImageAlt String?
-  heroEyebrow  String?
-  heroTitle    String?
-  heroSubtitle String?
+  id               String   @id @default(cuid())
+  name             String
+  slug             String   @unique
+  bio              String?
+  heroImage        String?
+  heroImageAlt     String?
+  heroEyebrow      String?
+  heroTitle        String?
+  heroSubtitle     String?
   currentWorkingOn String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  posts          Post[]
-  categories     Category[]
-  subscribers    Subscriber[]
-  followers      Follower[]
-  letterRequests LetterRequest[]
+  posts                     Post[]
+  categories                Category[]
+  subscribers               Subscriber[]
+  followers                 Follower[]
+  letterRequests            LetterRequest[]
+  pageViews                 PageView[]
+  postViews                 PostView[]
+  readingSessions           ReadingSession[]
+  subscriberAnalyticsEvents SubscriberAnalyticsEvent[]
 }
 
 model Category {
@@ -49,17 +53,17 @@ model Category {
 }
 
 model Post {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
   slug        String
   excerpt     String
   content     String
-  status      String   @default("draft")
-  universe    String   @default("public")
+  status      String    @default("draft")
+  universe    String    @default("public")
   coverImage  String?
   publishedAt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   chapterLabel String?
 
@@ -68,6 +72,9 @@ model Post {
 
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  postViews       PostView[]
+  readingSessions ReadingSession[]
 
   @@unique([creatorId, slug])
 }
@@ -83,39 +90,115 @@ model Subscriber {
   creatorId String
   creator   Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
+  analyticsEvents SubscriberAnalyticsEvent[]
+
   @@unique([creatorId, email])
 }
 
 model LetterRequest {
-  id          String   @id @default(cuid())
-  name        String
-  email       String
-  tier        String
-  message     String
-  status      String   @default("pending")
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  tier      String
+  message   String
+  status    String   @default("pending")
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  creatorId   String
-  creator     Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  creatorId String
+  creator   Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   @@index([creatorId, createdAt])
 }
 
 model Follower {
-  id             String   @id @default(cuid())
-  endpoint       String   @unique
+  id             String    @id @default(cuid())
+  endpoint       String    @unique
   p256dh         String
   auth           String
-  status         String   @default("active")
+  status         String    @default("active")
   userAgent      String?
   lastNotifiedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  creatorId String
+  creator   Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([creatorId, createdAt])
+}
+
+model PageView {
+  id        String   @id @default(cuid())
+  path      String
+  referrer  String?
+  sessionId String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  creatorId String
+  creator   Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([creatorId, createdAt])
+  @@index([creatorId, path])
+}
+
+model PostView {
+  id        String   @id @default(cuid())
+  path      String
+  referrer  String?
+  sessionId String?
+  userAgent String?
+  universe  String
+  createdAt DateTime @default(now())
+
+  creatorId String
+  creator   Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([creatorId, createdAt])
+  @@index([postId, createdAt])
+}
+
+model ReadingSession {
+  id             String   @id @default(cuid())
+  path           String
+  sessionId      String
+  maxProgress    Int      @default(0)
+  secondsSpent   Int      @default(0)
+  completed      Boolean  @default(false)
+  lastRecordedAt DateTime @default(now())
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   creatorId String
   creator   Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, sessionId])
   @@index([creatorId, createdAt])
+  @@index([postId, completed])
+}
+
+model SubscriberAnalyticsEvent {
+  id           String   @id @default(cuid())
+  type         String
+  tier         String?
+  email        String?
+  subscriberId String?
+  createdAt    DateTime @default(now())
+
+  creatorId String
+  creator   Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  subscriber Subscriber? @relation(fields: [subscriberId], references: [id], onDelete: SetNull)
+
+  @@index([creatorId, createdAt])
+  @@index([creatorId, type])
+  @@index([subscriberId])
 }

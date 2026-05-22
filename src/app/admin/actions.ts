@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { recordSubscriberAnalyticsEvent } from "@/lib/analytics";
 import { saveUploadedImage } from "@/lib/media";
 import { notifyFollowersOfPublishedPost } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
@@ -271,7 +272,19 @@ export async function createSubscriber(formData: FormData) {
     throw new Error("Email is required.");
   }
 
-  await prisma.subscriber.upsert({
+  const existingSubscriber = await prisma.subscriber.findUnique({
+    where: {
+      creatorId_email: {
+        creatorId: creator.id,
+        email,
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  const subscriber = await prisma.subscriber.upsert({
     where: {
       creatorId_email: {
         creatorId: creator.id,
@@ -290,15 +303,40 @@ export async function createSubscriber(formData: FormData) {
     },
   });
 
+  await recordSubscriberAnalyticsEvent({
+    creatorId: creator.id,
+    subscriberId: subscriber.id,
+    email: subscriber.email,
+    tier: subscriber.tier,
+    type: existingSubscriber ? "subscriber_updated" : "subscriber_created",
+  });
+
   await refreshAdminViews();
 }
 
 export async function deleteSubscriber(formData: FormData) {
   const id = normalizeRequired(formData.get("id"));
+  const subscriber = await prisma.subscriber.findUnique({
+    where: { id },
+    select: {
+      creatorId: true,
+      email: true,
+      tier: true,
+    },
+  });
 
   await prisma.subscriber.delete({
     where: { id },
   });
+
+  if (subscriber) {
+    await recordSubscriberAnalyticsEvent({
+      creatorId: subscriber.creatorId,
+      email: subscriber.email,
+      tier: subscriber.tier,
+      type: "subscriber_deleted",
+    });
+  }
 
   await refreshAdminViews();
 }
@@ -362,7 +400,20 @@ export async function subscribeToLetters(formData: FormData) {
     throw new Error("Email is required.");
   }
 
-  await prisma.subscriber.upsert({
+  const existingSubscriber = await prisma.subscriber.findUnique({
+    where: {
+      creatorId_email: {
+        creatorId: creator.id,
+        email,
+      },
+    },
+    select: {
+      id: true,
+      tier: true,
+    },
+  });
+
+  const subscriber = await prisma.subscriber.upsert({
     where: {
       creatorId_email: {
         creatorId: creator.id,
@@ -379,6 +430,19 @@ export async function subscribeToLetters(formData: FormData) {
       tier,
       creatorId: creator.id,
     },
+  });
+
+  await recordSubscriberAnalyticsEvent({
+    creatorId: creator.id,
+    subscriberId: subscriber.id,
+    email: subscriber.email,
+    tier: subscriber.tier,
+    type:
+      tier === "premium" && existingSubscriber?.tier !== "premium"
+        ? "premium_signup"
+        : existingSubscriber
+          ? "subscriber_updated"
+          : "subscriber_created",
   });
 
   const cookieStore = await cookies();

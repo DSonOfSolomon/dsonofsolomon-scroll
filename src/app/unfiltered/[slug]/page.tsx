@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import PostReadingTracker from "@/components/analytics/PostReadingTracker";
 import Container from "@/components/site/Container";
 import EmptyState from "@/components/site/EmptyState";
 import PageWrapper from "@/components/site/PageWrapper";
@@ -88,6 +89,7 @@ export default async function UnfilteredWritingPage({ params }: Props) {
     <PageWrapper>
       <Container className="max-w-2xl">
         <article>
+          <PostReadingTracker postId={post.id} universe={post.universe} />
           <div className="border-b border-gray-200 pb-10">
             <CategoryBadge label={post.category?.name ?? "Unfiltered"} />
 

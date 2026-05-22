@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { FiX } from "react-icons/fi";
 import { getPushSubscriptionOptions } from "@/lib/push";
 
@@ -39,7 +39,6 @@ export default function FollowButton({
   children = "Follow",
 }: FollowButtonProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
   const [state, setState] = useState<FollowState>("idle");
   const [message, setMessage] = useState("");
@@ -49,7 +48,9 @@ export default function FollowButton({
     typeof window !== "undefined" &&
     (window.location.hostname === "localhost" ||
       window.location.hostname === "127.0.0.1");
-  const showLocalTesting = devMode && searchParams.get("followDebug") === "1";
+  const showLocalTesting =
+    devMode &&
+    new URLSearchParams(window.location.search).get("followDebug") === "1";
 
   useEffect(() => {
     let cancelled = false;

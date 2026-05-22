@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import PostReadingTracker from "@/components/analytics/PostReadingTracker";
 import Container from "@/components/site/Container";
 import FollowButton from "@/components/follow/FollowButton";
 import PageWrapper from "@/components/site/PageWrapper";
@@ -158,6 +159,7 @@ export default async function WritingPage({ params }: Props) {
     <PageWrapper>
       <Container className="max-w-[44rem]">
         <article>
+          <PostReadingTracker postId={post.id} universe={post.universe} />
           <div className="mb-8">
             <Link
               href="/writings"

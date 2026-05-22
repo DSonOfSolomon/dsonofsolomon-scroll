@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
+import AnalyticsTracker from "@/components/analytics/AnalyticsTracker";
 import FollowerNotifications from "@/components/follow/FollowerNotifications";
 import SiteHeader from "@/components/site/SiteHeader";
 import { resolveSocialImage, SITE_URL } from "@/lib/site";
@@ -53,6 +55,9 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <SiteHeader />
         <FollowerNotifications />
+        <Suspense fallback={null}>
+          <AnalyticsTracker />
+        </Suspense>
         {children}
       </body>
     </html>

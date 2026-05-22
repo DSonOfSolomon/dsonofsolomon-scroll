@@ -25,30 +25,133 @@ function StatCard({
   );
 }
 
+function analyticsDelegatesAvailable() {
+  return Boolean(
+    prisma.pageView &&
+      prisma.postView &&
+      prisma.readingSession &&
+      prisma.subscriberAnalyticsEvent,
+  );
+}
+
 export default async function AdminDashboardPage() {
   await ensureDefaultCategories();
   const creator = await getPrimaryCreator();
   const heroPreviewSrc = creator.heroImage
     ? `${creator.heroImage}?v=${creator.updatedAt.getTime()}`
     : null;
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-  const [postCount, publishedCount, draftCount, publicCount, unfilteredCount, categoryCount, followerCount, premiumCount, letterRequestCount, recentPosts] =
-    await Promise.all([
-      prisma.post.count(),
-      prisma.post.count({ where: { status: "published" } }),
-      prisma.post.count({ where: { status: "draft" } }),
-      prisma.post.count({ where: { status: "published", universe: "public" } }),
-      prisma.post.count({ where: { status: "published", universe: "unfiltered" } }),
-      prisma.category.count(),
-      prisma.follower.count({ where: { status: "active" } }),
-      prisma.subscriber.count({ where: { tier: "premium" } }),
-      prisma.letterRequest.count(),
-      prisma.post.findMany({
-        orderBy: { updatedAt: "desc" },
-        take: 5,
-        include: { category: true },
-      }),
-    ]);
+  const coreDashboardData = await Promise.all([
+    prisma.post.count(),
+    prisma.post.count({ where: { status: "published" } }),
+    prisma.post.count({ where: { status: "draft" } }),
+    prisma.post.count({ where: { status: "published", universe: "public" } }),
+    prisma.post.count({ where: { status: "published", universe: "unfiltered" } }),
+    prisma.category.count(),
+    prisma.follower.count({ where: { status: "active" } }),
+    prisma.subscriber.count({ where: { tier: "premium" } }),
+    prisma.letterRequest.count(),
+    prisma.post.findMany({
+      orderBy: { updatedAt: "desc" },
+      take: 5,
+      include: { category: true },
+    }),
+  ]);
+
+  const [
+    postCount,
+    publishedCount,
+    draftCount,
+    publicCount,
+    unfilteredCount,
+    categoryCount,
+    followerCount,
+    premiumCount,
+    letterRequestCount,
+    recentPosts,
+  ] = coreDashboardData;
+
+  const [
+    totalPageViews,
+    recentPageViews,
+    totalPostViews,
+    recentPostViews,
+    completedReads,
+    readingStats,
+    subscriberEvents,
+    recentSubscriberEvents,
+    analyticsPosts,
+  ] = analyticsDelegatesAvailable()
+    ? await Promise.all([
+        prisma.pageView.count({ where: { creatorId: creator.id } }),
+        prisma.pageView.count({
+          where: {
+            creatorId: creator.id,
+            createdAt: { gte: sevenDaysAgo },
+          },
+        }),
+        prisma.postView.count({ where: { creatorId: creator.id } }),
+        prisma.postView.count({
+          where: {
+            creatorId: creator.id,
+            createdAt: { gte: sevenDaysAgo },
+          },
+        }),
+        prisma.readingSession.count({
+          where: {
+            creatorId: creator.id,
+            completed: true,
+          },
+        }),
+        prisma.readingSession.aggregate({
+          where: { creatorId: creator.id },
+          _avg: {
+            maxProgress: true,
+            secondsSpent: true,
+          },
+        }),
+        prisma.subscriberAnalyticsEvent.count({
+          where: { creatorId: creator.id },
+        }),
+        prisma.subscriberAnalyticsEvent.count({
+          where: {
+            creatorId: creator.id,
+            createdAt: { gte: sevenDaysAgo },
+          },
+        }),
+        prisma.post.findMany({
+          where: {
+            creatorId: creator.id,
+            status: "published",
+          },
+          include: {
+            _count: {
+              select: {
+                postViews: true,
+                readingSessions: true,
+              },
+            },
+          },
+        }),
+      ])
+    : [
+        0,
+        0,
+        0,
+        0,
+        0,
+        { _avg: { maxProgress: 0, secondsSpent: 0 } },
+        0,
+        0,
+        [],
+      ];
+  const averageProgress = Math.round(readingStats._avg.maxProgress ?? 0);
+  const averageSecondsSpent = Math.round(readingStats._avg.secondsSpent ?? 0);
+  const topViewedPosts = analyticsPosts
+    .sort((first, second) => second._count.postViews - first._count.postViews)
+    .slice(0, 5);
 
   return (
     <div className="space-y-8">
@@ -175,6 +278,75 @@ export default async function AdminDashboardPage() {
         <StatCard label="Premium" value={premiumCount} note="Reserved for the later premium layer" />
         <StatCard label="Letters" value={letterRequestCount} note="Dormant premium request queue" />
         <StatCard label="Audience" value={followerCount + premiumCount} note="Combined reach across followers and premium members" />
+      </section>
+
+      <section className="rounded-3xl border border-gray-200 bg-white p-6">
+        <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500">
+          Analytics
+        </p>
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950">
+          Website, reading and subscriber activity
+        </h2>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard
+            label="Site views"
+            value={totalPageViews}
+            note={`${recentPageViews} in the last 7 days`}
+          />
+          <StatCard
+            label="Post views"
+            value={totalPostViews}
+            note={`${recentPostViews} in the last 7 days`}
+          />
+          <StatCard
+            label="Completed reads"
+            value={completedReads}
+            note={`${averageProgress}% average progress`}
+          />
+          <StatCard
+            label="Subscriber events"
+            value={subscriberEvents}
+            note={`${recentSubscriberEvents} in the last 7 days`}
+          />
+        </div>
+
+        <div className="mt-6 overflow-hidden rounded-2xl border border-gray-100">
+          <table className="min-w-full divide-y divide-gray-100">
+            <thead className="bg-gray-50">
+              <tr className="text-left text-xs font-medium uppercase tracking-[0.18em] text-gray-500">
+                <th className="px-4 py-3">Top writing</th>
+                <th className="px-4 py-3">Universe</th>
+                <th className="px-4 py-3">Views</th>
+                <th className="px-4 py-3">Reading sessions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 bg-white text-sm text-gray-700">
+              {topViewedPosts.length > 0 ? (
+                topViewedPosts.map((post) => (
+                  <tr key={post.id}>
+                    <td className="px-4 py-4 font-medium text-gray-950">
+                      {post.title}
+                    </td>
+                    <td className="px-4 py-4 capitalize">{post.universe}</td>
+                    <td className="px-4 py-4">{post._count.postViews}</td>
+                    <td className="px-4 py-4">{post._count.readingSessions}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td className="px-4 py-4 text-gray-500" colSpan={4}>
+                    No post views recorded yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <p className="mt-4 text-sm text-gray-600">
+          Average reading time recorded: {averageSecondsSpent} seconds.
+        </p>
       </section>
 
       <section className="rounded-3xl border border-gray-200 bg-white p-6">

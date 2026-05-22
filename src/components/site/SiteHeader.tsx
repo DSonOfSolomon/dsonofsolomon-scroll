@@ -29,7 +29,7 @@ export default function SiteHeader() {
   const brandHref = isAdminRoute ? "/admin" : "/";
 
   return (
-    <header className="border-b border-white/10 bg-[#0a192f] text-white">
+    <header className="border-b border-white/10 bg-[#081421] text-white">
       <div className="mx-auto flex h-16 w-full max-w-[96rem] items-center justify-between px-6 lg:px-10 2xl:px-14">
         <Link href={brandHref} className="text-base font-semibold tracking-tight">
           D•sonofSolomon
@@ -46,10 +46,10 @@ export default function SiteHeader() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`transition-colors duration-200 ${
+                className={`rounded-lg px-3 py-2 transition-colors duration-200 ${
                   isActive
-                    ? "font-medium text-white"
-                    : "text-white/50 hover:text-white/80"
+                    ? "bg-white/10 font-medium text-white"
+                    : "text-white/55 hover:bg-white/5 hover:text-white/85"
                 }`}
               >
                 {link.label}
@@ -62,7 +62,7 @@ export default function SiteHeader() {
         <button
           type="button"
           onClick={() => setMenuOpen(!menuOpen)}
-          className="rounded-md border border-white/20 px-3 py-2 text-sm text-white md:hidden"
+          className="rounded-lg border border-white/15 px-3 py-2 text-sm text-white md:hidden"
         >
           {menuOpen ? <FiX size={20} /> : <FiMenu size={20} />}
         </button>
@@ -82,10 +82,10 @@ export default function SiteHeader() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
-                  className={`transition-colors duration-200 ${
+                  className={`rounded-lg px-3 py-2 transition-colors duration-200 ${
                     isActive
-                      ? "font-medium text-white"
-                      : "text-white/50 hover:text-white/80"
+                      ? "bg-white/10 font-medium text-white"
+                      : "text-white/55 hover:bg-white/5 hover:text-white/85"
                   }`}
                 >
                   {link.label}

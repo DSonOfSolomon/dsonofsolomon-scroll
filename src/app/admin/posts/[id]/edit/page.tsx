@@ -1,6 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { updatePost } from "@/app/admin/actions";
+import {
+  AdminPageHeader,
+  AdminPanel,
+  AdminPanelHeader,
+  adminFileInputClass,
+  adminInputClass,
+  adminPrimaryButtonClass,
+  adminSecondaryButtonClass,
+  StatusPill,
+} from "@/components/admin/AdminUI";
 import BackToDashboardLink from "@/components/admin/BackToDashboardLink";
 import { prisma } from "@/lib/prisma";
 import { ensureDefaultCategories } from "@/lib/admin";
@@ -28,28 +38,25 @@ export default async function EditPostPage({ params }: Props) {
     : null;
 
   return (
-    <div className="space-y-4">
-      <div className="mb-6">
+    <div className="space-y-8">
+      <div>
         <BackToDashboardLink />
       </div>
 
-      <section className="rounded-3xl border border-gray-200 bg-white p-6">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500">
-              Posts
-            </p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950">
-              Edit post
-            </h2>
-          </div>
-
-          <Link href="/admin/posts" className="text-sm text-gray-600 hover:text-gray-950">
+      <AdminPageHeader
+        eyebrow="Posts"
+        title="Edit post"
+        description="Update copy, taxonomy, media, and publishing state without leaving the editor."
+        action={
+          <Link href="/admin/posts" className={adminSecondaryButtonClass}>
             View posts
           </Link>
-        </div>
+        }
+      />
 
-        <form action={updatePost} className="mt-8 space-y-6">
+      <AdminPanel>
+        <AdminPanelHeader title={post.title} />
+        <form action={updatePost} className="space-y-6 p-5">
         <input type="hidden" name="id" value={post.id} />
 
         <div className="grid gap-6 md:grid-cols-2">
@@ -59,7 +66,7 @@ export default async function EditPostPage({ params }: Props) {
               name="title"
               required
               defaultValue={post.title}
-              className="mt-2 w-full rounded-2xl border border-gray-300 px-4 py-3 outline-none transition-colors focus:border-[#0a192f]"
+              className={adminInputClass}
             />
           </label>
 
@@ -68,7 +75,7 @@ export default async function EditPostPage({ params }: Props) {
             <input
               name="slug"
               defaultValue={post.slug}
-              className="mt-2 w-full rounded-2xl border border-gray-300 px-4 py-3 outline-none transition-colors focus:border-[#0a192f]"
+              className={adminInputClass}
             />
           </label>
         </div>
@@ -79,13 +86,15 @@ export default async function EditPostPage({ params }: Props) {
             <input
               name="chapterLabel"
               defaultValue={post.chapterLabel ?? ""}
-              className="mt-2 w-full rounded-2xl border border-gray-300 px-4 py-3 outline-none transition-colors focus:border-[#0a192f]"
+              className={adminInputClass}
             />
           </label>
-          <div className="rounded-2xl border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600">
+          <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-600">
             Current status:
-            <span className="ml-2 font-medium capitalize text-gray-900">
+            <span className="ml-2">
+              <StatusPill tone={post.status === "published" ? "success" : "warning"}>
               {post.status}
+              </StatusPill>
             </span>
           </div>
         </div>
@@ -95,7 +104,7 @@ export default async function EditPostPage({ params }: Props) {
           <select
             name="universe"
             defaultValue={post.universe}
-            className="mt-2 w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 outline-none transition-colors focus:border-[#0a192f]"
+            className={adminInputClass}
           >
             <option value="public">Writings</option>
             <option value="unfiltered">Unfiltered</option>
@@ -108,7 +117,7 @@ export default async function EditPostPage({ params }: Props) {
             <select
               name="categoryId"
               defaultValue={post.categoryId ?? ""}
-              className="mt-2 w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 outline-none transition-colors focus:border-[#0a192f]"
+              className={adminInputClass}
             >
               <option value="">Unassigned</option>
               {categories.map((category) => (
@@ -119,14 +128,14 @@ export default async function EditPostPage({ params }: Props) {
             </select>
           </label>
 
-          <div className="rounded-2xl border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600">
+          <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-600">
             Upload a new cover image directly, or use the advanced path field only if you need a manual file path.
           </div>
         </div>
 
         <input type="hidden" name="coverImage" value={post.coverImage ?? ""} />
         {coverPreviewSrc ? (
-          <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-[#f7f5ef] px-3 py-2">
+          <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
             <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
               <div className="relative h-10 w-14">
                 <img
@@ -151,18 +160,18 @@ export default async function EditPostPage({ params }: Props) {
             type="file"
             name="coverImageFile"
             accept="image/*"
-            className="mt-2 block w-full rounded-2xl border border-gray-300 px-4 py-3 text-sm text-gray-700 file:mr-4 file:rounded-full file:border-0 file:bg-[#0a192f] file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
+            className={adminFileInputClass}
           />
         </label>
 
-        <details className="rounded-2xl border border-gray-200 px-4 py-3">
+        <details className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
           <summary className="cursor-pointer text-sm font-medium text-gray-700">
             Advanced: use a manual cover image path
           </summary>
           <input
             name="coverImageOverride"
             defaultValue={post.coverImage ?? ""}
-            className="mt-3 w-full rounded-2xl border border-gray-300 px-4 py-3 outline-none transition-colors focus:border-[#0a192f]"
+            className={adminInputClass}
           />
         </details>
 
@@ -173,7 +182,7 @@ export default async function EditPostPage({ params }: Props) {
             required
             rows={3}
             defaultValue={post.excerpt}
-            className="mt-2 w-full rounded-2xl border border-gray-300 px-4 py-3 outline-none transition-colors focus:border-[#0a192f]"
+            className={adminInputClass}
           />
         </label>
 
@@ -184,7 +193,7 @@ export default async function EditPostPage({ params }: Props) {
             required
             rows={14}
             defaultValue={post.content}
-            className="mt-2 w-full rounded-3xl border border-gray-300 px-4 py-3 outline-none transition-colors focus:border-[#0a192f]"
+            className={adminInputClass}
           />
         </label>
 
@@ -193,7 +202,7 @@ export default async function EditPostPage({ params }: Props) {
             type="submit"
             name="status"
             value="draft"
-            className="inline-flex justify-center rounded-full border border-gray-300 px-6 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-900"
+            className={adminSecondaryButtonClass}
           >
             Save draft
           </button>
@@ -201,13 +210,13 @@ export default async function EditPostPage({ params }: Props) {
             type="submit"
             name="status"
             value="published"
-            className="inline-flex justify-center rounded-full bg-[#0a192f] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#13294b]"
+            className={adminPrimaryButtonClass}
           >
             Publish post
           </button>
         </div>
         </form>
-      </section>
+      </AdminPanel>
     </div>
   );
 }

@@ -1,5 +1,12 @@
 import Link from "next/link";
 import { deletePost, togglePostStatus } from "@/app/admin/actions";
+import {
+  AdminPageHeader,
+  AdminPanel,
+  AdminPanelHeader,
+  adminPrimaryButtonClass,
+  StatusPill,
+} from "@/components/admin/AdminUI";
 import BackToDashboardLink from "@/components/admin/BackToDashboardLink";
 import { prisma } from "@/lib/prisma";
 
@@ -14,54 +21,63 @@ export default async function AdminPostsPage() {
   });
 
   return (
-    <div className="space-y-4">
-      <div className="mb-6">
+    <div className="space-y-8">
+      <div>
         <BackToDashboardLink />
       </div>
 
-      <section className="rounded-3xl border border-gray-200 bg-white p-6">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500">
-            Posts
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950">
-            Manage writings
-          </h2>
-        </div>
+      <AdminPageHeader
+        eyebrow="Posts"
+        title="Manage writings"
+        description="Review status, universe placement, taxonomy, and publishing state from one focused table."
+        action={
+          <Link href="/admin/posts/new" className={adminPrimaryButtonClass}>
+            Create post
+          </Link>
+        }
+      />
 
-        <div className="mt-6 overflow-x-auto">
+      <AdminPanel>
+        <AdminPanelHeader title="Writing library" />
+        <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-100">
-            <thead>
-              <tr className="text-left text-xs font-medium uppercase tracking-[0.18em] text-gray-500">
-                <th className="px-3 py-3">Title</th>
-                <th className="px-3 py-3">Slug</th>
-                <th className="px-3 py-3">Category</th>
-                <th className="px-3 py-3">Status</th>
-                <th className="px-3 py-3">Universe</th>
-                <th className="px-3 py-3">Updated</th>
-                <th className="px-3 py-3">Actions</th>
+            <thead className="bg-gray-50">
+              <tr className="text-left text-xs font-semibold uppercase text-gray-500">
+                <th className="px-4 py-3">Title</th>
+                <th className="px-4 py-3">Slug</th>
+                <th className="px-4 py-3">Category</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Universe</th>
+                <th className="px-4 py-3">Updated</th>
+                <th className="px-4 py-3">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
+            <tbody className="divide-y divide-gray-100 bg-white text-sm text-gray-700">
               {posts.map((post) => (
-                <tr key={post.id}>
-                  <td className="px-3 py-4 font-medium text-gray-950">{post.title}</td>
-                  <td className="px-3 py-4 text-gray-500">{post.slug}</td>
-                  <td className="px-3 py-4">{post.category?.name ?? "Unassigned"}</td>
-                  <td className="px-3 py-4 capitalize">{post.status}</td>
-                  <td className="px-3 py-4 capitalize">{post.universe}</td>
-                  <td className="px-3 py-4">
+                <tr key={post.id} className="transition-colors hover:bg-gray-50/70">
+                  <td className="px-4 py-4 font-medium text-gray-950">{post.title}</td>
+                  <td className="px-4 py-4 text-gray-500">{post.slug}</td>
+                  <td className="px-4 py-4">{post.category?.name ?? "Unassigned"}</td>
+                  <td className="px-4 py-4">
+                    <StatusPill tone={post.status === "published" ? "success" : "warning"}>
+                      {post.status}
+                    </StatusPill>
+                  </td>
+                  <td className="px-4 py-4">
+                    <StatusPill>{post.universe}</StatusPill>
+                  </td>
+                  <td className="px-4 py-4">
                     {post.updatedAt.toLocaleDateString("en-GB", {
                       day: "numeric",
                       month: "short",
                       year: "numeric",
                     })}
                   </td>
-                  <td className="px-3 py-4">
+                  <td className="px-4 py-4">
                     <div className="flex flex-wrap gap-3">
                       <Link
                         href={`/admin/posts/${post.id}/edit`}
-                        className="text-[#0a192f] hover:text-[#13294b]"
+                        className="font-medium text-[#0a192f] hover:text-[#13294b]"
                       >
                         Edit
                       </Link>
@@ -75,7 +91,7 @@ export default async function AdminPostsPage() {
                         />
                         <button
                           type="submit"
-                          className="text-gray-600 hover:text-gray-950"
+                          className="cursor-pointer text-gray-600 hover:text-gray-950"
                         >
                           {post.status === "published" ? "Unpublish" : "Publish"}
                         </button>
@@ -85,7 +101,7 @@ export default async function AdminPostsPage() {
                         <input type="hidden" name="id" value={post.id} />
                         <button
                           type="submit"
-                          className="text-red-600 hover:text-red-700"
+                          className="cursor-pointer text-red-600 hover:text-red-700"
                         >
                           Delete
                         </button>
@@ -97,7 +113,7 @@ export default async function AdminPostsPage() {
             </tbody>
           </table>
         </div>
-      </section>
+      </AdminPanel>
     </div>
   );
 }

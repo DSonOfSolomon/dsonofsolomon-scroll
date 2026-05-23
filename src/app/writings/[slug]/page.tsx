@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import PostReadingTracker from "@/components/analytics/PostReadingTracker";
 import Container from "@/components/site/Container";
-import FollowButton from "@/components/follow/FollowButton";
+import PostFollowPrompt from "@/components/follow/PostFollowPrompt";
 import PageWrapper from "@/components/site/PageWrapper";
 import WritingCard from "@/components/writings/WritingCard";
 import CategoryBadge from "@/components/writings/CategoryBadge";
@@ -241,22 +241,7 @@ export default async function WritingPage({ params }: Props) {
           </div>
         </article>
 
-        {siteFeatures.followEnabled && (
-          <section className="mt-16 border-t border-gray-200 pt-10">
-            <div className="max-w-[22rem] rounded-[1.2rem] border border-gray-200 bg-[#f7f5ef] px-4 py-3.5">
-              <p className="text-base leading-7 text-gray-700">
-                If this resonated with you, hit the follow 
-                <br />
-                button to stay updated on future writings.
-              </p>
-              <FollowButton
-                className="mt-3 inline-flex rounded-full bg-[#0a192f] px-3.5 py-2 text-sm font-medium !text-white no-underline transition-colors hover:bg-[#13294b]"
-              >
-                Follow
-              </FollowButton>
-            </div>
-          </section>
-        )}
+        {siteFeatures.followEnabled && <PostFollowPrompt />}
 
         {(primaryContinuation || continuationWritings.length > 0) && (
           <section className="mt-16 border-t border-gray-200 pt-10">

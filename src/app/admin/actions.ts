@@ -28,7 +28,6 @@ async function refreshAdminViews() {
   revalidatePath("/admin/subscribers");
   revalidatePath("/admin/letter-requests");
   revalidatePath("/", "page");
-  revalidatePath("/follow");
   revalidatePath("/subscribe");
   revalidatePath("/writings", "page");
   revalidatePath("/unfiltered");

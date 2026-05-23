@@ -7,13 +7,13 @@ import { sendAnalyticsEvent } from "@/components/analytics/analytics-client";
 export default function AnalyticsTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const query = searchParams.toString();
 
   useEffect(() => {
     if (!pathname || pathname.startsWith("/admin")) {
       return;
     }
 
-    const query = searchParams.toString();
     const path = query ? `${pathname}?${query}` : pathname;
 
     sendAnalyticsEvent({
@@ -21,7 +21,7 @@ export default function AnalyticsTracker() {
       path,
       referrer: document.referrer || undefined,
     });
-  }, [pathname, searchParams]);
+  }, [pathname, query]);
 
   return null;
 }

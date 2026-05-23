@@ -12,17 +12,29 @@ type PushSubscriptionPayload = {
 
 export async function POST(request: NextRequest) {
   const creator = await getPrimaryCreator();
-  const body = (await request.json()) as PushSubscriptionPayload;
+  let body: PushSubscriptionPayload;
+
+  try {
+    body = (await request.json()) as PushSubscriptionPayload;
+  } catch {
+    return NextResponse.json({ error: "Invalid follow payload." }, { status: 400 });
+  }
+
   const endpoint = body.endpoint?.trim();
   const p256dh = body.keys?.p256dh?.trim();
   const auth = body.keys?.auth?.trim();
 
   if (!endpoint || !p256dh || !auth) {
-    return NextResponse.json({ error: "Invalid subscription payload." }, { status: 400 });
+    return NextResponse.json({ error: "Invalid follow payload." }, { status: 400 });
   }
 
-  await prisma.follower.upsert({
-    where: { endpoint },
+  const follower = await prisma.follower.upsert({
+    where: {
+      creatorId_endpoint: {
+        creatorId: creator.id,
+        endpoint,
+      },
+    },
     update: {
       p256dh,
       auth,
@@ -39,5 +51,11 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({
+    ok: true,
+    follower: {
+      id: follower.id,
+      status: follower.status,
+    },
+  });
 }

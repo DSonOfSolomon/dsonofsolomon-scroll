@@ -8,6 +8,7 @@ import WritingCard from "@/components/writings/WritingCard";
 import Link from "next/link";
 import { getPrimaryCreator } from "@/lib/admin";
 import { siteFeatures } from "@/lib/features";
+import { countPrimaryCreatorFollowers } from "@/lib/followers";
 import { prisma } from "@/lib/prisma";
 import { absoluteUrl, resolveSocialImage } from "@/lib/site";
 import { getPostPreview } from "@/lib/writings";
@@ -64,11 +65,7 @@ export default async function HomePage() {
       },
       take: 3,
     }),
-    prisma.follower.count({
-      where: {
-        status: "active",
-      },
-    }),
+    countPrimaryCreatorFollowers(),
   ]);
   const heroEyebrow = creator.heroEyebrow?.trim() || "Personal Writing System";
   const heroTitle = creator.heroTitle?.trim() || creator.name;
@@ -142,7 +139,7 @@ export default async function HomePage() {
                     {followerCount}
                   </span>
                   <span className="text-sm font-medium text-gray-600">
-                    Followers
+                    {followerCount === 1 ? "Follower" : "Followers"}
                   </span>
                 </div>
               )}
@@ -168,7 +165,7 @@ export default async function HomePage() {
 
               <Link
                 href="/writings"
-                className="inline-flex h-[2.5rem] items-center justify-center rounded-full bg-[#0a192f] px-5 text-sm font-medium !text-white no-underline transition-colors hover:bg-[#13294b]"
+                className="inline-flex h-[2.5rem] shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[#0a192f] px-5 text-sm font-medium !text-white no-underline transition-colors hover:bg-[#13294b]"
               >
                 Go deeper
               </Link>

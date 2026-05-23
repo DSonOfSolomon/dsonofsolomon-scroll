@@ -4,12 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
-import { siteFeatures } from "@/lib/features";
 
 const publicNavLinks = [
   { label: "Home", href: "/" },
   { label: "Writings", href: "/writings" },
-  ...(siteFeatures.followEnabled ? [{ label: "Follow", href: "/follow" }] : []),
   { label: "About", href: "/about" },
 ];
 
@@ -31,7 +29,10 @@ export default function SiteHeader() {
   return (
     <header className="border-b border-white/10 bg-[#081421] text-white">
       <div className="mx-auto flex h-16 w-full max-w-[96rem] items-center justify-between px-6 lg:px-10 2xl:px-14">
-        <Link href={brandHref} className="text-base font-semibold tracking-tight">
+        <Link
+          href={brandHref}
+          className="text-base font-semibold tracking-tight !text-[#8a6a2f] transition-colors hover:!text-[#b28a45]"
+        >
           D•sonofSolomon
         </Link>
 

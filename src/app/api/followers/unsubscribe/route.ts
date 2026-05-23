@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getPrimaryCreator } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
-  const body = (await request.json()) as { endpoint?: string };
+  const creator = await getPrimaryCreator();
+  let body: { endpoint?: string };
+
+  try {
+    body = (await request.json()) as { endpoint?: string };
+  } catch {
+    return NextResponse.json({ error: "Invalid follow payload." }, { status: 400 });
+  }
+
   const endpoint = body.endpoint?.trim();
 
   if (!endpoint) {
@@ -10,7 +19,10 @@ export async function POST(request: NextRequest) {
   }
 
   await prisma.follower.updateMany({
-    where: { endpoint },
+    where: {
+      endpoint,
+      creatorId: creator.id,
+    },
     data: {
       status: "inactive",
     },

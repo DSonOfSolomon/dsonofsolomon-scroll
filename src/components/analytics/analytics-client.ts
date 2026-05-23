@@ -12,6 +12,22 @@ type AnalyticsEvent = {
 
 const SESSION_KEY = "dsonofsolomon_analytics_session";
 
+function shouldSendAnalytics() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const isLocalhost =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1";
+
+  if (!isLocalhost) {
+    return true;
+  }
+
+  return new URLSearchParams(window.location.search).get("analyticsDebug") === "1";
+}
+
 export function getAnalyticsSessionId() {
   if (typeof window === "undefined") {
     return "";
@@ -32,6 +48,10 @@ export function getAnalyticsSessionId() {
 }
 
 export function sendAnalyticsEvent(event: AnalyticsEvent) {
+  if (!shouldSendAnalytics()) {
+    return;
+  }
+
   const body = JSON.stringify({
     ...event,
     sessionId: event.sessionId ?? getAnalyticsSessionId(),

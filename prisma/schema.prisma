@@ -114,7 +114,7 @@ model LetterRequest {
 
 model Follower {
   id             String    @id @default(cuid())
-  endpoint       String    @unique
+  endpoint       String
   p256dh         String
   auth           String
   status         String    @default("active")
@@ -126,6 +126,7 @@ model Follower {
   creatorId String
   creator   Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
+  @@unique([creatorId, endpoint])
   @@index([creatorId, createdAt])
 }
 

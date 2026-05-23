@@ -1,4 +1,5 @@
 import webpush from "web-push";
+import { getNotificationBody } from "@/lib/followers";
 import { prisma } from "@/lib/prisma";
 
 const VAPID_PUBLIC_KEY =
@@ -67,11 +68,15 @@ export async function notifyFollowersOfPublishedPost(
   }
 
   const payload = JSON.stringify({
-    title: "New content just dropped",
-    body: post.chapterLabel
-      ? `${post.chapterLabel} — ${post.title}`
-      : post.title,
+    title: "New writing just dropped",
+    body: getNotificationBody(post),
     url: `/writings/${post.slug}`,
+    actions: [
+      {
+        action: "read",
+        title: "Read",
+      },
+    ],
   });
 
   const publishedAt = post.publishedAt ?? new Date();

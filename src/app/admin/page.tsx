@@ -30,18 +30,24 @@ export default async function AdminDashboardPage() {
     : null;
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const creatorWhere = { creatorId: creator.id };
 
   const coreDashboardData = await Promise.all([
-    prisma.post.count(),
-    prisma.post.count({ where: { status: "published" } }),
-    prisma.post.count({ where: { status: "draft" } }),
-    prisma.post.count({ where: { status: "published", universe: "public" } }),
-    prisma.post.count({ where: { status: "published", universe: "unfiltered" } }),
-    prisma.category.count(),
-    prisma.follower.count({ where: { status: "active" } }),
-    prisma.subscriber.count({ where: { tier: "premium" } }),
-    prisma.letterRequest.count(),
+    prisma.post.count({ where: creatorWhere }),
+    prisma.post.count({ where: { ...creatorWhere, status: "published" } }),
+    prisma.post.count({ where: { ...creatorWhere, status: "draft" } }),
+    prisma.post.count({
+      where: { ...creatorWhere, status: "published", universe: "public" },
+    }),
+    prisma.post.count({
+      where: { ...creatorWhere, status: "published", universe: "unfiltered" },
+    }),
+    prisma.category.count({ where: creatorWhere }),
+    prisma.follower.count({ where: { ...creatorWhere, status: "active" } }),
+    prisma.subscriber.count({ where: { ...creatorWhere, tier: "premium" } }),
+    prisma.letterRequest.count({ where: creatorWhere }),
     prisma.post.findMany({
+      where: creatorWhere,
       orderBy: { updatedAt: "desc" },
       take: 5,
       include: { category: true },
@@ -344,39 +350,39 @@ export default async function AdminDashboardPage() {
           title="Recently updated posts"
         />
 
-        <div className="overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-100">
+        <div className="overflow-x-auto">
+          <table className="min-w-[46rem] divide-y divide-gray-100">
             <thead className="bg-gray-50">
               <tr className="text-left text-xs font-semibold uppercase text-gray-500">
-                <th className="px-4 py-3">Title</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Universe</th>
-                <th className="px-4 py-3">Category</th>
-                <th className="px-4 py-3">Updated</th>
-                <th className="px-4 py-3">Edit</th>
+                <th className="whitespace-nowrap px-4 py-3">Title</th>
+                <th className="whitespace-nowrap px-4 py-3">Status</th>
+                <th className="whitespace-nowrap px-4 py-3">Universe</th>
+                <th className="whitespace-nowrap px-4 py-3">Category</th>
+                <th className="whitespace-nowrap px-4 py-3">Updated</th>
+                <th className="whitespace-nowrap px-4 py-3">Edit</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white text-sm text-gray-700">
               {recentPosts.map((post) => (
                 <tr key={post.id} className="transition-colors hover:bg-gray-50/70">
-                  <td className="px-4 py-4 font-medium text-gray-950">{post.title}</td>
-                  <td className="px-4 py-4">
+                  <td className="w-[13rem] px-4 py-4 font-medium text-gray-950">{post.title}</td>
+                  <td className="whitespace-nowrap px-4 py-4">
                     <StatusPill tone={post.status === "published" ? "success" : "warning"}>
                       {post.status}
                     </StatusPill>
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="whitespace-nowrap px-4 py-4">
                     <StatusPill>{post.universe}</StatusPill>
                   </td>
-                  <td className="px-4 py-4">{post.category?.name ?? "Unassigned"}</td>
-                  <td className="px-4 py-4">
+                  <td className="whitespace-nowrap px-4 py-4">{post.category?.name ?? "Unassigned"}</td>
+                  <td className="whitespace-nowrap px-4 py-4">
                     {post.updatedAt.toLocaleDateString("en-GB", {
                       day: "numeric",
                       month: "short",
                       year: "numeric",
                     })}
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="whitespace-nowrap px-4 py-4">
                     <Link
                       href={`/admin/posts/${post.id}/edit`}
                       className="font-medium text-[#0a192f] hover:text-[#13294b]"

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getPrimaryCreator } from "@/lib/admin";
+import { getNotificationBody } from "@/lib/followers";
 import { prisma } from "@/lib/prisma";
 
 type PendingRequestBody = {
@@ -6,7 +8,15 @@ type PendingRequestBody = {
 };
 
 export async function POST(request: NextRequest) {
-  const body = (await request.json()) as PendingRequestBody;
+  const creator = await getPrimaryCreator();
+  let body: PendingRequestBody;
+
+  try {
+    body = (await request.json()) as PendingRequestBody;
+  } catch {
+    return NextResponse.json({ error: "Invalid follow payload." }, { status: 400 });
+  }
+
   const endpoint = body.endpoint?.trim();
 
   if (!endpoint) {
@@ -18,7 +28,12 @@ export async function POST(request: NextRequest) {
   }
 
   const follower = await prisma.follower.findUnique({
-    where: { endpoint },
+    where: {
+      creatorId_endpoint: {
+        creatorId: creator.id,
+        endpoint,
+      },
+    },
     select: {
       endpoint: true,
       status: true,
@@ -62,10 +77,8 @@ export async function POST(request: NextRequest) {
     pending: true,
     notification: {
       postId: pendingPost.id,
-      title: "New content just dropped",
-      body: pendingPost.chapterLabel
-        ? `${pendingPost.chapterLabel} — ${pendingPost.title}`
-        : pendingPost.title,
+      title: "New writing just dropped",
+      body: getNotificationBody(pendingPost),
       url: `/writings/${pendingPost.slug}`,
       publishedAt: pendingPost.publishedAt?.toISOString() ?? null,
     },

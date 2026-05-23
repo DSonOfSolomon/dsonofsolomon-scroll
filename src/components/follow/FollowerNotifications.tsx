@@ -29,6 +29,15 @@ export default function FollowerNotifications() {
       return;
     }
 
+    const debugPollingEnabled =
+      (window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1") &&
+      new URLSearchParams(window.location.search).get("followDebug") === "1";
+
+    if (!debugPollingEnabled) {
+      return;
+    }
+
     let cancelled = false;
 
     async function checkForNotifications() {

@@ -37,3 +37,21 @@ a {
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 18px 40px rgba(10, 25, 47, 0.08);
 }
+
+@keyframes working-on-slide {
+  0%,
+  16% {
+    transform: translateX(0);
+  }
+
+  76%,
+  100% {
+    transform: translateX(calc(-1 * var(--marquee-distance)));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .working-on-marquee {
+    animation: none;
+  }
+}

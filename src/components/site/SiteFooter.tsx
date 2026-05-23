@@ -4,6 +4,7 @@ import { FaTiktok } from "react-icons/fa6";
 import { FaFacebookF } from "react-icons/fa";
 import Link from "next/link";
 import { getPrimaryCreator } from "@/lib/admin";
+import WorkingOnMarquee from "@/components/site/WorkingOnMarquee";
 
 export default async function SiteFooter() {
   const creator = await getPrimaryCreator();
@@ -77,13 +78,13 @@ export default async function SiteFooter() {
         </div>
 
         <div className="mt-8 flex flex-col gap-2 border-t border-white/10 pt-5 text-sm text-white/58 sm:flex-row sm:items-center sm:justify-between">
-          <p className="inline-flex w-fit items-center rounded-full border border-white/12 bg-white px-4 py-2 text-sm text-black">
-            <span className="font-semibold text-black">
+          <p className="flex max-w-full items-center rounded-full border border-white/12 bg-white px-4 py-2 text-sm text-black sm:max-w-[min(45rem,70vw)]">
+            <span className="shrink-0 font-semibold text-black">
               Currently working on:
             </span>
-            <span className="ml-2 text-black/80">
-              {creator.currentWorkingOn ?? "The D•sonofSolomon writing system."}
-            </span>
+            <WorkingOnMarquee
+              text={creator.currentWorkingOn ?? "The D•sonofSolomon writing system."}
+            />
           </p>
           <p>© {currentYear} D•sonofSolomon</p>
         </div>

@@ -5,8 +5,12 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { recordSubscriberAnalyticsEvent } from "@/lib/analytics";
 import { saveUploadedImage } from "@/lib/media";
-import { notifyFollowersOfPublishedPost } from "@/lib/notifications";
+import {
+  notifyFollowersOfPublishedPost,
+  sendFollowerTestNotification,
+} from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
+import { siteFeatures } from "@/lib/features";
 import {
   getPrimaryCreator,
   getUniquePostSlug,
@@ -22,10 +26,49 @@ function normalizeRequired(value: FormDataEntryValue | null) {
   return value?.toString().trim() ?? "";
 }
 
+const ADMIN_COOKIE_NAME = "dsonofsolomon_admin";
+
+function getAdminSessionSecret() {
+  return process.env.ADMIN_SESSION_SECRET ?? process.env.ADMIN_PASSWORD;
+}
+
+export async function loginAdmin(formData: FormData) {
+  const username = normalizeRequired(formData.get("username"));
+  const password = normalizeRequired(formData.get("password"));
+  const adminUsername = process.env.ADMIN_USERNAME ?? "admin";
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  const sessionSecret = getAdminSessionSecret();
+
+  if (
+    !adminPassword ||
+    !sessionSecret ||
+    username !== adminUsername ||
+    password !== adminPassword
+  ) {
+    redirect("/admin/login?error=1");
+  }
+
+  const cookieStore = await cookies();
+  cookieStore.set(ADMIN_COOKIE_NAME, sessionSecret, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  });
+
+  redirect("/admin");
+}
+
+export async function logoutAdmin() {
+  const cookieStore = await cookies();
+  cookieStore.delete(ADMIN_COOKIE_NAME);
+  redirect("/");
+}
+
 async function refreshAdminViews() {
   revalidatePath("/admin", "page");
   revalidatePath("/admin/posts", "page");
-  revalidatePath("/admin/subscribers");
+  revalidatePath("/admin/followers");
   revalidatePath("/admin/letter-requests");
   revalidatePath("/", "page");
   revalidatePath("/subscribe");
@@ -38,7 +81,19 @@ async function safeNotifyFollowersOfPublishedPost(
   post: Parameters<typeof notifyFollowersOfPublishedPost>[0],
 ) {
   try {
-    await notifyFollowersOfPublishedPost(post);
+    const summary = await notifyFollowersOfPublishedPost(post);
+    console.info(
+      "Follower notification summary",
+      JSON.stringify({
+        postId: post.id,
+        title: post.title,
+        attempted: summary.attempted,
+        sent: summary.sent,
+        failed: summary.failed,
+        skipped: summary.skipped,
+        reason: summary.reason,
+      }),
+    );
   } catch (error) {
     console.error("Follower notification failed", error);
   }
@@ -51,7 +106,11 @@ export async function createPost(formData: FormData) {
   const excerpt = normalizeRequired(formData.get("excerpt"));
   const content = normalizeRequired(formData.get("content"));
   const status = normalizeRequired(formData.get("status")) || "draft";
-  const universe = normalizeRequired(formData.get("universe")) || "public";
+  const requestedUniverse = normalizeRequired(formData.get("universe")) || "public";
+  const universe =
+    requestedUniverse === "unfiltered" && siteFeatures.unfilteredEnabled
+      ? "unfiltered"
+      : "public";
   const chapterLabel = normalizeOptional(formData.get("chapterLabel"));
   const categoryId = normalizeOptional(formData.get("categoryId"));
   const coverImageInput =
@@ -113,7 +172,11 @@ export async function updatePost(formData: FormData) {
   const excerpt = normalizeRequired(formData.get("excerpt"));
   const content = normalizeRequired(formData.get("content"));
   const status = normalizeRequired(formData.get("status")) || "draft";
-  const universe = normalizeRequired(formData.get("universe")) || "public";
+  const requestedUniverse = normalizeRequired(formData.get("universe")) || "public";
+  const universe =
+    requestedUniverse === "unfiltered" && siteFeatures.unfilteredEnabled
+      ? "unfiltered"
+      : "public";
   const chapterLabel = normalizeOptional(formData.get("chapterLabel"));
   const categoryId = normalizeOptional(formData.get("categoryId"));
   const coverImageInput = normalizeOptional(formData.get("coverImage"));
@@ -259,6 +322,85 @@ export async function togglePostStatus(formData: FormData) {
       ? `/writings/${existing.slug}`
       : `/unfiltered/${existing.slug}`,
   );
+}
+
+export async function notifyFollowersForPost(formData: FormData) {
+  const id = normalizeRequired(formData.get("id"));
+
+  const post = await prisma.post.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      chapterLabel: true,
+      creatorId: true,
+      universe: true,
+      status: true,
+      publishedAt: true,
+    },
+  });
+
+  if (!post) {
+    throw new Error("Post not found.");
+  }
+
+  await safeNotifyFollowersOfPublishedPost(post);
+  await refreshAdminViews();
+}
+
+export async function testFollowerNotification(formData: FormData) {
+  const creator = await getPrimaryCreator();
+  const id = normalizeRequired(formData.get("id"));
+
+  const follower = await prisma.follower.findFirst({
+    where: {
+      id,
+      creatorId: creator.id,
+    },
+    select: {
+      id: true,
+      endpoint: true,
+      p256dh: true,
+      auth: true,
+      creatorId: true,
+    },
+  });
+
+  if (!follower) {
+    throw new Error("Follower endpoint not found.");
+  }
+
+  const summary = await sendFollowerTestNotification(follower);
+  console.info(
+    "Follower endpoint test summary",
+    JSON.stringify({
+      followerId: follower.id,
+      attempted: summary.attempted,
+      sent: summary.sent,
+      failed: summary.failed,
+      skipped: summary.skipped,
+      reason: summary.reason,
+    }),
+  );
+  await refreshAdminViews();
+}
+
+export async function deactivateFollower(formData: FormData) {
+  const creator = await getPrimaryCreator();
+  const id = normalizeRequired(formData.get("id"));
+
+  await prisma.follower.updateMany({
+    where: {
+      id,
+      creatorId: creator.id,
+    },
+    data: {
+      status: "inactive",
+    },
+  });
+
+  await refreshAdminViews();
 }
 
 export async function createSubscriber(formData: FormData) {

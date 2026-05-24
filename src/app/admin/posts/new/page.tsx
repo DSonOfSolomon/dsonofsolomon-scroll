@@ -11,6 +11,7 @@ import {
 } from "@/components/admin/AdminUI";
 import BackToDashboardLink from "@/components/admin/BackToDashboardLink";
 import { ensureDefaultCategories } from "@/lib/admin";
+import { siteFeatures } from "@/lib/features";
 
 export default async function NewPostPage() {
   const categories = await ensureDefaultCategories();
@@ -78,7 +79,9 @@ export default async function NewPostPage() {
             className={adminInputClass}
           >
             <option value="public">Writings</option>
-            <option value="unfiltered">Unfiltered</option>
+            {siteFeatures.unfilteredEnabled ? (
+              <option value="unfiltered">Unfiltered</option>
+            ) : null}
           </select>
         </label>
 

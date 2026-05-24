@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
+import { siteFeatures } from "@/lib/features";
 
 const publicNavLinks = [
   { label: "Home", href: "/" },
@@ -14,14 +15,21 @@ const publicNavLinks = [
 const adminNavLinks = [
   { label: "Overview", href: "/admin" },
   { label: "Posts", href: "/admin/posts" },
-  { label: "Letter Requests", href: "/admin/letter-requests" },
-  { label: "Followers", href: "/admin/subscribers" },
+  ...(siteFeatures.letterRequestsEnabled
+    ? [{ label: "Letter Requests", href: "/admin/letter-requests" }]
+    : []),
+  { label: "Followers", href: "/admin/followers" },
   { label: "Logout", href: "/admin/logout" },
 ];
 
 export default function SiteHeader() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  if (pathname === "/admin/login") {
+    return null;
+  }
+
   const isAdminRoute = pathname.startsWith("/admin");
   const navLinks = isAdminRoute ? adminNavLinks : publicNavLinks;
   const brandHref = isAdminRoute ? "/admin" : "/";

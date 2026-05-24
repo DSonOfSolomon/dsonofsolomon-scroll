@@ -14,6 +14,7 @@ import {
 import BackToDashboardLink from "@/components/admin/BackToDashboardLink";
 import { prisma } from "@/lib/prisma";
 import { ensureDefaultCategories } from "@/lib/admin";
+import { siteFeatures } from "@/lib/features";
 
 type Props = {
   params: Promise<{
@@ -107,7 +108,9 @@ export default async function EditPostPage({ params }: Props) {
             className={adminInputClass}
           >
             <option value="public">Writings</option>
-            <option value="unfiltered">Unfiltered</option>
+            {siteFeatures.unfilteredEnabled || post.universe === "unfiltered" ? (
+              <option value="unfiltered">Unfiltered</option>
+            ) : null}
           </select>
         </label>
 

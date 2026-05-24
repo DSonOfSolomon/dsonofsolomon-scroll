@@ -4,16 +4,27 @@ import { useEffect } from "react";
 
 type PendingNotificationResponse = {
   pending: boolean;
+  deliveryId?: string;
   notification?: {
     postId: string;
     title: string;
     body: string;
     url: string;
+    tag?: string;
+    timestamp?: number;
+    renotify?: boolean;
   };
 };
 
-const POLL_INTERVAL_MS = 10000;
+type ExtendedNotificationOptions = NotificationOptions & {
+  renotify?: boolean;
+  timestamp?: number;
+};
+
+const POLL_INTERVAL_MS = 30000;
 const LOCAL_TEST_FOLLOWER_KEY = "local_test_follower_endpoint";
+const LAST_SEEN_DELIVERY_KEY = "dsonofsolomon_last_seen_delivery_id";
+const DEBUG_PUSH_POLLING_KEY = "dsonofsolomon_debug_push_polling";
 
 export default function FollowerNotifications() {
   useEffect(() => {
@@ -29,12 +40,12 @@ export default function FollowerNotifications() {
       return;
     }
 
-    const debugPollingEnabled =
+    const localFallbackEnabled =
       (window.location.hostname === "localhost" ||
         window.location.hostname === "127.0.0.1") &&
-      new URLSearchParams(window.location.search).get("followDebug") === "1";
+      window.localStorage.getItem(DEBUG_PUSH_POLLING_KEY) === "1";
 
-    if (!debugPollingEnabled) {
+    if (!localFallbackEnabled) {
       return;
     }
 
@@ -62,6 +73,9 @@ export default function FollowerNotifications() {
           },
           body: JSON.stringify({
             endpoint,
+            lastSeenDeliveryId: window.localStorage.getItem(
+              LAST_SEEN_DELIVERY_KEY,
+            ) ?? undefined,
           }),
         });
 
@@ -76,12 +90,29 @@ export default function FollowerNotifications() {
           return;
         }
 
-        await registration.showNotification(data.notification.title, {
+        if (data.deliveryId && !window.localStorage.getItem(LAST_SEEN_DELIVERY_KEY)) {
+          window.localStorage.setItem(LAST_SEEN_DELIVERY_KEY, data.deliveryId);
+          return;
+        }
+
+        const notificationOptions: ExtendedNotificationOptions = {
           body: data.notification.body,
+          tag: data.notification.tag,
+          renotify: data.notification.renotify ?? true,
+          timestamp: data.notification.timestamp ?? Date.now(),
           data: {
             url: data.notification.url,
           },
-        });
+        };
+
+        await registration.showNotification(
+          data.notification.title,
+          notificationOptions,
+        );
+
+        if (data.deliveryId) {
+          window.localStorage.setItem(LAST_SEEN_DELIVERY_KEY, data.deliveryId);
+        }
 
         await fetch("/api/followers/ack", {
           method: "POST",

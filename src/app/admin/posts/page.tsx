@@ -1,5 +1,9 @@
 import Link from "next/link";
-import { deletePost, togglePostStatus } from "@/app/admin/actions";
+import {
+  deletePost,
+  notifyFollowersForPost,
+  togglePostStatus,
+} from "@/app/admin/actions";
 import {
   AdminPageHeader,
   AdminPanel,
@@ -106,6 +110,18 @@ export default async function AdminPostsPage() {
                           Delete
                         </button>
                       </form>
+
+                      {post.status === "published" && post.universe === "public" ? (
+                        <form action={notifyFollowersForPost}>
+                          <input type="hidden" name="id" value={post.id} />
+                          <button
+                            type="submit"
+                            className="cursor-pointer text-[#8a6a2f] hover:text-[#6f5525]"
+                          >
+                            Notify followers
+                          </button>
+                        </form>
+                      ) : null}
                     </div>
                   </td>
                 </tr>

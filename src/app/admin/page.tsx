@@ -12,6 +12,7 @@ import {
 } from "@/components/admin/AdminUI";
 import { prisma } from "@/lib/prisma";
 import { ensureDefaultCategories, getPrimaryCreator } from "@/lib/admin";
+import { siteFeatures } from "@/lib/features";
 
 function analyticsDelegatesAvailable() {
   return Boolean(
@@ -167,18 +168,24 @@ export default async function AdminDashboardPage() {
         <AdminPanelHeader
           eyebrow="Overview"
           title="Content and audience snapshot"
-          description="The current state of publishing, taxonomy, audience, and premium activity."
+          description="The current state of publishing, taxonomy, and audience activity."
         />
-        <div className="grid gap-4 p-5 sm:grid-cols-2 xl:grid-cols-5">
+        <div className="grid gap-4 p-5 sm:grid-cols-2 xl:grid-cols-4">
           <AdminMetricCard label="Posts" value={postCount} note="Total writings" />
           <AdminMetricCard label="Published" value={publishedCount} note="Across both universes" />
           <AdminMetricCard label="Drafts" value={draftCount} note="Still in progress" />
           <AdminMetricCard label="Writings" value={publicCount} note="Public universe" />
-          <AdminMetricCard label="Unfiltered" value={unfilteredCount} note="Premium universe" />
+          {siteFeatures.unfilteredEnabled ? (
+            <AdminMetricCard label="Unfiltered" value={unfilteredCount} note="Premium universe" />
+          ) : null}
           <AdminMetricCard label="Categories" value={categoryCount} note="Controlled taxonomy" />
           <AdminMetricCard label="Followers" value={followerCount} note="Push audience" />
-          <AdminMetricCard label="Premium" value={premiumCount} note="Premium members" />
-          <AdminMetricCard label="Letters" value={letterRequestCount} note="Request queue" />
+          {siteFeatures.premiumEnabled ? (
+            <AdminMetricCard label="Premium" value={premiumCount} note="Premium members" />
+          ) : null}
+          {siteFeatures.letterRequestsEnabled ? (
+            <AdminMetricCard label="Letters" value={letterRequestCount} note="Request queue" />
+          ) : null}
           <AdminMetricCard label="Audience" value={followerCount + premiumCount} note="Combined reach" />
         </div>
       </AdminPanel>

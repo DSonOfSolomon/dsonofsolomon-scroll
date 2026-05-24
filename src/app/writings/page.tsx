@@ -11,14 +11,14 @@ import { getPostPreview } from "@/lib/writings";
 export const metadata: Metadata = {
   title: "Writings",
   description:
-    "Public writings from D•sonofSolomon on love, life, laughter and systems.",
+    "Single chapter-style writings from D•sonofSolomon on love, life, laughter and systems.",
   alternates: {
     canonical: absoluteUrl("/writings"),
   },
   openGraph: {
     title: "Writings",
     description:
-      "Public writings from D•sonofSolomon on love, life, laughter and systems.",
+      "Single chapter-style writings from D•sonofSolomon on love, life, laughter and systems.",
     url: absoluteUrl("/writings"),
     type: "website",
     images: [
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Writings",
     description:
-      "Public writings from D•sonofSolomon on love, life, laughter and systems.",
+      "Single chapter-style writings from D•sonofSolomon on love, life, laughter and systems.",
     images: [resolveSocialImage()],
   },
 };
@@ -104,7 +104,7 @@ export default async function WritingsPage({
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
-                Public universe
+                Soloverse
               </p>
 
               <h1 className="mt-4 text-4xl font-bold tracking-tight text-gray-950 md:text-5xl">
@@ -112,8 +112,8 @@ export default async function WritingsPage({
               </h1>
 
               <p className="mt-5 max-w-2xl text-lg leading-8 text-gray-600">
-                Move from the latest chapter into a wider body of thoughts on
-                love, life, laughter and systems.
+                Single pieces arranged as chapters: complete thoughts on love,
+                life, laughter and systems.
               </p>
 
               <Link
@@ -142,8 +142,8 @@ export default async function WritingsPage({
                     <div>
                       <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
                         {currentPage === 1
-                          ? "Latest chapter in the universe"
-                          : "More writings in the universe"}
+                          ? "Latest single chapter"
+                          : "More single chapters"}
                       </p>
 
                       <div className="mt-5">

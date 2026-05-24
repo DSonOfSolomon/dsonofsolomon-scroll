@@ -3,13 +3,25 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { FiMenu, FiX } from "react-icons/fi";
+import { FiChevronDown, FiMenu, FiX } from "react-icons/fi";
 import { siteFeatures } from "@/lib/features";
 
 const publicNavLinks = [
   { label: "Home", href: "/" },
-  { label: "Writings", href: "/writings" },
   { label: "About", href: "/about" },
+];
+
+const soloverseLinks = [
+  {
+    label: "Series",
+    href: "/series",
+    description: "Continuations and episodic worlds",
+  },
+  {
+    label: "Writings",
+    href: "/writings",
+    description: "Single pieces arranged as chapters",
+  },
 ];
 
 const adminNavLinks = [
@@ -25,6 +37,7 @@ const adminNavLinks = [
 export default function SiteHeader() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [soloverseOpen, setSoloverseOpen] = useState(false);
 
   if (pathname === "/admin/login") {
     return null;
@@ -33,6 +46,11 @@ export default function SiteHeader() {
   const isAdminRoute = pathname.startsWith("/admin");
   const navLinks = isAdminRoute ? adminNavLinks : publicNavLinks;
   const brandHref = isAdminRoute ? "/admin" : "/";
+  const soloverseActive =
+    !isAdminRoute &&
+    soloverseLinks.some(
+      (link) => pathname === link.href || pathname.startsWith(`${link.href}/`),
+    );
 
   return (
     <header className="border-b border-white/10 bg-[#081421] text-white">
@@ -51,10 +69,88 @@ export default function SiteHeader() {
               pathname === link.href ||
               (link.href !== "/" && pathname.startsWith(link.href));
 
+            if (!isAdminRoute && link.href === "/about") {
+              return null;
+            }
+
             return (
               <Link
                 key={link.href}
                 href={link.href}
+                onClick={() => setSoloverseOpen(false)}
+                className={`rounded-lg px-3 py-2 transition-colors duration-200 ${
+                  isActive
+                    ? "bg-white/10 font-medium text-white"
+                    : "text-white/55 hover:bg-white/5 hover:text-white/85"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
+
+          {!isAdminRoute && (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setSoloverseOpen((value) => !value)}
+                className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-2 transition-colors duration-200 ${
+                  soloverseActive || soloverseOpen
+                    ? "bg-white/10 font-medium text-white"
+                    : "text-white/55 hover:bg-white/5 hover:text-white/85"
+                }`}
+                aria-expanded={soloverseOpen}
+                aria-haspopup="menu"
+              >
+                Soloverse
+                <FiChevronDown
+                  size={15}
+                  className={`transition-transform ${
+                    soloverseOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {soloverseOpen && (
+                <div
+                  className="absolute right-0 top-[calc(100%+0.65rem)] z-50 w-64 overflow-hidden rounded-xl border border-white/10 bg-[#0b1725] py-2 shadow-2xl"
+                  role="menu"
+                >
+                  {soloverseLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setSoloverseOpen(false)}
+                      className="block px-4 py-3 transition-colors hover:bg-white/[0.07]"
+                      role="menuitem"
+                    >
+                      <span className="block text-sm font-medium text-white">
+                        {link.label}
+                      </span>
+                      <span className="mt-1 block text-xs leading-5 text-white/50">
+                        {link.description}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {navLinks.map((link) => {
+            const isActive =
+              pathname === link.href ||
+              (link.href !== "/" && pathname.startsWith(link.href));
+
+            if (!isAdminRoute && link.href !== "/about") {
+              return null;
+            }
+
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setSoloverseOpen(false)}
                 className={`rounded-lg px-3 py-2 transition-colors duration-200 ${
                   isActive
                     ? "bg-white/10 font-medium text-white"
@@ -86,11 +182,79 @@ export default function SiteHeader() {
                 pathname === link.href ||
                 (link.href !== "/" && pathname.startsWith(link.href));
 
+              if (!isAdminRoute && link.href === "/about") {
+                return null;
+              }
+
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  onClick={() => setMenuOpen(false)}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setSoloverseOpen(false);
+                  }}
+                  className={`rounded-lg px-3 py-2 transition-colors duration-200 ${
+                    isActive
+                      ? "bg-white/10 font-medium text-white"
+                      : "text-white/55 hover:bg-white/5 hover:text-white/85"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+
+            {!isAdminRoute && (
+              <div className="rounded-xl border border-white/10 p-2">
+                <p className="px-3 pb-2 pt-1 text-xs font-medium uppercase tracking-[0.18em] text-white/40">
+                  Soloverse
+                </p>
+                <div className="flex flex-col gap-1">
+                  {soloverseLinks.map((link) => {
+                    const isActive =
+                      pathname === link.href ||
+                      pathname.startsWith(`${link.href}/`);
+
+                    return (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => {
+                          setMenuOpen(false);
+                          setSoloverseOpen(false);
+                        }}
+                        className={`rounded-lg px-3 py-2 transition-colors duration-200 ${
+                          isActive
+                            ? "bg-white/10 font-medium text-white"
+                            : "text-white/55 hover:bg-white/5 hover:text-white/85"
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {navLinks.map((link) => {
+              const isActive =
+                pathname === link.href ||
+                (link.href !== "/" && pathname.startsWith(link.href));
+
+              if (!isAdminRoute && link.href !== "/about") {
+                return null;
+              }
+
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setSoloverseOpen(false);
+                  }}
                   className={`rounded-lg px-3 py-2 transition-colors duration-200 ${
                     isActive
                       ? "bg-white/10 font-medium text-white"

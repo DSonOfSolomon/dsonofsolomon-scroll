@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   updateCreatorBranding,
   updateCreatorFooter,
@@ -297,10 +298,12 @@ export default async function AdminDashboardPage() {
             <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
               <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
                 <div className="relative h-10 w-14">
-                  <img
+                  <Image
                     src={heroPreviewSrc}
                     alt={creator.heroImageAlt ?? "Current hero image"}
-                    className="h-full w-full object-contain"
+                    fill
+                    sizes="56px"
+                    className="object-contain"
                   />
                 </div>
               </div>

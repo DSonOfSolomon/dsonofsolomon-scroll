@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 import AdminSubmitButton from "@/components/admin/AdminSubmitButton";
 import {
@@ -254,10 +255,12 @@ export default function AdminPostForm({
           <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
             <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
               <div className="relative h-10 w-14">
-                <img
+                <Image
                   src={coverPreviewSrc}
                   alt={defaults?.coverAlt ?? defaults?.title ?? "Cover image"}
-                  className="h-full w-full object-contain"
+                  fill
+                  sizes="56px"
+                  className="object-contain"
                 />
               </div>
             </div>

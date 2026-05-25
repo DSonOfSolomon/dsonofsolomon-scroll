@@ -79,21 +79,23 @@ export default function SeriesAccessLink({
           onClick={() => setOpen(false)}
         >
           <div
-            className="relative w-full max-w-sm rounded-2xl border border-white/10 bg-white px-6 pb-6 pt-16 shadow-2xl"
+            className="w-full max-w-sm rounded-2xl border border-white/10 bg-white p-6 shadow-2xl"
             onClick={(event) => event.stopPropagation()}
           >
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="absolute right-4 top-4 z-10 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
-              aria-label="Close"
-            >
-              <FiX size={18} />
-            </button>
+            <div className="flex items-start justify-between gap-4">
+              <p className="pt-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#8a6a2f]">
+                Series access
+              </p>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                aria-label="Close"
+              >
+                <FiX size={18} />
+              </button>
+            </div>
 
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8a6a2f]">
-              Series access
-            </p>
             <p className="mt-4 max-w-[18rem] text-base font-medium leading-7 text-gray-950">
               Follow D•sonofSolomon to access series.
             </p>

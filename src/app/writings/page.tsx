@@ -142,12 +142,12 @@ export default async function WritingsPage({
                       </div>
 
                       {leadWriting.chapterLabel && (
-                        <p className="mt-5 text-sm font-semibold uppercase tracking-[0.22em] text-[#8a6a2f]">
+                        <p className="mt-5 text-xs uppercase tracking-[0.22em] text-gray-500">
                           {leadWriting.chapterLabel}
                         </p>
                       )}
 
-                      <h2 className="mt-5 max-w-[44rem] text-3xl font-semibold tracking-tight text-gray-950 md:text-[3.1rem] md:leading-[1.05]">
+                      <h2 className="mt-5 max-w-[44rem] text-3xl font-semibold tracking-tight text-[#8a6a2f] md:text-[3.1rem] md:leading-[1.05]">
                         {leadWriting.title}
                       </h2>
 
@@ -164,8 +164,8 @@ export default async function WritingsPage({
                         <p>{getReadingTime(leadWriting.content)} min read</p>
                       </div>
 
-                      <p className="mt-6 inline-flex text-sm font-medium text-[#0a192f] transition-colors hover:text-[#13294b]">
-                        Enter this chapter
+                      <p className="mt-6 inline-flex text-sm font-semibold text-[#0a192f] transition-colors hover:text-[#13294b]">
+                        Immerse
                       </p>
                     </div>
                   </article>
@@ -182,7 +182,7 @@ export default async function WritingsPage({
                       <div className="space-y-3 text-sm text-gray-500">
                         <CategoryBadge label={writing.category?.name ?? "Writing"} />
                         {writing.chapterLabel && (
-                          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#8a6a2f]">
+                          <p className="text-xs uppercase tracking-[0.22em] text-gray-500">
                             {writing.chapterLabel}
                           </p>
                         )}
@@ -191,7 +191,7 @@ export default async function WritingsPage({
 
                       <div>
                         <Link href={`/writings/${writing.slug}`} className="group no-underline">
-                          <h3 className="text-2xl font-semibold tracking-tight text-gray-950 transition-colors group-hover:text-[#13294b]">
+                          <h3 className="text-2xl font-semibold tracking-tight text-[#8a6a2f] transition-colors group-hover:text-[#6f5525]">
                             {writing.title}
                           </h3>
 
@@ -200,8 +200,8 @@ export default async function WritingsPage({
                             <span className="text-gray-400">...</span>
                           </p>
 
-                          <p className="mt-5 inline-flex text-sm font-medium text-[#0a192f] transition-colors group-hover:text-[#13294b]">
-                            Enter this chapter
+                          <p className="mt-5 inline-flex text-sm font-semibold text-[#0a192f] transition-colors group-hover:text-[#13294b]">
+                            Immerse
                           </p>
                         </Link>
                       </div>

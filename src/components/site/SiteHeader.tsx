@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { FiChevronDown, FiMenu, FiX } from "react-icons/fi";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import SeriesAccessLink from "@/components/series/SeriesAccessLink";
 import { siteFeatures } from "@/lib/features";
 
 const publicNavLinks = [
@@ -127,22 +128,40 @@ export default function SiteHeader() {
                   className="absolute right-0 top-[calc(100%+0.65rem)] z-50 w-64 overflow-hidden rounded-xl border border-white/10 bg-[#0b1725] py-2 shadow-2xl"
                   role="menu"
                 >
-                  {souloverseLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setSouloverseOpen(false)}
-                      className="block px-4 py-3 transition-colors hover:bg-white/[0.07]"
-                      role="menuitem"
-                    >
-                      <span className="block text-sm font-medium text-white">
-                        {link.label}
-                      </span>
-                      <span className="mt-1 block text-xs leading-5 text-white/50">
-                        {link.description}
-                      </span>
-                    </Link>
-                  ))}
+                  {souloverseLinks.map((link) => {
+                    const content = (
+                      <>
+                        <span className="block text-sm font-medium text-white">
+                          {link.label}
+                        </span>
+                        <span className="mt-1 block text-xs leading-5 text-white/50">
+                          {link.description}
+                        </span>
+                      </>
+                    );
+
+                    return link.href === "/series" ? (
+                      <SeriesAccessLink
+                        key={link.href}
+                        href={link.href}
+                        onNavigate={() => setSouloverseOpen(false)}
+                        className="block px-4 py-3 transition-colors hover:bg-white/[0.07]"
+                        role="menuitem"
+                      >
+                        {content}
+                      </SeriesAccessLink>
+                    ) : (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setSouloverseOpen(false)}
+                        className="block px-4 py-3 transition-colors hover:bg-white/[0.07]"
+                        role="menuitem"
+                      >
+                        {content}
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -243,8 +262,25 @@ export default function SiteHeader() {
                       const isActive =
                         pathname === link.href ||
                         pathname.startsWith(`${link.href}/`);
+                      const className = `rounded-lg px-3 py-2 transition-colors duration-200 ${
+                        isActive
+                          ? "bg-white/10 font-medium text-white"
+                          : "text-white/82 hover:bg-white/5 hover:text-white"
+                      }`;
 
-                      return (
+                      return link.href === "/series" ? (
+                        <SeriesAccessLink
+                          key={link.href}
+                          href={link.href}
+                          onNavigate={() => {
+                            setMenuOpen(false);
+                            setSouloverseOpen(false);
+                          }}
+                          className={className}
+                        >
+                          {link.label}
+                        </SeriesAccessLink>
+                      ) : (
                         <Link
                           key={link.href}
                           href={link.href}
@@ -252,11 +288,7 @@ export default function SiteHeader() {
                             setMenuOpen(false);
                             setSouloverseOpen(false);
                           }}
-                          className={`rounded-lg px-3 py-2 transition-colors duration-200 ${
-                            isActive
-                              ? "bg-white/10 font-medium text-white"
-                              : "text-white/82 hover:bg-white/5 hover:text-white"
-                          }`}
+                          className={className}
                         >
                           {link.label}
                         </Link>

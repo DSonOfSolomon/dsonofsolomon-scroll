@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { SITE_URL } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [posts, seriesEpisodes] = await Promise.all([
+  const [posts, seriesList, seriesEpisodes] = await Promise.all([
     prisma.post.findMany({
       where: {
         status: "published",
@@ -17,14 +17,39 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         publishedAt: "desc",
       },
     }),
-    prisma.post.findMany({
+    prisma.series.findMany({
       where: {
-        status: "published",
-        universe: "series",
+        posts: {
+          some: {
+            status: "published",
+            universe: "series",
+          },
+        },
       },
       select: {
         slug: true,
         updatedAt: true,
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+    }),
+    prisma.post.findMany({
+      where: {
+        status: "published",
+        universe: "series",
+        seriesId: {
+          not: null,
+        },
+      },
+      select: {
+        slug: true,
+        updatedAt: true,
+        series: {
+          select: {
+            slug: true,
+          },
+        },
       },
       orderBy: {
         publishedAt: "desc",
@@ -72,12 +97,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  const seriesRoutes: MetadataRoute.Sitemap = seriesEpisodes.map((post) => ({
-    url: `${SITE_URL}/series/${post.slug}`,
-    lastModified: post.updatedAt,
-    changeFrequency: "monthly",
+  const seriesRoutes: MetadataRoute.Sitemap = seriesList.map((series) => ({
+    url: `${SITE_URL}/series/${series.slug}`,
+    lastModified: series.updatedAt,
+    changeFrequency: "weekly",
     priority: 0.75,
   }));
 
-  return [...staticRoutes, ...postRoutes, ...seriesRoutes];
+  const seriesEpisodeRoutes: MetadataRoute.Sitemap = seriesEpisodes
+    .filter((post) => post.series)
+    .map((post) => ({
+      url: `${SITE_URL}/series/${post.series?.slug}/${post.slug}`,
+      lastModified: post.updatedAt,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    }));
+
+  return [
+    ...staticRoutes,
+    ...postRoutes,
+    ...seriesRoutes,
+    ...seriesEpisodeRoutes,
+  ];
 }

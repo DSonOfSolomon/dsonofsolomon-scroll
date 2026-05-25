@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import SeriesAccessLink from "@/components/series/SeriesAccessLink";
 
 export default function SouloverseMenuButton() {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,13 +42,13 @@ export default function SouloverseMenuButton() {
           >
             Writings
           </Link>
-          <Link
+          <SeriesAccessLink
             href="/series"
             className="block rounded-xl px-4 py-3 text-sm font-medium text-gray-900 no-underline transition-colors hover:bg-gray-100"
-            onClick={() => setIsOpen(false)}
+            onNavigate={() => setIsOpen(false)}
           >
             Series
-          </Link>
+          </SeriesAccessLink>
         </div>
       ) : null}
     </div>

@@ -1,41 +1,45 @@
-import Link from "next/link";
-import CategoryBadge from "@/components/writings/CategoryBadge";
+"use client";
 
-type WritingCardProps = {
-  title: string;
+import CategoryBadge from "@/components/writings/CategoryBadge";
+import SeriesAccessLink from "@/components/series/SeriesAccessLink";
+
+type SeriesPreviewCardProps = {
+  href: string;
+  seriesTitle: string;
+  episodeTitle: string;
   excerpt: string;
-  slug: string;
   category: string;
-  chapterLabel?: string;
-  basePath?: string;
-  actionLabel?: string;
+  episodeLabel?: string;
 };
 
-export default function WritingCard({
-  title,
+export default function SeriesPreviewCard({
+  href,
+  seriesTitle,
+  episodeTitle,
   excerpt,
-  slug,
   category,
-  chapterLabel,
-  basePath = "/writings",
-  actionLabel = "Immerse",
-}: WritingCardProps) {
+  episodeLabel,
+}: SeriesPreviewCardProps) {
   return (
-    <Link
-      href={`${basePath}/${slug}`}
+    <SeriesAccessLink
+      href={href}
       className="block rounded-2xl border border-gray-200 p-6 transition-colors hover:border-gray-400"
     >
       <article>
         <CategoryBadge label={category} />
 
-        {chapterLabel && (
+        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-[#8a6a2f]">
+          {seriesTitle}
+        </p>
+
+        {episodeLabel ? (
           <p className="mt-4 text-xs uppercase tracking-[0.22em] text-gray-500">
-            {chapterLabel}
+            {episodeLabel}
           </p>
-        )}
+        ) : null}
 
         <h3 className="mt-4 text-xl font-semibold tracking-tight text-[#8a6a2f]">
-          {title}
+          {episodeTitle}
         </h3>
 
         <p className="mt-3 overflow-hidden text-sm leading-7 text-gray-600 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4]">
@@ -44,9 +48,9 @@ export default function WritingCard({
         </p>
 
         <p className="mt-5 inline-flex text-sm font-semibold text-[#0a192f] transition-colors hover:text-[#13294b]">
-          {actionLabel}
+          Immerse
         </p>
       </article>
-    </Link>
+    </SeriesAccessLink>
   );
 }

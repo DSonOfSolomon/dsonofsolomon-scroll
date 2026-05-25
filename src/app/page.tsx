@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import Container from "@/components/site/Container";
 import EmptyState from "@/components/site/EmptyState";
 import FollowButton from "@/components/follow/FollowButton";
+import SeriesPreviewCard from "@/components/series/SeriesPreviewCard";
 import SiteFooter from "@/components/site/SiteFooter";
 import PageWrapper from "@/components/site/PageWrapper";
 import SouloverseMenuButton from "@/components/site/SouloverseMenuButton";
@@ -216,6 +218,15 @@ export default async function HomePage() {
               ))}
             </div>
 
+            <div className="mt-7">
+              <Link
+                href="/writings"
+                className="inline-flex rounded-full border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-900 transition-colors hover:border-gray-900"
+              >
+                More writings
+              </Link>
+            </div>
+
             <div className="mt-14">
               <div>
                 <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
@@ -223,7 +234,7 @@ export default async function HomePage() {
                 </p>
 
                 <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-950 md:text-3xl">
-                  Latest episodes
+                  Latest series
                 </h2>
               </div>
 
@@ -237,22 +248,21 @@ export default async function HomePage() {
                     }
 
                     return (
-                      <WritingCard
+                      <SeriesPreviewCard
                         key={series.id}
-                        title={series.title}
+                        href={`/series/${series.slug}`}
+                        seriesTitle={series.title}
+                        episodeTitle={firstEpisode.title}
                         excerpt={getPostPreview(
                           firstEpisode.excerpt,
                           firstEpisode.content,
                         )}
-                        slug={firstEpisode.slug}
                         category={firstEpisode.category?.name ?? "Series"}
-                        chapterLabel={
+                        episodeLabel={
                           firstEpisode.episodeNumber
                             ? `Episode ${firstEpisode.episodeNumber}`
-                            : undefined
+                            : "Episode"
                         }
-                        basePath="/series"
-                        actionLabel="Enter episode"
                       />
                     );
                   })}

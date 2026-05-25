@@ -1,13 +1,10 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import PostReadingTracker from "@/components/analytics/PostReadingTracker";
-import PostFollowPrompt from "@/components/follow/PostFollowPrompt";
 import Container from "@/components/site/Container";
 import PageWrapper from "@/components/site/PageWrapper";
+import SeriesAccessGate from "@/components/series/SeriesAccessGate";
 import CategoryBadge from "@/components/writings/CategoryBadge";
-import { siteFeatures } from "@/lib/features";
 import { prisma } from "@/lib/prisma";
 import { absoluteUrl, resolveSocialImage } from "@/lib/site";
 import { getPostPreview } from "@/lib/writings";
@@ -18,25 +15,52 @@ type Props = {
   }>;
 };
 
-async function getSeriesEpisodeBySlug(slug: string) {
-  return prisma.post.findFirst({
+async function getPublishedSeries(slug: string) {
+  return prisma.series.findFirst({
     where: {
       slug,
-      status: "published",
-      universe: "series",
+      posts: {
+        some: {
+          status: "published",
+          universe: "series",
+        },
+      },
     },
     include: {
-      category: true,
-      series: true,
+      posts: {
+        where: {
+          status: "published",
+          universe: "series",
+        },
+        include: {
+          category: true,
+        },
+        orderBy: [
+          {
+            episodeNumber: "asc",
+          },
+          {
+            publishedAt: "asc",
+          },
+        ],
+      },
     },
+  });
+}
+
+function formatDate(value: Date) {
+  return value.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getSeriesEpisodeBySlug(slug);
+  const series = await getPublishedSeries(slug);
 
-  if (!post) {
+  if (!series) {
     return {
       title: "Series",
       robots: {
@@ -46,133 +70,135 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const title = post.series?.title
-    ? `${post.series.title}: ${post.title}`
-    : post.title;
-  const description = getPostPreview(post.excerpt, post.content);
-  const url = absoluteUrl(`/series/${post.slug}`);
+  const firstEpisode = series.posts[0];
+  const description =
+    series.description?.trim() ||
+    (firstEpisode ? getPostPreview(firstEpisode.excerpt, firstEpisode.content) : "");
+  const url = absoluteUrl(`/series/${series.slug}`);
 
   return {
-    title,
+    title: series.title,
     description,
     alternates: {
       canonical: url,
     },
     openGraph: {
-      title,
+      title: series.title,
       description,
       url,
-      type: "article",
-      publishedTime: (post.publishedAt ?? post.createdAt).toISOString(),
+      type: "website",
       images: [
         {
-          url: resolveSocialImage(post.coverImage),
-          alt: post.title,
+          url: resolveSocialImage(firstEpisode?.coverImage),
+          alt: series.title,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: series.title,
       description,
-      images: [resolveSocialImage(post.coverImage)],
+      images: [resolveSocialImage(firstEpisode?.coverImage)],
     },
   };
 }
 
-export default async function SeriesEpisodePage({ params }: Props) {
+export default async function SeriesLandingPage({ params }: Props) {
   const { slug } = await params;
-  const post = await getSeriesEpisodeBySlug(slug);
+  const series = await getPublishedSeries(slug);
 
-  if (!post) {
+  if (!series) {
     notFound();
   }
 
-  const formattedDate = (post.publishedAt ?? post.createdAt).toLocaleDateString(
-    "en-GB",
-    {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    },
-  );
-  const wordCount = post.content.trim().split(/\s+/).length;
-  const readingTime = Math.max(1, Math.ceil(wordCount / 200));
-  const coverImageIsSvg = post.coverImage?.toLowerCase().endsWith(".svg");
-  const paragraphs = post.content
-    .replace(/\r\n/g, "\n")
-    .trim()
-    .split(/\n\s*\n+/)
-    .map((paragraph) => paragraph.replace(/\n+/g, " ").trim())
-    .filter(Boolean);
+  const firstEpisode = series.posts[0];
+  const category = firstEpisode?.category?.name ?? "Series";
+  const description =
+    series.description?.trim() ||
+    (firstEpisode ? getPostPreview(firstEpisode.excerpt, firstEpisode.content) : "");
 
   return (
     <PageWrapper>
-      <Container className="max-w-[44rem]">
-        <article>
-          <PostReadingTracker postId={post.id} universe={post.universe} />
-          <div className="mb-8">
-            <Link
-              href="/series"
-              className="inline-flex text-sm font-medium text-[#0a192f] transition-colors hover:text-[#13294b]"
-            >
-              Back to series
-            </Link>
-          </div>
-
-          <div className="border-b border-gray-200 pb-10">
-            <CategoryBadge label={post.category?.name ?? "Series"} />
-
-            <p className="mt-4 text-xs uppercase tracking-[0.22em] text-gray-500">
-              {post.episodeNumber ? `Episode ${post.episodeNumber}` : "Series"}
-            </p>
-
-            {post.series ? (
-              <p className="mt-4 text-sm font-semibold uppercase tracking-[0.22em] text-[#8a6a2f]">
-                {post.series.title}
+      <Container className="max-w-[78rem]">
+        <section className="overflow-hidden rounded-[1.75rem] bg-[#081421] text-white">
+          <div className="px-6 py-8 md:px-9 md:py-10 lg:px-11">
+            <div>
+              <p className="text-sm font-medium uppercase tracking-[0.2em] text-white/45">
+                Series
               </p>
-            ) : null}
 
-            <h1 className="mt-4 text-4xl font-bold tracking-tight text-gray-950 md:text-5xl">
-              {post.title}
-            </h1>
+              <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight text-white md:text-5xl">
+                {series.title}
+              </h1>
 
-            <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-gray-500">
-              <span>D•sonofSolomon</span>
-              <span>•</span>
-              <span>{formattedDate}</span>
-              <span>•</span>
-              <span>{readingTime} min read</span>
+              {description ? (
+                <p className="mt-5 max-w-2xl text-lg leading-8 text-white/68">
+                  {description}
+                </p>
+              ) : null}
+
+              <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-white/55">
+                <span>{category}</span>
+                <span>•</span>
+                <span>
+                  {series.posts.length === 1
+                    ? "1 episode"
+                    : `${series.posts.length} episodes`}
+                </span>
+              </div>
             </div>
           </div>
+        </section>
 
-          {post.coverImage ? (
-            <div className="mt-8 overflow-hidden rounded-[2rem] border border-gray-200 bg-[#f7f5ef]">
-              <Image
-                src={post.coverImage}
-                alt={post.title}
-                width={1600}
-                height={1000}
-                className="h-auto w-full object-cover"
-                sizes="(max-width: 768px) 100vw, 44rem"
-                priority
-                unoptimized={coverImageIsSvg}
-              />
+        <section className="mt-12 pb-16 md:pb-20">
+          <SeriesAccessGate>
+            <div className="mb-8">
+              <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
+                Episodes
+              </p>
+              <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-950">
+                Read the series
+              </h2>
             </div>
-          ) : null}
 
-          <div className="mt-10">
-            <div className="max-w-[43rem] space-y-7 text-[1.075rem] leading-[2.05rem] tracking-[-0.005em] text-gray-700 md:text-[1.18rem] md:leading-[2.22rem]">
-              {paragraphs.map((paragraph, index) => (
-                <p key={`${index}-${paragraph.slice(0, 24)}`}>
-                  {paragraph}
-                </p>
+            <div className="rounded-[1.25rem] border border-gray-200 bg-white px-5 py-2 shadow-sm md:px-7">
+              {series.posts.map((episode) => (
+                <article
+                  key={episode.id}
+                  className="border-t border-gray-200 py-7 first:border-t-0"
+                >
+                  <Link
+                    href={`/series/${series.slug}/${episode.slug}`}
+                    className="group grid gap-4 no-underline md:grid-cols-[12rem_minmax(0,1fr)] md:gap-8"
+                  >
+                    <div className="space-y-3 text-sm text-gray-500">
+                      <CategoryBadge label={episode.category?.name ?? category} />
+                      <p className="text-xs uppercase tracking-[0.22em] text-gray-500">
+                        {episode.episodeNumber
+                          ? `Episode ${episode.episodeNumber}`
+                          : "Episode"}
+                      </p>
+                      <p>{formatDate(episode.publishedAt ?? episode.createdAt)}</p>
+                    </div>
+
+                    <div>
+                      <h3 className="text-2xl font-semibold tracking-tight text-[#8a6a2f] transition-colors group-hover:text-[#6f5525]">
+                        {episode.title}
+                      </h3>
+                      <p className="mt-4 max-w-[44rem] text-base leading-8 text-gray-600">
+                        {getPostPreview(episode.excerpt, episode.content)}
+                        <span className="text-gray-400">...</span>
+                      </p>
+                      <p className="mt-5 inline-flex text-sm font-semibold text-[#0a192f] transition-colors group-hover:text-[#13294b]">
+                        Immerse
+                      </p>
+                    </div>
+                  </Link>
+                </article>
               ))}
             </div>
-          </div>
-        </article>
-
-        {siteFeatures.followEnabled && <PostFollowPrompt />}
+          </SeriesAccessGate>
+        </section>
       </Container>
     </PageWrapper>
   );

@@ -110,6 +110,48 @@ async function refreshAdminViews() {
   revalidatePath("/request-a-letter");
 }
 
+async function revalidateSeriesPostPaths(
+  postSlug: string,
+  seriesId?: string | null,
+) {
+  revalidatePath("/series", "page");
+
+  if (!seriesId) {
+    return;
+  }
+
+  const series = await prisma.series.findUnique({
+    where: {
+      id: seriesId,
+    },
+    select: {
+      slug: true,
+    },
+  });
+
+  if (!series) {
+    return;
+  }
+
+  revalidatePath(`/series/${series.slug}`);
+  revalidatePath(`/series/${series.slug}/${postSlug}`);
+}
+
+async function revalidatePostPublicPath(
+  universe: string,
+  slug: string,
+  seriesId?: string | null,
+) {
+  if (universe === "series") {
+    await revalidateSeriesPostPaths(slug, seriesId);
+    return;
+  }
+
+  revalidatePath(
+    universe === "public" ? `/writings/${slug}` : `/unfiltered/${slug}`,
+  );
+}
+
 async function getUniqueSeriesSlug(
   creatorId: string,
   value: string,
@@ -318,13 +360,7 @@ export async function createPost(formData: FormData) {
   }
 
   await refreshAdminViews();
-  if (post.universe === "series") {
-    revalidatePath(`/series/${post.slug}`);
-  } else {
-    revalidatePath(
-      post.universe === "public" ? `/writings/${post.slug}` : `/unfiltered/${post.slug}`,
-    );
-  }
+  await revalidatePostPublicPath(post.universe, post.slug, post.seriesId);
   redirect("/admin/posts");
 }
 
@@ -355,6 +391,7 @@ export async function updatePost(formData: FormData) {
       slug: true,
       status: true,
       universe: true,
+      seriesId: true,
       creatorId: true,
       publishedAt: true,
     },
@@ -424,19 +461,15 @@ export async function updatePost(formData: FormData) {
   }
 
   await refreshAdminViews();
-  revalidatePath(
-    existing.universe === "series"
-      ? `/series/${existing.slug}`
-      : existing.universe === "public"
-        ? `/writings/${existing.slug}`
-        : `/unfiltered/${existing.slug}`,
+  await revalidatePostPublicPath(
+    existing.universe,
+    existing.slug,
+    existing.seriesId,
   );
-  revalidatePath(
-    updatedPost.universe === "series"
-      ? `/series/${updatedPost.slug}`
-      : updatedPost.universe === "public"
-        ? `/writings/${updatedPost.slug}`
-        : `/unfiltered/${updatedPost.slug}`,
+  await revalidatePostPublicPath(
+    updatedPost.universe,
+    updatedPost.slug,
+    updatedPost.seriesId,
   );
   redirect("/admin/posts");
 }
@@ -464,6 +497,7 @@ export async function togglePostStatus(formData: FormData) {
       chapterLabel: true,
       creatorId: true,
       universe: true,
+      seriesId: true,
       status: true,
       publishedAt: true,
     },
@@ -508,12 +542,10 @@ export async function togglePostStatus(formData: FormData) {
   }
 
   await refreshAdminViews();
-  revalidatePath(
-    existing.universe === "series"
-      ? `/series/${existing.slug}`
-      : existing.universe === "public"
-        ? `/writings/${existing.slug}`
-        : `/unfiltered/${existing.slug}`,
+  await revalidatePostPublicPath(
+    existing.universe,
+    existing.slug,
+    existing.seriesId,
   );
 }
 

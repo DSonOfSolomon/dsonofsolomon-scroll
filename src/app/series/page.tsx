@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Container from "@/components/site/Container";
 import EmptyState from "@/components/site/EmptyState";
 import PageWrapper from "@/components/site/PageWrapper";
-import WritingCard from "@/components/writings/WritingCard";
+import SeriesAccessGate from "@/components/series/SeriesAccessGate";
+import SeriesPreviewCard from "@/components/series/SeriesPreviewCard";
 import { prisma } from "@/lib/prisma";
 import { absoluteUrl, resolveSocialImage } from "@/lib/site";
 import { getPostPreview } from "@/lib/writings";
@@ -37,26 +38,37 @@ export const metadata: Metadata = {
 };
 
 export default async function SeriesPage() {
-  const episodes = await prisma.post.findMany({
+  const seriesList = await prisma.series.findMany({
     where: {
-      status: "published",
-      universe: "series",
-      seriesId: {
-        not: null,
+      posts: {
+        some: {
+          status: "published",
+          universe: "series",
+        },
       },
     },
     include: {
-      category: true,
-      series: true,
+      posts: {
+        where: {
+          status: "published",
+          universe: "series",
+        },
+        include: {
+          category: true,
+        },
+        orderBy: [
+          {
+            episodeNumber: "asc",
+          },
+          {
+            publishedAt: "asc",
+          },
+        ],
+      },
     },
-    orderBy: [
-      {
-        publishedAt: "desc",
-      },
-      {
-        createdAt: "desc",
-      },
-    ],
+    orderBy: {
+      updatedAt: "desc",
+    },
   });
 
   return (
@@ -74,39 +86,47 @@ export default async function SeriesPage() {
               </h1>
 
               <p className="mt-5 max-w-2xl text-lg leading-8 text-white/68">
-                Episodic writings will live here: connected pieces with a clear
-                beginning, continuation, and room to follow the world as it grows.
+                Episodic writings live here as connected worlds. Enter a series,
+                then choose the episode you want to read.
               </p>
             </div>
           </div>
         </section>
 
-        <section className="mt-12 pb-16">
-          {episodes.length > 0 ? (
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {episodes.map((episode) => (
-                <WritingCard
-                  key={episode.slug}
-                  title={episode.series?.title ?? episode.title}
-                  excerpt={getPostPreview(episode.excerpt, episode.content)}
-                  slug={episode.slug}
-                  category={episode.category?.name ?? "Series"}
-                  chapterLabel={
-                    episode.episodeNumber
-                      ? `Episode ${episode.episodeNumber}`
-                      : undefined
+        <section className="mt-12 pb-16 md:pb-20">
+          <SeriesAccessGate>
+            {seriesList.length > 0 ? (
+              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                {seriesList.map((series) => {
+                  const firstEpisode = series.posts[0];
+                  if (!firstEpisode) {
+                    return null;
                   }
-                  basePath="/series"
-                  actionLabel="Enter episode"
-                />
-              ))}
-            </div>
-          ) : (
-            <EmptyState
-              title="No series yet"
-              message="Series will appear here once the first episodic world is ready."
-            />
-          )}
+
+                  return (
+                    <SeriesPreviewCard
+                      key={series.id}
+                      href={`/series/${series.slug}`}
+                      seriesTitle={series.title}
+                      episodeTitle={firstEpisode.title}
+                      excerpt={getPostPreview(firstEpisode.excerpt, firstEpisode.content)}
+                      category={firstEpisode.category?.name ?? "Series"}
+                      episodeLabel={
+                        firstEpisode.episodeNumber
+                          ? `Episode ${firstEpisode.episodeNumber}`
+                          : "Episode"
+                      }
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              <EmptyState
+                title="No series yet"
+                message="Series will appear here once the first episodic world is ready."
+              />
+            )}
+          </SeriesAccessGate>
         </section>
       </Container>
     </PageWrapper>

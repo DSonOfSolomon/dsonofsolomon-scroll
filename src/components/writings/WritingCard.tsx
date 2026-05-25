@@ -8,7 +8,6 @@ type WritingCardProps = {
   category: string;
   chapterLabel?: string;
   basePath?: string;
-  actionLabel?: string;
 };
 
 export default function WritingCard({
@@ -18,7 +17,6 @@ export default function WritingCard({
   category,
   chapterLabel,
   basePath = "/writings",
-  actionLabel = "Immerse",
 }: WritingCardProps) {
   return (
     <Link
@@ -40,11 +38,8 @@ export default function WritingCard({
 
         <p className="mt-3 overflow-hidden text-sm leading-7 text-gray-600 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4]">
           {excerpt}
-          <span className="text-gray-400">...more</span>
-        </p>
-
-        <p className="mt-5 inline-flex text-sm font-semibold text-[#0a192f] transition-colors hover:text-[#13294b]">
-          {actionLabel}
+          <span className="text-gray-400">...</span>
+          <span className="font-semibold text-[#0a192f]">immerse</span>
         </p>
       </article>
     </Link>

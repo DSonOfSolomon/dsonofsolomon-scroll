@@ -120,32 +120,30 @@ export default async function SeriesLandingPage({ params }: Props) {
   return (
     <PageWrapper>
       <Container className="max-w-[78rem]">
-        <section className="overflow-hidden rounded-[1.75rem] bg-[#081421] text-white">
-          <div className="px-6 py-8 md:px-9 md:py-10 lg:px-11">
-            <div>
-              <p className="text-sm font-medium uppercase tracking-[0.2em] text-white/45">
-                Series
+        <section className="border-b border-gray-200 pb-10">
+          <div>
+            <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
+              Series
+            </p>
+
+            <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight text-gray-950 md:text-5xl">
+              {series.title}
+            </h1>
+
+            {description ? (
+              <p className="mt-5 max-w-2xl text-lg leading-8 text-gray-600">
+                {description}
               </p>
+            ) : null}
 
-              <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight text-white md:text-5xl">
-                {series.title}
-              </h1>
-
-              {description ? (
-                <p className="mt-5 max-w-2xl text-lg leading-8 text-white/68">
-                  {description}
-                </p>
-              ) : null}
-
-              <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-white/55">
-                <span>{category}</span>
-                <span>•</span>
-                <span>
-                  {series.posts.length === 1
-                    ? "1 episode"
-                    : `${series.posts.length} episodes`}
-                </span>
-              </div>
+            <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-gray-500">
+              <span>{category}</span>
+              <span>•</span>
+              <span>
+                {series.posts.length === 1
+                  ? "1 episode"
+                  : `${series.posts.length} episodes`}
+              </span>
             </div>
           </div>
         </section>
@@ -188,9 +186,7 @@ export default async function SeriesLandingPage({ params }: Props) {
                       <p className="mt-4 max-w-[44rem] text-base leading-8 text-gray-600">
                         {getPostPreview(episode.excerpt, episode.content)}
                         <span className="text-gray-400">...</span>
-                      </p>
-                      <p className="mt-5 inline-flex text-sm font-semibold text-[#0a192f] transition-colors group-hover:text-[#13294b]">
-                        Immerse
+                        <span className="font-semibold text-[#0a192f]">immerse</span>
                       </p>
                     </div>
                   </Link>

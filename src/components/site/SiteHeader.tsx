@@ -124,45 +124,53 @@ export default function SiteHeader() {
               </button>
 
               {souloverseOpen && (
-                <div
-                  className="absolute right-0 top-[calc(100%+0.65rem)] z-50 w-64 overflow-hidden rounded-xl border border-white/10 bg-[#0b1725] py-2 shadow-2xl"
-                  role="menu"
-                >
-                  {souloverseLinks.map((link) => {
-                    const content = (
-                      <>
-                        <span className="block text-sm font-medium text-white">
-                          {link.label}
-                        </span>
-                        <span className="mt-1 block text-xs leading-5 text-white/50">
-                          {link.description}
-                        </span>
-                      </>
-                    );
+                <>
+                  <button
+                    type="button"
+                    className="fixed inset-0 z-40 cursor-default"
+                    aria-label="Close Souloverse menu"
+                    onClick={() => setSouloverseOpen(false)}
+                  />
+                  <div
+                    className="absolute right-0 top-[calc(100%+0.65rem)] z-50 w-64 overflow-hidden rounded-xl border border-white/10 bg-[#0b1725] py-2 shadow-2xl"
+                    role="menu"
+                  >
+                    {souloverseLinks.map((link) => {
+                      const content = (
+                        <>
+                          <span className="block text-sm font-medium text-white">
+                            {link.label}
+                          </span>
+                          <span className="mt-1 block text-xs leading-5 text-white/50">
+                            {link.description}
+                          </span>
+                        </>
+                      );
 
-                    return link.href === "/series" ? (
-                      <SeriesAccessLink
-                        key={link.href}
-                        href={link.href}
-                        onNavigate={() => setSouloverseOpen(false)}
-                        className="block px-4 py-3 transition-colors hover:bg-white/[0.07]"
-                        role="menuitem"
-                      >
-                        {content}
-                      </SeriesAccessLink>
-                    ) : (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        onClick={() => setSouloverseOpen(false)}
-                        className="block px-4 py-3 transition-colors hover:bg-white/[0.07]"
-                        role="menuitem"
-                      >
-                        {content}
-                      </Link>
-                    );
-                  })}
-                </div>
+                      return link.href === "/series" ? (
+                        <SeriesAccessLink
+                          key={link.href}
+                          href={link.href}
+                          onNavigate={() => setSouloverseOpen(false)}
+                          className="block px-4 py-3 transition-colors hover:bg-white/[0.07]"
+                          role="menuitem"
+                        >
+                          {content}
+                        </SeriesAccessLink>
+                      ) : (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          onClick={() => setSouloverseOpen(false)}
+                          className="block px-4 py-3 transition-colors hover:bg-white/[0.07]"
+                          role="menuitem"
+                        >
+                          {content}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </>
               )}
             </div>
           )}

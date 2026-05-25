@@ -28,12 +28,12 @@ export default function SeriesPreviewCard({
       <article>
         <CategoryBadge label={category} />
 
-        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-[#8a6a2f]">
+        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-gray-950">
           {seriesTitle}
         </p>
 
         {episodeLabel ? (
-          <p className="mt-4 text-xs uppercase tracking-[0.22em] text-gray-500">
+          <p className="mt-5 text-xs uppercase tracking-[0.22em] text-gray-500">
             {episodeLabel}
           </p>
         ) : null}
@@ -44,11 +44,8 @@ export default function SeriesPreviewCard({
 
         <p className="mt-3 overflow-hidden text-sm leading-7 text-gray-600 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4]">
           {excerpt}
-          <span className="text-gray-400">...more</span>
-        </p>
-
-        <p className="mt-5 inline-flex text-sm font-semibold text-[#0a192f] transition-colors hover:text-[#13294b]">
-          Immerse
+          <span className="text-gray-400">...</span>
+          <span className="font-semibold text-[#0a192f]">immerse</span>
         </p>
       </article>
     </SeriesAccessLink>

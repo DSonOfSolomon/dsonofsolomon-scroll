@@ -287,10 +287,7 @@ export default async function WritingPage({ params }: Props) {
                       primaryContinuation.content,
                     )}
                     <span className="text-gray-400">...</span>
-                  </p>
-
-                  <p className="mt-6 inline-flex text-sm font-medium text-[#0a192f] transition-colors hover:text-[#13294b]">
-                    Read next
+                    <span className="font-semibold text-[#0a192f]">immerse</span>
                   </p>
                 </article>
               </Link>

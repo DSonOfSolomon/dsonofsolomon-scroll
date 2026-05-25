@@ -227,7 +227,7 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <div className="mt-14">
+            <div className="mt-20">
               <div>
                 <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
                   Series

@@ -63,6 +63,8 @@ export default function AdminPostForm({
 }: AdminPostFormProps) {
   const [universe, setUniverse] = useState(defaults?.universe ?? "public");
   const selectedLabel = souloverseLabels[universe] ?? "Writings";
+  const titleLabel = universe === "series" ? "Episode title" : "Title";
+  const slugLabel = universe === "series" ? "Episode slug" : "Slug";
   const contentTitle = useMemo(() => {
     if (universe === "series") {
       return mode === "create" ? "Create series episode" : "Edit series episode";
@@ -128,7 +130,7 @@ export default function AdminPostForm({
 
         <div className="grid gap-6 md:grid-cols-2">
           <label className="block">
-            <span className="text-sm font-medium text-gray-900">Title</span>
+            <span className="text-sm font-medium text-gray-900">{titleLabel}</span>
             <input
               name="title"
               required
@@ -138,7 +140,7 @@ export default function AdminPostForm({
           </label>
 
           <label className="block">
-            <span className="text-sm font-medium text-gray-900">Slug</span>
+            <span className="text-sm font-medium text-gray-900">{slugLabel}</span>
             <input
               name="slug"
               defaultValue={defaults?.slug ?? ""}

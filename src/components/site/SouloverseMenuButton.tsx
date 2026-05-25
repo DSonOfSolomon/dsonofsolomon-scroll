@@ -20,7 +20,7 @@ export default function SouloverseMenuButton() {
   }, []);
 
   return (
-    <div ref={wrapperRef} className="relative inline-flex shrink-0">
+    <div ref={wrapperRef} className="relative z-30 inline-flex shrink-0">
       <button
         type="button"
         onClick={() => setIsOpen((current) => !current)}
@@ -34,22 +34,30 @@ export default function SouloverseMenuButton() {
       </button>
 
       {isOpen ? (
-        <div className="absolute right-0 top-[calc(100%+0.5rem)] z-20 w-48 overflow-hidden rounded-2xl border border-gray-200 bg-white p-2 shadow-lg shadow-gray-950/10">
-          <Link
-            href="/writings"
-            className="block rounded-xl px-4 py-3 text-sm font-medium text-gray-900 no-underline transition-colors hover:bg-gray-100"
+        <>
+          <button
+            type="button"
+            className="fixed inset-0 z-10 cursor-default"
+            aria-label="Close Souloverse menu"
             onClick={() => setIsOpen(false)}
-          >
-            Writings
-          </Link>
-          <SeriesAccessLink
-            href="/series"
-            className="block rounded-xl px-4 py-3 text-sm font-medium text-gray-900 no-underline transition-colors hover:bg-gray-100"
-            onNavigate={() => setIsOpen(false)}
-          >
-            Series
-          </SeriesAccessLink>
-        </div>
+          />
+          <div className="absolute right-0 top-[calc(100%+0.5rem)] z-20 w-48 overflow-hidden rounded-2xl border border-gray-200 bg-white p-2 shadow-lg shadow-gray-950/10">
+            <Link
+              href="/writings"
+              className="block rounded-xl px-4 py-3 text-sm font-medium text-gray-900 no-underline transition-colors hover:bg-gray-100"
+              onClick={() => setIsOpen(false)}
+            >
+              Writings
+            </Link>
+            <SeriesAccessLink
+              href="/series"
+              className="block rounded-xl px-4 py-3 text-sm font-medium text-gray-900 no-underline transition-colors hover:bg-gray-100"
+              onNavigate={() => setIsOpen(false)}
+            >
+              Series
+            </SeriesAccessLink>
+          </div>
+        </>
       ) : null}
     </div>
   );

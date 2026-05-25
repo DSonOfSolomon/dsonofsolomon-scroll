@@ -154,6 +154,7 @@ export default async function WritingsPage({
                       <p className="mt-5 max-w-[40rem] text-lg leading-8 text-gray-600">
                         {getPostPreview(leadWriting.excerpt, leadWriting.content)}
                         <span className="text-gray-400">...</span>
+                        <span className="font-semibold text-[#0a192f]">immerse</span>
                       </p>
                     </div>
 
@@ -163,10 +164,6 @@ export default async function WritingsPage({
                         <p>{formatArchiveDate(leadWriting.publishedAt ?? leadWriting.createdAt)}</p>
                         <p>{getReadingTime(leadWriting.content)} min read</p>
                       </div>
-
-                      <p className="mt-6 inline-flex text-sm font-semibold text-[#0a192f] transition-colors hover:text-[#13294b]">
-                        Immerse
-                      </p>
                     </div>
                   </article>
                 </Link>
@@ -198,10 +195,7 @@ export default async function WritingsPage({
                           <p className="mt-4 max-w-[44rem] text-base leading-8 text-gray-600">
                             {getPostPreview(writing.excerpt, writing.content)}
                             <span className="text-gray-400">...</span>
-                          </p>
-
-                          <p className="mt-5 inline-flex text-sm font-semibold text-[#0a192f] transition-colors group-hover:text-[#13294b]">
-                            Immerse
+                            <span className="font-semibold text-[#0a192f]">immerse</span>
                           </p>
                         </Link>
                       </div>

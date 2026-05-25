@@ -74,12 +74,18 @@ export default function SeriesAccessLink({
       </Link>
 
       {open ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#07111f]/60 px-5">
-          <div className="relative w-full max-w-sm rounded-2xl border border-white/10 bg-white p-6 shadow-2xl">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#07111f]/60 px-5"
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-sm rounded-2xl border border-white/10 bg-white px-6 pb-6 pt-16 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="absolute right-4 top-4 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
+              className="absolute right-4 top-4 z-10 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
               aria-label="Close"
             >
               <FiX size={18} />

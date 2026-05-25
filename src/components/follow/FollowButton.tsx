@@ -165,8 +165,14 @@ export default function FollowButton({
       </button>
 
       {open && state === "following" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#07111f]/60 px-5">
-          <div className="relative w-full max-w-sm rounded-2xl border border-white/10 bg-white p-6 shadow-2xl">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#07111f]/60 px-5"
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-sm rounded-2xl border border-white/10 bg-white p-6 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
             <button
               type="button"
               onClick={() => setOpen(false)}

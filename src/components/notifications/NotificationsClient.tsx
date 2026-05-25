@@ -114,7 +114,7 @@ export default function NotificationsClient() {
             No updates yet
           </h2>
           <p className="mt-3 text-sm leading-7 text-gray-600">
-            New public chapters will appear here after you follow.
+            New chapters and series episodes will appear here after you follow.
           </p>
         </div>
       ) : (

@@ -165,7 +165,7 @@ export default async function WritingPage({ params }: Props) {
               href="/writings"
               className="inline-flex text-sm font-medium text-[#0a192f] transition-colors hover:text-[#13294b]"
             >
-              ← Back
+              ← Back to writings
             </Link>
           </div>
 
@@ -244,7 +244,7 @@ export default async function WritingPage({ params }: Props) {
         {siteFeatures.followEnabled && <PostFollowPrompt />}
 
         {(primaryContinuation || continuationWritings.length > 0) && (
-          <section className="mt-16 border-t border-gray-200 pt-10">
+          <section className="mt-16 border-t border-gray-200 pb-20 pt-10 md:pb-24">
             <div className="mb-8">
               <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
                 Continue the universe
@@ -309,6 +309,10 @@ export default async function WritingPage({ params }: Props) {
             )}
           </section>
         )}
+
+        {!primaryContinuation && continuationWritings.length === 0 ? (
+          <div className="pb-20 md:pb-24" />
+        ) : null}
       </Container>
     </PageWrapper>
   );

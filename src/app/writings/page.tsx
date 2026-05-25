@@ -100,6 +100,15 @@ export default async function WritingsPage({
   return (
     <PageWrapper>
       <Container className="max-w-[78rem]">
+        <div className="mb-6">
+          <Link
+            href="/"
+            className="inline-flex text-sm font-medium text-[#0a192f] transition-colors hover:text-[#13294b]"
+          >
+            ← Back home
+          </Link>
+        </div>
+
         <section className="overflow-hidden rounded-[1.75rem] bg-[#081421] text-white">
           <div className="px-6 py-8 md:px-9 md:py-10 lg:px-11">
             <div>
@@ -119,7 +128,7 @@ export default async function WritingsPage({
           </div>
         </section>
 
-        <section className="mt-10 pb-16 md:pb-20">
+        <section className="mt-10 pb-20 md:pb-24">
           {writings.length > 0 ? (
             <>
               {leadWriting && (

@@ -10,6 +10,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: absoluteUrl("/notifications"),
   },
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function NotificationsPage() {
@@ -24,7 +28,7 @@ export default function NotificationsPage() {
             Notifications
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-8 text-white/68">
-            New public chapters and reader updates from D•sonofSolomon.
+            New chapters, series episodes, and reader updates from D•sonofSolomon.
           </p>
         </section>
 

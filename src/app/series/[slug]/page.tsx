@@ -120,6 +120,15 @@ export default async function SeriesLandingPage({ params }: Props) {
   return (
     <PageWrapper>
       <Container className="max-w-[78rem]">
+        <div className="mb-6">
+          <Link
+            href="/series"
+            className="inline-flex text-sm font-medium text-[#0a192f] transition-colors hover:text-[#13294b]"
+          >
+            ← Back to series
+          </Link>
+        </div>
+
         <section className="border-b border-gray-200 pb-10">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
@@ -148,7 +157,7 @@ export default async function SeriesLandingPage({ params }: Props) {
           </div>
         </section>
 
-        <section className="mt-12 pb-16 md:pb-20">
+        <section className="mt-12 pb-20 md:pb-24">
           <SeriesAccessGate>
             <div className="mb-8">
               <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">

@@ -122,62 +122,63 @@ export default async function SeriesEpisodePage({ params }: Props) {
                 href={`/series/${post.series.slug}`}
                 className="inline-flex text-sm font-medium text-[#0a192f] transition-colors hover:text-[#13294b]"
               >
-                Back to episodes
+                ← Back to episodes
               </Link>
             </div>
 
-          <div className="border-b border-gray-200 pb-10">
-            <CategoryBadge label={post.category?.name ?? "Series"} />
+            <div className="border-b border-gray-200 pb-10">
+              <CategoryBadge label={post.category?.name ?? "Series"} />
 
-            <p className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1 uppercase">
-              <span className="text-xs tracking-[0.22em] text-gray-500">
-                {post.episodeNumber ? `Episode ${post.episodeNumber}` : "Episode"}
-              </span>
-              <span className="text-sm font-semibold tracking-[0.22em] text-[#8a6a2f]">
-                {post.series.title}
-              </span>
-            </p>
+              <p className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1 uppercase">
+                <span className="text-xs tracking-[0.22em] text-gray-500">
+                  {post.episodeNumber ? `Episode ${post.episodeNumber}` : "Episode"}
+                </span>
+                <span className="text-sm font-semibold tracking-[0.22em] text-[#8a6a2f]">
+                  {post.series.title}
+                </span>
+              </p>
 
-            <h1 className="mt-4 text-4xl font-bold tracking-tight text-gray-950 md:text-5xl">
-              {post.title}
-            </h1>
+              <h1 className="mt-4 text-4xl font-bold tracking-tight text-gray-950 md:text-5xl">
+                {post.title}
+              </h1>
 
-            <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-gray-500">
-              <span>D•sonofSolomon</span>
-              <span>•</span>
-              <span>{formattedDate}</span>
-              <span>•</span>
-              <span>{readingTime} min read</span>
+              <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                <span>D•sonofSolomon</span>
+                <span>•</span>
+                <span>{formattedDate}</span>
+                <span>•</span>
+                <span>{readingTime} min read</span>
+              </div>
             </div>
-          </div>
 
-          {post.coverImage ? (
-            <div className="mt-8 overflow-hidden rounded-[2rem] border border-gray-200 bg-[#f7f5ef]">
-              <Image
-                src={post.coverImage}
-                alt={post.title}
-                width={1600}
-                height={1000}
-                className="h-auto w-full object-cover"
-                sizes="(max-width: 768px) 100vw, 44rem"
-                priority
-                unoptimized={coverImageIsSvg}
-              />
-            </div>
-          ) : null}
+            {post.coverImage ? (
+              <div className="mt-8 overflow-hidden rounded-[2rem] border border-gray-200 bg-[#f7f5ef]">
+                <Image
+                  src={post.coverImage}
+                  alt={post.title}
+                  width={1600}
+                  height={1000}
+                  className="h-auto w-full object-cover"
+                  sizes="(max-width: 768px) 100vw, 44rem"
+                  priority
+                  unoptimized={coverImageIsSvg}
+                />
+              </div>
+            ) : null}
 
-          <div className="mt-10">
-            <div className="max-w-[43rem] space-y-7 text-[1.075rem] leading-[2.05rem] tracking-[-0.005em] text-gray-700 md:text-[1.18rem] md:leading-[2.22rem]">
-              {paragraphs.map((paragraph, index) => (
-                <p key={`${index}-${paragraph.slice(0, 24)}`}>
-                  {paragraph}
-                </p>
-              ))}
+            <div className="mt-10">
+              <div className="max-w-[43rem] space-y-7 text-[1.075rem] leading-[2.05rem] tracking-[-0.005em] text-gray-700 md:text-[1.18rem] md:leading-[2.22rem]">
+                {paragraphs.map((paragraph, index) => (
+                  <p key={`${index}-${paragraph.slice(0, 24)}`}>
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
             </div>
-          </div>
           </article>
 
           {siteFeatures.followEnabled && <PostFollowPrompt />}
+          <div className="pb-20 md:pb-24" />
         </SeriesAccessGate>
       </Container>
     </PageWrapper>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import Container from "@/components/site/Container";
 import EmptyState from "@/components/site/EmptyState";
 import PageWrapper from "@/components/site/PageWrapper";
@@ -74,6 +75,15 @@ export default async function SeriesPage() {
   return (
     <PageWrapper>
       <Container className="max-w-[78rem]">
+        <div className="mb-6">
+          <Link
+            href="/"
+            className="inline-flex text-sm font-medium text-[#0a192f] transition-colors hover:text-[#13294b]"
+          >
+            ← Back home
+          </Link>
+        </div>
+
         <section className="overflow-hidden rounded-[1.75rem] bg-[#081421] text-white">
           <div className="px-6 py-8 md:px-9 md:py-10 lg:px-11">
             <div>
@@ -93,7 +103,7 @@ export default async function SeriesPage() {
           </div>
         </section>
 
-        <section className="mt-12 pb-16 md:pb-20">
+        <section className="mt-12 pb-20 md:pb-24">
           <SeriesAccessGate>
             {seriesList.length > 0 ? (
               <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">

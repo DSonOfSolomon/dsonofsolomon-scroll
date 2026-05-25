@@ -251,6 +251,10 @@ async function resolveSeriesPlacement(
 async function safeNotifyFollowersOfPublishedPost(
   post: Parameters<typeof notifyFollowersOfPublishedPost>[0],
 ) {
+  if (!siteFeatures.pushNotificationsEnabled) {
+    return;
+  }
+
   try {
     const summary = await notifyFollowersOfPublishedPost(post);
     console.info(
@@ -346,6 +350,8 @@ export async function createPost(formData: FormData) {
       creatorId: post.creatorId,
       universe: post.universe,
       status: post.status,
+      seriesId: post.seriesId,
+      episodeNumber: post.episodeNumber,
     });
     await safeNotifyFollowersOfPublishedPost({
       id: post.id,
@@ -356,6 +362,20 @@ export async function createPost(formData: FormData) {
       universe: post.universe,
       status: post.status,
       publishedAt: post.publishedAt,
+    });
+  }
+
+  if (post.status === "published" && post.universe === "series") {
+    await safeCreateInAppNotificationsForPublishedPost({
+      id: post.id,
+      title: post.title,
+      slug: post.slug,
+      chapterLabel: post.chapterLabel,
+      creatorId: post.creatorId,
+      universe: post.universe,
+      status: post.status,
+      seriesId: post.seriesId,
+      episodeNumber: post.episodeNumber,
     });
   }
 
@@ -433,12 +453,12 @@ export async function updatePost(formData: FormData) {
     },
   });
 
-  const shouldNotifyFollowers =
+  const shouldCreateReaderNotifications =
     updatedPost.status === "published" &&
-    updatedPost.universe === "public" &&
-    (existing.status !== "published" || existing.universe !== "public");
+    (updatedPost.universe === "public" || updatedPost.universe === "series") &&
+    (existing.status !== "published" || existing.universe !== updatedPost.universe);
 
-  if (shouldNotifyFollowers) {
+  if (shouldCreateReaderNotifications) {
     await safeCreateInAppNotificationsForPublishedPost({
       id: updatedPost.id,
       title: updatedPost.title,
@@ -447,7 +467,12 @@ export async function updatePost(formData: FormData) {
       creatorId: updatedPost.creatorId,
       universe: updatedPost.universe,
       status: updatedPost.status,
+      seriesId: updatedPost.seriesId,
+      episodeNumber: updatedPost.episodeNumber,
     });
+  }
+
+  if (shouldCreateReaderNotifications && updatedPost.universe === "public") {
     await safeNotifyFollowersOfPublishedPost({
       id: updatedPost.id,
       title: updatedPost.title,
@@ -476,12 +501,27 @@ export async function updatePost(formData: FormData) {
 
 export async function deletePost(formData: FormData) {
   const id = normalizeRequired(formData.get("id"));
+  const existing = await prisma.post.findUnique({
+    where: { id },
+    select: {
+      slug: true,
+      universe: true,
+      seriesId: true,
+    },
+  });
 
   await prisma.post.delete({
     where: { id },
   });
 
   await refreshAdminViews();
+  if (existing) {
+    await revalidatePostPublicPath(
+      existing.universe,
+      existing.slug,
+      existing.seriesId,
+    );
+  }
 }
 
 export async function togglePostStatus(formData: FormData) {
@@ -498,6 +538,7 @@ export async function togglePostStatus(formData: FormData) {
       creatorId: true,
       universe: true,
       seriesId: true,
+      episodeNumber: true,
       status: true,
       publishedAt: true,
     },
@@ -518,7 +559,7 @@ export async function togglePostStatus(formData: FormData) {
   if (
     existing.status !== "published" &&
     updatedPost.status === "published" &&
-    existing.universe === "public"
+    (existing.universe === "public" || existing.universe === "series")
   ) {
     await safeCreateInAppNotificationsForPublishedPost({
       id: existing.id,
@@ -528,7 +569,16 @@ export async function togglePostStatus(formData: FormData) {
       creatorId: existing.creatorId,
       universe: existing.universe,
       status: updatedPost.status,
+      seriesId: existing.seriesId,
+      episodeNumber: existing.episodeNumber,
     });
+  }
+
+  if (
+    existing.status !== "published" &&
+    updatedPost.status === "published" &&
+    existing.universe === "public"
+  ) {
     await safeNotifyFollowersOfPublishedPost({
       id: existing.id,
       title: existing.title,

@@ -8,6 +8,7 @@ type WritingCardProps = {
   category: string;
   chapterLabel?: string;
   basePath?: string;
+  actionLabel?: string;
 };
 
 export default function WritingCard({
@@ -17,6 +18,7 @@ export default function WritingCard({
   category,
   chapterLabel,
   basePath = "/writings",
+  actionLabel = "Continue reading",
 }: WritingCardProps) {
   return (
     <Link
@@ -27,7 +29,7 @@ export default function WritingCard({
         <CategoryBadge label={category} />
 
         {chapterLabel && (
-          <p className="mt-4 text-xs uppercase tracking-[0.22em] text-gray-500">
+          <p className="mt-4 text-sm font-semibold uppercase tracking-[0.22em] text-[#8a6a2f]">
             {chapterLabel}
           </p>
         )}
@@ -42,7 +44,7 @@ export default function WritingCard({
         </p>
 
         <p className="mt-5 inline-flex text-sm font-medium text-[#0a192f] transition-colors hover:text-[#13294b]">
-          Continue reading
+          {actionLabel}
         </p>
       </article>
     </Link>

@@ -11,14 +11,14 @@ import { getPostPreview } from "@/lib/writings";
 export const metadata: Metadata = {
   title: "Writings",
   description:
-    "Single chapter-style writings from D•sonofSolomon on love, life, laughter and systems.",
+    "Single chapter-style writings from D•sonofSolomon inside the Souloverse.",
   alternates: {
     canonical: absoluteUrl("/writings"),
   },
   openGraph: {
     title: "Writings",
     description:
-      "Single chapter-style writings from D•sonofSolomon on love, life, laughter and systems.",
+      "Single chapter-style writings from D•sonofSolomon inside the Souloverse.",
     url: absoluteUrl("/writings"),
     type: "website",
     images: [
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Writings",
     description:
-      "Single chapter-style writings from D•sonofSolomon on love, life, laughter and systems.",
+      "Single chapter-style writings from D•sonofSolomon inside the Souloverse.",
     images: [resolveSocialImage()],
   },
 };
@@ -100,43 +100,32 @@ export default async function WritingsPage({
   return (
     <PageWrapper>
       <Container className="max-w-[78rem]">
-        <section>
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <section className="overflow-hidden rounded-[1.75rem] bg-[#081421] text-white">
+          <div className="px-6 py-8 md:px-9 md:py-10 lg:px-11">
             <div>
-              <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
-                Soloverse
+              <p className="text-sm font-medium uppercase tracking-[0.2em] text-white/45">
+                Souloverse
               </p>
 
-              <h1 className="mt-4 text-4xl font-bold tracking-tight text-gray-950 md:text-5xl">
+              <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight text-white md:text-5xl">
                 Writings
               </h1>
 
-              <p className="mt-5 max-w-2xl text-lg leading-8 text-gray-600">
+              <p className="mt-5 max-w-2xl text-lg leading-8 text-white/68">
                 Single pieces arranged as chapters: complete thoughts on love,
                 life, laughter and systems.
               </p>
-
-              <Link
-                href="/"
-                className="mt-5 inline-flex text-sm font-medium text-[#0a192f] transition-colors hover:text-[#13294b]"
-              >
-                Return to the front of the universe
-              </Link>
-            </div>
-
-            <div className="inline-flex h-[2.7rem] items-center rounded-full border border-gray-200 px-4 text-sm text-gray-500">
-              Page {currentPage} of {totalPages}
             </div>
           </div>
         </section>
 
-        <section className="mt-12">
+        <section className="mt-10 pb-16 md:pb-20">
           {writings.length > 0 ? (
             <>
               {leadWriting && (
                 <Link
                   href={`/writings/${leadWriting.slug}`}
-                  className="block rounded-[2rem] border border-gray-200 bg-[#f7f5ef] p-7 no-underline transition-colors hover:border-gray-400 md:p-9"
+                  className="block rounded-[1.75rem] border border-gray-200 bg-[#f7f5ef] p-7 no-underline shadow-sm transition-colors hover:border-gray-400 md:p-9"
                 >
                   <article className="grid gap-8 lg:grid-cols-[minmax(0,1.5fr)_minmax(18rem,0.95fr)] lg:items-end">
                     <div>
@@ -153,7 +142,7 @@ export default async function WritingsPage({
                       </div>
 
                       {leadWriting.chapterLabel && (
-                        <p className="mt-5 text-xs uppercase tracking-[0.22em] text-gray-500">
+                        <p className="mt-5 text-sm font-semibold uppercase tracking-[0.22em] text-[#8a6a2f]">
                           {leadWriting.chapterLabel}
                         </p>
                       )}
@@ -183,7 +172,7 @@ export default async function WritingsPage({
                 </Link>
               )}
 
-              <div className="mt-8">
+              <div className="mt-10 rounded-[1.25rem] border border-gray-200 bg-white px-5 pb-8 pt-8 shadow-sm md:px-7 md:pb-10 md:pt-10">
                 {remainingWritings.map((writing) => (
                   <article
                     key={writing.slug}
@@ -193,7 +182,7 @@ export default async function WritingsPage({
                       <div className="space-y-3 text-sm text-gray-500">
                         <CategoryBadge label={writing.category?.name ?? "Writing"} />
                         {writing.chapterLabel && (
-                          <p className="text-xs uppercase tracking-[0.22em] text-gray-500">
+                          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#8a6a2f]">
                             {writing.chapterLabel}
                           </p>
                         )}
@@ -244,12 +233,12 @@ export default async function WritingsPage({
                     {hasNextPage ? (
                       <Link
                         href={`/writings?page=${currentPage + 1}`}
-                        className="inline-flex rounded-full bg-[#0a192f] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#13294b]"
+                        className="inline-flex rounded-full border border-gray-300 bg-transparent px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:border-gray-900"
                       >
                         Next
                       </Link>
                     ) : (
-                      <span className="inline-flex rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-400">
+                      <span className="inline-flex rounded-full border border-gray-200 bg-transparent px-4 py-2 text-sm font-medium text-gray-400">
                         Next
                       </span>
                     )}

@@ -3,6 +3,7 @@ import {
   deactivateFollower,
   testFollowerNotification,
 } from "@/app/admin/actions";
+import AdminSubmitButton from "@/components/admin/AdminSubmitButton";
 import {
   AdminMetricCard,
   AdminPageHeader,
@@ -201,24 +202,24 @@ export default async function AdminFollowersPage() {
                           {siteFeatures.pushNotificationsEnabled ? (
                             <form action={testFollowerNotification}>
                               <input type="hidden" name="id" value={follower.id} />
-                              <button
-                                type="submit"
+                              <AdminSubmitButton
                                 className="cursor-pointer font-medium text-[#0a192f] hover:text-[#13294b]"
+                                pendingLabel="Testing..."
                               >
                                 Test
-                              </button>
+                              </AdminSubmitButton>
                             </form>
                           ) : null}
 
                           {follower.status === "active" ? (
                             <form action={deactivateFollower}>
                               <input type="hidden" name="id" value={follower.id} />
-                              <button
-                                type="submit"
+                              <AdminSubmitButton
                                 className="cursor-pointer text-red-600 hover:text-red-700"
+                                pendingLabel="Deactivating..."
                               >
                                 Deactivate
-                              </button>
+                              </AdminSubmitButton>
                             </form>
                           ) : null}
                         </div>

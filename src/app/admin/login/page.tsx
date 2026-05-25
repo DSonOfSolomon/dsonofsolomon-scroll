@@ -1,4 +1,5 @@
 import { loginAdmin } from "@/app/admin/actions";
+import AdminSubmitButton from "@/components/admin/AdminSubmitButton";
 
 export default async function AdminLoginPage({
   searchParams,
@@ -41,12 +42,12 @@ export default async function AdminLoginPage({
             <p className="text-sm text-red-600">Invalid admin login.</p>
           ) : null}
 
-          <button
-            type="submit"
+          <AdminSubmitButton
             className="inline-flex h-11 w-full cursor-pointer items-center justify-center rounded-xl bg-[#0a192f] px-5 text-sm font-medium text-white transition-colors hover:bg-[#13294b]"
+            pendingLabel="Entering..."
           >
             Enter admin
-          </button>
+          </AdminSubmitButton>
         </form>
       </section>
     </main>

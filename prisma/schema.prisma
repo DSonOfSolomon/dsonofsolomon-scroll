@@ -27,6 +27,7 @@ model Creator {
   updatedAt        DateTime @updatedAt
 
   posts                     Post[]
+  series                    Series[]
   categories                Category[]
   subscribers               Subscriber[]
   followers                 Follower[]
@@ -36,6 +37,7 @@ model Creator {
   readingSessions           ReadingSession[]
   subscriberAnalyticsEvents SubscriberAnalyticsEvent[]
   notificationDeliveries    NotificationDelivery[]
+  inAppNotifications        InAppNotification[]
 }
 
 model Category {
@@ -51,6 +53,23 @@ model Category {
   posts Post[]
 
   @@unique([creatorId, slug])
+}
+
+model Series {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  creatorId String
+  creator   Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  posts Post[]
+
+  @@unique([creatorId, slug])
+  @@index([creatorId, createdAt])
 }
 
 model Post {
@@ -74,11 +93,17 @@ model Post {
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
+  seriesId      String?
+  series        Series? @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+  episodeNumber Int?
+
   postViews              PostView[]
   readingSessions        ReadingSession[]
   notificationDeliveries NotificationDelivery[]
+  inAppNotifications     InAppNotification[]
 
   @@unique([creatorId, slug])
+  @@index([seriesId, episodeNumber])
 }
 
 model Subscriber {
@@ -129,9 +154,34 @@ model Follower {
   creator   Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   notificationDeliveries NotificationDelivery[]
+  inAppNotifications     InAppNotification[]
 
   @@unique([creatorId, endpoint])
   @@index([creatorId, createdAt])
+}
+
+model InAppNotification {
+  id        String    @id @default(cuid())
+  type      String    @default("public_post")
+  title     String
+  body      String
+  href      String
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  creatorId String
+  creator   Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  postId String?
+  post   Post?   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  followerId String
+  follower   Follower @relation(fields: [followerId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, postId, type])
+  @@index([creatorId, createdAt])
+  @@index([followerId, readAt])
+  @@index([postId, createdAt])
 }
 
 model NotificationDelivery {

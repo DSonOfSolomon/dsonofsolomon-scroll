@@ -9,6 +9,7 @@ import {
   notifyFollowersOfPublishedPost,
   sendFollowerTestNotification,
 } from "@/lib/notifications";
+import { createInAppNotificationsForPublishedPost } from "@/lib/inAppNotifications";
 import { prisma } from "@/lib/prisma";
 import { siteFeatures } from "@/lib/features";
 import {
@@ -24,6 +25,36 @@ function normalizeOptional(value: FormDataEntryValue | null) {
 
 function normalizeRequired(value: FormDataEntryValue | null) {
   return value?.toString().trim() ?? "";
+}
+
+function normalizeOptionalNumber(value: FormDataEntryValue | null) {
+  const normalized = normalizeOptional(value);
+
+  if (!normalized) {
+    return null;
+  }
+
+  const parsed = Number(normalized);
+
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    throw new Error("Episode number must be a whole number greater than zero.");
+  }
+
+  return parsed;
+}
+
+function normalizeUniverse(value: FormDataEntryValue | null) {
+  const requestedUniverse = normalizeRequired(value) || "public";
+
+  if (requestedUniverse === "series") {
+    return "series";
+  }
+
+  if (requestedUniverse === "unfiltered" && siteFeatures.unfilteredEnabled) {
+    return "unfiltered";
+  }
+
+  return "public";
 }
 
 const ADMIN_COOKIE_NAME = "dsonofsolomon_admin";
@@ -70,11 +101,109 @@ async function refreshAdminViews() {
   revalidatePath("/admin/posts", "page");
   revalidatePath("/admin/followers");
   revalidatePath("/admin/letter-requests");
+  revalidatePath("/", "layout");
   revalidatePath("/", "page");
   revalidatePath("/subscribe");
   revalidatePath("/writings", "page");
+  revalidatePath("/series", "page");
   revalidatePath("/unfiltered");
   revalidatePath("/request-a-letter");
+}
+
+async function getUniqueSeriesSlug(
+  creatorId: string,
+  value: string,
+  currentSeriesId?: string,
+) {
+  const baseSlug = fallbackSlug(value);
+  let candidate = baseSlug;
+  let suffix = 2;
+
+  while (true) {
+    const existing = await prisma.series.findUnique({
+      where: {
+        creatorId_slug: {
+          creatorId,
+          slug: candidate,
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!existing || existing.id === currentSeriesId) {
+      return candidate;
+    }
+
+    candidate = `${baseSlug}-${suffix}`;
+    suffix += 1;
+  }
+}
+
+async function resolveSeriesPlacement(
+  formData: FormData,
+  creatorId: string,
+  universe: string,
+) {
+  if (universe !== "series") {
+    return {
+      seriesId: null,
+      episodeNumber: null,
+    };
+  }
+
+  const selectedSeriesId = normalizeOptional(formData.get("seriesId"));
+  const newSeriesTitle = normalizeOptional(formData.get("newSeriesTitle"));
+  const newSeriesSlug = normalizeOptional(formData.get("newSeriesSlug"));
+  const newSeriesDescription = normalizeOptional(formData.get("newSeriesDescription"));
+  const episodeNumber = normalizeOptionalNumber(formData.get("episodeNumber"));
+
+  if (selectedSeriesId) {
+    const selectedSeries = await prisma.series.findFirst({
+      where: {
+        id: selectedSeriesId,
+        creatorId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!selectedSeries) {
+      throw new Error("Selected series was not found.");
+    }
+
+    return {
+      seriesId: selectedSeriesId,
+      episodeNumber,
+    };
+  }
+
+  if (!newSeriesTitle) {
+    throw new Error("Choose an existing series or add a new series title.");
+  }
+
+  const slug = await getUniqueSeriesSlug(
+    creatorId,
+    newSeriesSlug ?? newSeriesTitle,
+  );
+  const series = await prisma.series.create({
+    data: {
+      title: newSeriesTitle,
+      slug,
+      description: newSeriesDescription,
+      creatorId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  return {
+    seriesId: series.id,
+    episodeNumber,
+  };
 }
 
 async function safeNotifyFollowersOfPublishedPost(
@@ -99,6 +228,25 @@ async function safeNotifyFollowersOfPublishedPost(
   }
 }
 
+async function safeCreateInAppNotificationsForPublishedPost(
+  post: Parameters<typeof createInAppNotificationsForPublishedPost>[0],
+) {
+  try {
+    const summary = await createInAppNotificationsForPublishedPost(post);
+    console.info(
+      "In-app notification summary",
+      JSON.stringify({
+        postId: post.id,
+        title: post.title,
+        created: summary.created,
+        skipped: summary.skipped,
+      }),
+    );
+  } catch (error) {
+    console.error("In-app notification creation failed", error);
+  }
+}
+
 export async function createPost(formData: FormData) {
   const creator = await getPrimaryCreator();
   const title = normalizeRequired(formData.get("title"));
@@ -106,11 +254,7 @@ export async function createPost(formData: FormData) {
   const excerpt = normalizeRequired(formData.get("excerpt"));
   const content = normalizeRequired(formData.get("content"));
   const status = normalizeRequired(formData.get("status")) || "draft";
-  const requestedUniverse = normalizeRequired(formData.get("universe")) || "public";
-  const universe =
-    requestedUniverse === "unfiltered" && siteFeatures.unfilteredEnabled
-      ? "unfiltered"
-      : "public";
+  const universe = normalizeUniverse(formData.get("universe"));
   const chapterLabel = normalizeOptional(formData.get("chapterLabel"));
   const categoryId = normalizeOptional(formData.get("categoryId"));
   const coverImageInput =
@@ -127,6 +271,11 @@ export async function createPost(formData: FormData) {
   }
 
   const slug = await getUniquePostSlug(creator.id, manualSlug ?? title);
+  const seriesPlacement = await resolveSeriesPlacement(
+    formData,
+    creator.id,
+    universe,
+  );
 
   const post = await prisma.post.create({
     data: {
@@ -139,12 +288,23 @@ export async function createPost(formData: FormData) {
       chapterLabel,
       categoryId,
       coverImage,
+      seriesId: seriesPlacement.seriesId,
+      episodeNumber: seriesPlacement.episodeNumber,
       creatorId: creator.id,
       publishedAt: status === "published" ? new Date() : null,
     },
   });
 
   if (post.status === "published" && post.universe === "public") {
+    await safeCreateInAppNotificationsForPublishedPost({
+      id: post.id,
+      title: post.title,
+      slug: post.slug,
+      chapterLabel: post.chapterLabel,
+      creatorId: post.creatorId,
+      universe: post.universe,
+      status: post.status,
+    });
     await safeNotifyFollowersOfPublishedPost({
       id: post.id,
       title: post.title,
@@ -158,9 +318,13 @@ export async function createPost(formData: FormData) {
   }
 
   await refreshAdminViews();
-  revalidatePath(
-    post.universe === "public" ? `/writings/${post.slug}` : `/unfiltered/${post.slug}`,
-  );
+  if (post.universe === "series") {
+    revalidatePath(`/series/${post.slug}`);
+  } else {
+    revalidatePath(
+      post.universe === "public" ? `/writings/${post.slug}` : `/unfiltered/${post.slug}`,
+    );
+  }
   redirect("/admin/posts");
 }
 
@@ -172,14 +336,12 @@ export async function updatePost(formData: FormData) {
   const excerpt = normalizeRequired(formData.get("excerpt"));
   const content = normalizeRequired(formData.get("content"));
   const status = normalizeRequired(formData.get("status")) || "draft";
-  const requestedUniverse = normalizeRequired(formData.get("universe")) || "public";
-  const universe =
-    requestedUniverse === "unfiltered" && siteFeatures.unfilteredEnabled
-      ? "unfiltered"
-      : "public";
+  const universe = normalizeUniverse(formData.get("universe"));
   const chapterLabel = normalizeOptional(formData.get("chapterLabel"));
   const categoryId = normalizeOptional(formData.get("categoryId"));
-  const coverImageInput = normalizeOptional(formData.get("coverImage"));
+  const coverImageInput =
+    normalizeOptional(formData.get("coverImageOverride")) ??
+    normalizeOptional(formData.get("coverImage"));
   const coverImageUpload = await saveUploadedImage(
     formData.get("coverImageFile"),
     "post-cover",
@@ -207,6 +369,11 @@ export async function updatePost(formData: FormData) {
     : existing.status === "published"
       ? existing.slug
       : await getUniquePostSlug(creator.id, title, id);
+  const seriesPlacement = await resolveSeriesPlacement(
+    formData,
+    creator.id,
+    universe,
+  );
 
   const updatedPost = await prisma.post.update({
     where: { id },
@@ -220,6 +387,8 @@ export async function updatePost(formData: FormData) {
       chapterLabel,
       categoryId,
       coverImage,
+      seriesId: seriesPlacement.seriesId,
+      episodeNumber: seriesPlacement.episodeNumber,
       publishedAt:
         status === "published"
           ? existing.publishedAt ?? new Date()
@@ -233,6 +402,15 @@ export async function updatePost(formData: FormData) {
     (existing.status !== "published" || existing.universe !== "public");
 
   if (shouldNotifyFollowers) {
+    await safeCreateInAppNotificationsForPublishedPost({
+      id: updatedPost.id,
+      title: updatedPost.title,
+      slug: updatedPost.slug,
+      chapterLabel: updatedPost.chapterLabel,
+      creatorId: updatedPost.creatorId,
+      universe: updatedPost.universe,
+      status: updatedPost.status,
+    });
     await safeNotifyFollowersOfPublishedPost({
       id: updatedPost.id,
       title: updatedPost.title,
@@ -247,14 +425,18 @@ export async function updatePost(formData: FormData) {
 
   await refreshAdminViews();
   revalidatePath(
-    existing.universe === "public"
-      ? `/writings/${existing.slug}`
-      : `/unfiltered/${existing.slug}`,
+    existing.universe === "series"
+      ? `/series/${existing.slug}`
+      : existing.universe === "public"
+        ? `/writings/${existing.slug}`
+        : `/unfiltered/${existing.slug}`,
   );
   revalidatePath(
-    updatedPost.universe === "public"
-      ? `/writings/${updatedPost.slug}`
-      : `/unfiltered/${updatedPost.slug}`,
+    updatedPost.universe === "series"
+      ? `/series/${updatedPost.slug}`
+      : updatedPost.universe === "public"
+        ? `/writings/${updatedPost.slug}`
+        : `/unfiltered/${updatedPost.slug}`,
   );
   redirect("/admin/posts");
 }
@@ -304,6 +486,15 @@ export async function togglePostStatus(formData: FormData) {
     updatedPost.status === "published" &&
     existing.universe === "public"
   ) {
+    await safeCreateInAppNotificationsForPublishedPost({
+      id: existing.id,
+      title: existing.title,
+      slug: existing.slug,
+      chapterLabel: existing.chapterLabel,
+      creatorId: existing.creatorId,
+      universe: existing.universe,
+      status: updatedPost.status,
+    });
     await safeNotifyFollowersOfPublishedPost({
       id: existing.id,
       title: existing.title,
@@ -318,9 +509,11 @@ export async function togglePostStatus(formData: FormData) {
 
   await refreshAdminViews();
   revalidatePath(
-    existing.universe === "public"
-      ? `/writings/${existing.slug}`
-      : `/unfiltered/${existing.slug}`,
+    existing.universe === "series"
+      ? `/series/${existing.slug}`
+      : existing.universe === "public"
+        ? `/writings/${existing.slug}`
+        : `/unfiltered/${existing.slug}`,
   );
 }
 
@@ -616,7 +809,6 @@ export async function updateCreatorBranding(formData: FormData) {
   const heroEyebrow = normalizeOptional(formData.get("heroEyebrow"));
   const heroTitle = normalizeOptional(formData.get("heroTitle"));
   const heroSubtitle = normalizeOptional(formData.get("heroSubtitle"));
-  const currentWorkingOn = normalizeOptional(formData.get("currentWorkingOn"));
 
   await prisma.creator.update({
     where: { id: creator.id },
@@ -626,6 +818,20 @@ export async function updateCreatorBranding(formData: FormData) {
       heroEyebrow,
       heroTitle,
       heroSubtitle,
+    },
+  });
+
+  await refreshAdminViews();
+  redirect("/admin");
+}
+
+export async function updateCreatorFooter(formData: FormData) {
+  const creator = await getPrimaryCreator();
+  const currentWorkingOn = normalizeOptional(formData.get("currentWorkingOn"));
+
+  await prisma.creator.update({
+    where: { id: creator.id },
+    data: {
       currentWorkingOn,
     },
   });

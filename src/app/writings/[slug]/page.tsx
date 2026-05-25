@@ -175,7 +175,7 @@ export default async function WritingPage({ params }: Props) {
                 <CategoryBadge label={post.category?.name ?? "Writing"} />
 
                 {post.chapterLabel && (
-                  <p className="mt-4 text-xs uppercase tracking-[0.22em] text-gray-500">
+                  <p className="mt-4 text-sm font-semibold uppercase tracking-[0.22em] text-[#8a6a2f]">
                     {post.chapterLabel}
                   </p>
                 )}
@@ -211,7 +211,7 @@ export default async function WritingPage({ params }: Props) {
               <CategoryBadge label={post.category?.name ?? "Writing"} />
 
               {post.chapterLabel && (
-                <p className="mt-4 text-xs uppercase tracking-[0.22em] text-gray-500">
+                <p className="mt-4 text-sm font-semibold uppercase tracking-[0.22em] text-[#8a6a2f]">
                   {post.chapterLabel}
                 </p>
               )}

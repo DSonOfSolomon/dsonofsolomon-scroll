@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Container from "@/components/site/Container";
+import EmptyState from "@/components/site/EmptyState";
 import FollowButton from "@/components/follow/FollowButton";
 import SiteFooter from "@/components/site/SiteFooter";
 import PageWrapper from "@/components/site/PageWrapper";
+import SouloverseMenuButton from "@/components/site/SouloverseMenuButton";
 import WritingCard from "@/components/writings/WritingCard";
-import Link from "next/link";
 import { getPrimaryCreator } from "@/lib/admin";
 import { siteFeatures } from "@/lib/features";
 import { countPrimaryCreatorFollowers } from "@/lib/followers";
@@ -50,7 +51,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const [creator, featuredWritings, followerCount] = await Promise.all([
+  const [creator, featuredWritings, featuredSeries, followerCount] = await Promise.all([
     getPrimaryCreator(),
     prisma.post.findMany({
       where: {
@@ -63,6 +64,42 @@ export default async function HomePage() {
       orderBy: {
         publishedAt: "desc",
       },
+      take: 3,
+    }),
+    prisma.series.findMany({
+      where: {
+        posts: {
+          some: {
+            status: "published",
+            universe: "series",
+          },
+        },
+      },
+      include: {
+        posts: {
+          where: {
+            status: "published",
+            universe: "series",
+          },
+          include: {
+            category: true,
+          },
+          orderBy: [
+            {
+              episodeNumber: "asc",
+            },
+            {
+              publishedAt: "asc",
+            },
+          ],
+          take: 1,
+        },
+      },
+      orderBy: [
+        {
+          updatedAt: "desc",
+        },
+      ],
       take: 3,
     }),
     countPrimaryCreatorFollowers(),
@@ -146,29 +183,24 @@ export default async function HomePage() {
             </div>
           </section>
 
-          <section className="mt-20 border-t border-gray-200 pt-12">
+          <section className="mt-20 border-t border-gray-200 pb-16 pt-12 md:pb-20">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
-                  Public universe
+                  Souloverse
                 </p>
 
                 <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-950 md:text-3xl">
-                  Latest writings
+                  Latest chapters
                 </h2>
 
                 <p className="mt-3 max-w-2xl text-base leading-7 text-gray-600">
                   Begin with the latest chapter, or move deeper into the
-                  writings as the universe keeps unfolding.
+                  Souloverse as the writing keeps unfolding.
                 </p>
               </div>
 
-              <Link
-                href="/writings"
-                className="inline-flex h-[2.5rem] shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[#0a192f] px-5 text-sm font-medium !text-white no-underline transition-colors hover:bg-[#13294b]"
-              >
-                Go deeper
-              </Link>
+              <SouloverseMenuButton />
             </div>
 
             <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -182,6 +214,57 @@ export default async function HomePage() {
                   chapterLabel={writing.chapterLabel ?? undefined}
                 />
               ))}
+            </div>
+
+            <div className="mt-14">
+              <div>
+                <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
+                  Series
+                </p>
+
+                <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-950 md:text-3xl">
+                  Latest episodes
+                </h2>
+              </div>
+
+              {featuredSeries.length > 0 ? (
+                <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                  {featuredSeries.map((series) => {
+                    const firstEpisode = series.posts[0];
+
+                    if (!firstEpisode) {
+                      return null;
+                    }
+
+                    return (
+                      <WritingCard
+                        key={series.id}
+                        title={series.title}
+                        excerpt={getPostPreview(
+                          firstEpisode.excerpt,
+                          firstEpisode.content,
+                        )}
+                        slug={firstEpisode.slug}
+                        category={firstEpisode.category?.name ?? "Series"}
+                        chapterLabel={
+                          firstEpisode.episodeNumber
+                            ? `Episode ${firstEpisode.episodeNumber}`
+                            : undefined
+                        }
+                        basePath="/series"
+                        actionLabel="Enter episode"
+                      />
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="mt-8">
+                  <EmptyState
+                    title="No series yet"
+                    message="The first series episodes will appear here after they are published."
+                  />
+                </div>
+              )}
             </div>
           </section>
         </Container>

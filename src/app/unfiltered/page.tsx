@@ -65,7 +65,7 @@ export default async function UnfilteredPage() {
           </p>
         </section>
 
-        <section className="mt-12">
+        <section className="mt-12 pb-16 md:pb-20">
           {writings.length > 0 ? (
             <div className="space-y-6">
               {writings.map((writing) => (

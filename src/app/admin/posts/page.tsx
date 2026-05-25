@@ -4,6 +4,7 @@ import {
   notifyFollowersForPost,
   togglePostStatus,
 } from "@/app/admin/actions";
+import AdminSubmitButton from "@/components/admin/AdminSubmitButton";
 import {
   AdminPageHeader,
   AdminPanel,
@@ -19,6 +20,7 @@ export default async function AdminPostsPage() {
   const posts = await prisma.post.findMany({
     include: {
       category: true,
+      series: true,
     },
     orderBy: {
       updatedAt: "desc",
@@ -32,9 +34,9 @@ export default async function AdminPostsPage() {
       </div>
 
       <AdminPageHeader
-        eyebrow="Posts"
-        title="Manage writings"
-        description="Review status, universe placement, taxonomy, and publishing state from one focused table."
+        eyebrow="Content"
+        title="Manage Souloverse"
+        description="Review writings, series episodes, universe placement, taxonomy, and publishing state from one focused table."
         action={
           <Link href="/admin/posts/new" className={adminPrimaryButtonClass}>
             Create post
@@ -43,7 +45,7 @@ export default async function AdminPostsPage() {
       />
 
       <AdminPanel>
-        <AdminPanelHeader title="Writing library" />
+        <AdminPanelHeader title="Content library" />
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-100">
             <thead className="bg-gray-50">
@@ -60,7 +62,15 @@ export default async function AdminPostsPage() {
             <tbody className="divide-y divide-gray-100 bg-white text-sm text-gray-700">
               {posts.map((post) => (
                 <tr key={post.id} className="transition-colors hover:bg-gray-50/70">
-                  <td className="px-4 py-4 font-medium text-gray-950">{post.title}</td>
+                  <td className="px-4 py-4 font-medium text-gray-950">
+                    <div>{post.title}</div>
+                    {post.series ? (
+                      <div className="mt-1 text-xs font-medium text-gray-500">
+                        {post.series.title}
+                        {post.episodeNumber ? ` - Episode ${post.episodeNumber}` : ""}
+                      </div>
+                    ) : null}
+                  </td>
                   <td className="px-4 py-4 text-gray-500">{post.slug}</td>
                   <td className="px-4 py-4">{post.category?.name ?? "Unassigned"}</td>
                   <td className="px-4 py-4">
@@ -94,22 +104,22 @@ export default async function AdminPostsPage() {
                           name="nextStatus"
                           value={post.status === "published" ? "draft" : "published"}
                         />
-                        <button
-                          type="submit"
+                        <AdminSubmitButton
                           className="cursor-pointer text-gray-600 hover:text-gray-950"
+                          pendingLabel="Updating..."
                         >
                           {post.status === "published" ? "Unpublish" : "Publish"}
-                        </button>
+                        </AdminSubmitButton>
                       </form>
 
                       <form action={deletePost}>
                         <input type="hidden" name="id" value={post.id} />
-                        <button
-                          type="submit"
+                        <AdminSubmitButton
                           className="cursor-pointer text-red-600 hover:text-red-700"
+                          pendingLabel="Deleting..."
                         >
                           Delete
-                        </button>
+                        </AdminSubmitButton>
                       </form>
 
                       {siteFeatures.pushNotificationsEnabled &&
@@ -117,12 +127,12 @@ export default async function AdminPostsPage() {
                       post.universe === "public" ? (
                         <form action={notifyFollowersForPost}>
                           <input type="hidden" name="id" value={post.id} />
-                          <button
-                            type="submit"
+                          <AdminSubmitButton
                             className="cursor-pointer text-[#8a6a2f] hover:text-[#6f5525]"
+                            pendingLabel="Sending..."
                           >
                             Notify followers
-                          </button>
+                          </AdminSubmitButton>
                         </form>
                       ) : null}
                     </div>

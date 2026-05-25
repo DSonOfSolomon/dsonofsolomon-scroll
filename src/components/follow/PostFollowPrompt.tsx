@@ -33,8 +33,8 @@ export default function PostFollowPrompt() {
   }, []);
 
   return (
-    <section className="mt-16 border-t border-gray-200 pt-10">
-      <div className="max-w-[24rem] rounded-[1.2rem] border border-gray-200 bg-[#f7f5ef] px-4 py-3.5">
+    <section className="mt-16 border-t border-gray-200 pb-16 pt-10 md:pb-20">
+      <div className="w-full max-w-[28rem] rounded-[1.2rem] border border-gray-200 bg-[#f7f5ef] px-5 py-4">
         <p className="text-base leading-7 text-gray-700">
           {following ? (
             <>

@@ -3,19 +3,34 @@ import { prisma } from "@/lib/prisma";
 import { SITE_URL } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const posts = await prisma.post.findMany({
-    where: {
-      status: "published",
-      universe: "public",
-    },
-    select: {
-      slug: true,
-      updatedAt: true,
-    },
-    orderBy: {
-      publishedAt: "desc",
-    },
-  });
+  const [posts, seriesEpisodes] = await Promise.all([
+    prisma.post.findMany({
+      where: {
+        status: "published",
+        universe: "public",
+      },
+      select: {
+        slug: true,
+        updatedAt: true,
+      },
+      orderBy: {
+        publishedAt: "desc",
+      },
+    }),
+    prisma.post.findMany({
+      where: {
+        status: "published",
+        universe: "series",
+      },
+      select: {
+        slug: true,
+        updatedAt: true,
+      },
+      orderBy: {
+        publishedAt: "desc",
+      },
+    }),
+  ]);
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -37,6 +52,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
+      url: `${SITE_URL}/notifications`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.4,
+    },
+    {
       url: `${SITE_URL}/about`,
       lastModified: new Date(),
       changeFrequency: "monthly",
@@ -51,5 +72,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  return [...staticRoutes, ...postRoutes];
+  const seriesRoutes: MetadataRoute.Sitemap = seriesEpisodes.map((post) => ({
+    url: `${SITE_URL}/series/${post.slug}`,
+    lastModified: post.updatedAt,
+    changeFrequency: "monthly",
+    priority: 0.75,
+  }));
+
+  return [...staticRoutes, ...postRoutes, ...seriesRoutes];
 }

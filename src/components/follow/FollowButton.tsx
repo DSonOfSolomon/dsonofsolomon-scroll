@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { FiX } from "react-icons/fi";
 
 type FollowButtonProps = {
   className: string;
@@ -47,7 +48,7 @@ export default function FollowButton({
   const router = useRouter();
   const [state, setState] = useState<FollowState>("idle");
   const [isPending, setIsPending] = useState(false);
-  const [isIntentionalUnfollow, setIsIntentionalUnfollow] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     function syncFollowing() {
@@ -125,7 +126,7 @@ export default function FollowButton({
 
         window.localStorage.removeItem(LOCAL_TEST_FOLLOWER_KEY);
         setState("idle");
-        setIsIntentionalUnfollow(false);
+        setOpen(false);
         emitFollowStateChanged();
         router.refresh();
       } finally {
@@ -134,29 +135,70 @@ export default function FollowButton({
     })();
   }
 
+  function handleButtonClick() {
+    if (state === "following") {
+      setOpen(true);
+      return;
+    }
+
+    handleFollow();
+  }
+
   const label = isPending
     ? state === "following"
       ? "Unfollowing..."
       : "Following..."
     : state === "following"
-      ? isIntentionalUnfollow
-        ? "Unfollow"
-        : "Following"
+      ? "Following"
       : children;
 
   return (
-    <button
-      type="button"
-      onClick={state === "following" ? handleUnfollow : handleFollow}
-      onBlur={() => setIsIntentionalUnfollow(false)}
-      onFocus={() => setIsIntentionalUnfollow(state === "following")}
-      onMouseEnter={() => setIsIntentionalUnfollow(state === "following")}
-      onMouseLeave={() => setIsIntentionalUnfollow(false)}
-      disabled={isPending}
-      className={className}
-      aria-pressed={state === "following"}
-    >
-      {label}
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={handleButtonClick}
+        disabled={isPending}
+        className={className}
+        aria-pressed={state === "following"}
+      >
+        {label}
+      </button>
+
+      {open && state === "following" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#07111f]/60 px-5">
+          <div className="relative w-full max-w-sm rounded-2xl border border-white/10 bg-white p-6 shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              disabled={isPending}
+              className="absolute right-4 top-4 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 disabled:opacity-60"
+              aria-label="Close"
+            >
+              <FiX size={18} />
+            </button>
+
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8a6a2f]">
+              Following D•sonofSolomon
+            </p>
+            <p className="mt-4 max-w-[18rem] text-base font-medium leading-7 text-gray-950">
+              You now have access to series.
+            </p>
+
+            <p className="mt-2 max-w-[18rem] text-base font-medium leading-7 text-gray-700">
+              You get in-app notifications whenever a new series or chapter drops.
+            </p>
+
+            <button
+              type="button"
+              onClick={handleUnfollow}
+              disabled={isPending}
+              className="mt-6 inline-flex h-11 cursor-pointer items-center justify-center rounded-xl border border-gray-300 px-5 text-sm font-medium text-gray-900 transition-colors hover:border-gray-900 disabled:opacity-60"
+            >
+              {isPending ? "Unfollowing..." : "Unfollow"}
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

@@ -1,5 +1,9 @@
 import Link from "next/link";
-import { updateCreatorBranding } from "@/app/admin/actions";
+import {
+  updateCreatorBranding,
+  updateCreatorFooter,
+} from "@/app/admin/actions";
+import AdminSubmitButton from "@/components/admin/AdminSubmitButton";
 import {
   AdminMetricCard,
   AdminPageHeader,
@@ -153,7 +157,7 @@ export default async function AdminDashboardPage() {
       <AdminPageHeader
         eyebrow="Content Administration"
         title="Dashboard"
-        description="A focused command surface for publishing, audience signals, and the public face of the writing system."
+        description=""
         action={
           <Link
             href="/admin/posts/new"
@@ -168,13 +172,13 @@ export default async function AdminDashboardPage() {
         <AdminPanelHeader
           eyebrow="Overview"
           title="Content and audience snapshot"
-          description="The current state of publishing, taxonomy, and audience activity."
+          description=""
         />
         <div className="grid gap-4 p-5 sm:grid-cols-2 xl:grid-cols-4">
           <AdminMetricCard label="Posts" value={postCount} note="Total writings" />
           <AdminMetricCard label="Published" value={publishedCount} note="Across both universes" />
           <AdminMetricCard label="Drafts" value={draftCount} note="Still in progress" />
-          <AdminMetricCard label="Writings" value={publicCount} note="Public universe" />
+          <AdminMetricCard label="Writings" value={publicCount} note="Souloverse" />
           {siteFeatures.unfilteredEnabled ? (
             <AdminMetricCard label="Unfiltered" value={unfilteredCount} note="Premium universe" />
           ) : null}
@@ -189,6 +193,7 @@ export default async function AdminDashboardPage() {
           <AdminMetricCard label="Audience" value={followerCount + premiumCount} note="Combined reach" />
         </div>
       </AdminPanel>
+
 
       <AdminPanel>
         <AdminPanelHeader
@@ -260,11 +265,12 @@ export default async function AdminDashboardPage() {
         </p>
       </AdminPanel>
 
+
       <AdminPanel>
         <AdminPanelHeader
-          eyebrow="Homepage and footer"
-          title="Hero image, copy and footer status"
-          description="Control the first public impression and the small status line that anchors the site."
+          eyebrow="Homepage"
+          title="Homepage hero"
+          description="Control the hero image and copy readers see first on the public homepage."
         />
 
         <form action={updateCreatorBranding} className="grid gap-4 p-5">
@@ -334,6 +340,25 @@ export default async function AdminDashboardPage() {
             placeholder="Hero image description"
             className={adminInputClass}
           />
+          <div>
+            <AdminSubmitButton
+              className={adminPrimaryButtonClass}
+              pendingLabel="Saving homepage..."
+            >
+              Save homepage
+            </AdminSubmitButton>
+          </div>
+        </form>
+      </AdminPanel>
+
+      <AdminPanel>
+        <AdminPanelHeader
+          eyebrow="Footer"
+          title="Currently working on"
+          description="Update the short status line that appears in the public footer."
+        />
+
+        <form action={updateCreatorFooter} className="grid gap-4 p-5">
           <input
             name="currentWorkingOn"
             defaultValue={creator.currentWorkingOn ?? ""}
@@ -341,12 +366,12 @@ export default async function AdminDashboardPage() {
             className={adminInputClass}
           />
           <div>
-            <button
-              type="submit"
+            <AdminSubmitButton
               className={adminPrimaryButtonClass}
+              pendingLabel="Saving footer..."
             >
-              Save homepage and footer
-            </button>
+              Save footer
+            </AdminSubmitButton>
           </div>
         </form>
       </AdminPanel>

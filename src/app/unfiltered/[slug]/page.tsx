@@ -94,7 +94,7 @@ export default async function UnfilteredWritingPage({ params }: Props) {
             <CategoryBadge label={post.category?.name ?? "Unfiltered"} />
 
             {post.chapterLabel && (
-              <p className="mt-4 text-xs uppercase tracking-[0.22em] text-gray-500">
+              <p className="mt-4 text-sm font-semibold uppercase tracking-[0.22em] text-[#8a6a2f]">
                 {post.chapterLabel}
               </p>
             )}
@@ -123,7 +123,7 @@ export default async function UnfilteredWritingPage({ params }: Props) {
         </article>
 
         {relatedWritings.length > 0 ? (
-          <section className="mt-16 border-t border-gray-200 pt-10">
+          <section className="mt-16 border-t border-gray-200 pb-16 pt-10 md:pb-20">
             <div className="mb-8">
               <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
                 Continue deeper
@@ -149,7 +149,7 @@ export default async function UnfilteredWritingPage({ params }: Props) {
             </div>
           </section>
         ) : (
-          <section className="mt-16 border-t border-gray-200 pt-10">
+          <section className="mt-16 border-t border-gray-200 pb-16 pt-10 md:pb-20">
             <EmptyState
               title="No related Unfiltered writings yet"
               message="More premium reflections will appear here as the universe expands."

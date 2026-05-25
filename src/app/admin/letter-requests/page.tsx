@@ -2,6 +2,7 @@ import {
   deleteLetterRequest,
   updateLetterRequestStatus,
 } from "@/app/admin/actions";
+import AdminSubmitButton from "@/components/admin/AdminSubmitButton";
 import {
   AdminPageHeader,
   AdminPanel,
@@ -82,24 +83,33 @@ export default async function AdminLetterRequestsPage() {
                       <form action={updateLetterRequestStatus}>
                         <input type="hidden" name="id" value={request.id} />
                         <input type="hidden" name="status" value="in_progress" />
-                        <button type="submit" className="cursor-pointer text-[#0a192f] hover:text-[#13294b]">
+                        <AdminSubmitButton
+                          className="cursor-pointer text-[#0a192f] hover:text-[#13294b]"
+                          pendingLabel="Starting..."
+                        >
                           Start
-                        </button>
+                        </AdminSubmitButton>
                       </form>
 
                       <form action={updateLetterRequestStatus}>
                         <input type="hidden" name="id" value={request.id} />
                         <input type="hidden" name="status" value="completed" />
-                        <button type="submit" className="cursor-pointer text-gray-600 hover:text-gray-950">
+                        <AdminSubmitButton
+                          className="cursor-pointer text-gray-600 hover:text-gray-950"
+                          pendingLabel="Completing..."
+                        >
                           Complete
-                        </button>
+                        </AdminSubmitButton>
                       </form>
 
                       <form action={deleteLetterRequest}>
                         <input type="hidden" name="id" value={request.id} />
-                        <button type="submit" className="cursor-pointer text-red-600 hover:text-red-700">
+                        <AdminSubmitButton
+                          className="cursor-pointer text-red-600 hover:text-red-700"
+                          pendingLabel="Deleting..."
+                        >
                           Delete
-                        </button>
+                        </AdminSubmitButton>
                       </form>
                     </div>
                   </td>

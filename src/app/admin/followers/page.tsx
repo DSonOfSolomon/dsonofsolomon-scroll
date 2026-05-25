@@ -11,6 +11,7 @@ import {
   StatusPill,
 } from "@/components/admin/AdminUI";
 import { getPrimaryCreator } from "@/lib/admin";
+import { siteFeatures } from "@/lib/features";
 import { prisma } from "@/lib/prisma";
 
 function getBrowserLabel(userAgent: string | null, endpoint: string) {
@@ -37,7 +38,11 @@ function getBrowserLabel(userAgent: string | null, endpoint: string) {
     return "Local test";
   }
 
-  return "Unknown";
+  if (endpoint.startsWith("in-app://")) {
+    return "In-app";
+  }
+
+  return "Saved";
 }
 
 function formatDate(value: Date | null) {
@@ -118,14 +123,14 @@ export default async function AdminFollowersPage() {
 
       <AdminPageHeader
         eyebrow="Followers"
-        title="Notification audience"
-        description="Browser notification endpoints created when readers follow the public writings."
+        title="Reader audience"
+        description="Readers who have followed D•sonofSolomon. Browser push is disabled for V1 and can be re-enabled later."
       />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <AdminMetricCard label="Active" value={activeFollowerCount} note="Ready for public post notifications" />
-        <AdminMetricCard label="Inactive" value={inactiveFollowerCount} note="Turned off or expired endpoints" />
-        <AdminMetricCard label="Notified" value={notifiedFollowerCount} note="Reached by at least one post" />
+        <AdminMetricCard label="Active" value={activeFollowerCount} note="Currently following" />
+        <AdminMetricCard label="Inactive" value={inactiveFollowerCount} note="Manually deactivated" />
+        <AdminMetricCard label="Notified" value={notifiedFollowerCount} note="Reserved for notification upgrades" />
       </section>
 
       <AdminPanel>
@@ -135,8 +140,8 @@ export default async function AdminFollowersPage() {
             <table className="w-full divide-y divide-gray-100">
               <thead className="bg-gray-50">
                 <tr className="text-left text-xs font-semibold uppercase text-gray-500">
-                  <th className="whitespace-nowrap px-4 py-3">Browser</th>
-                  <th className="whitespace-nowrap px-4 py-3">Endpoint</th>
+                  <th className="whitespace-nowrap px-4 py-3">Source</th>
+                  <th className="whitespace-nowrap px-4 py-3">Follower key</th>
                   <th className="whitespace-nowrap px-4 py-3">Status</th>
                   <th className="whitespace-nowrap px-4 py-3">Last delivery</th>
                   <th className="whitespace-nowrap px-4 py-3">Last notified</th>
@@ -193,15 +198,17 @@ export default async function AdminFollowersPage() {
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex flex-wrap gap-3">
-                          <form action={testFollowerNotification}>
-                            <input type="hidden" name="id" value={follower.id} />
-                            <button
-                              type="submit"
-                              className="cursor-pointer font-medium text-[#0a192f] hover:text-[#13294b]"
-                            >
-                              Test
-                            </button>
-                          </form>
+                          {siteFeatures.pushNotificationsEnabled ? (
+                            <form action={testFollowerNotification}>
+                              <input type="hidden" name="id" value={follower.id} />
+                              <button
+                                type="submit"
+                                className="cursor-pointer font-medium text-[#0a192f] hover:text-[#13294b]"
+                              >
+                                Test
+                              </button>
+                            </form>
+                          ) : null}
 
                           {follower.status === "active" ? (
                             <form action={deactivateFollower}>
@@ -225,75 +232,77 @@ export default async function AdminFollowersPage() {
         </div>
       </AdminPanel>
 
-      <AdminPanel>
-        <AdminPanelHeader
-          title="Recent notification deliveries"
-          description="The latest browser push attempts for published public writings."
-        />
-        <div className="w-full max-w-full overflow-x-scroll overscroll-x-contain px-1 pb-3 [-webkit-overflow-scrolling:touch]">
-          <div className="w-max min-w-[62rem] rounded-xl border border-gray-100">
-            <table className="w-full divide-y divide-gray-100">
-              <thead className="bg-gray-50">
-                <tr className="text-left text-xs font-semibold uppercase text-gray-500">
-                  <th className="whitespace-nowrap px-4 py-3">Post</th>
-                  <th className="whitespace-nowrap px-4 py-3">Status</th>
-                  <th className="whitespace-nowrap px-4 py-3">Endpoint</th>
-                  <th className="whitespace-nowrap px-4 py-3">Reason</th>
-                  <th className="whitespace-nowrap px-4 py-3">When</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
-                {recentDeliveries.length === 0 ? (
-                  <tr>
-                    <td className="px-4 py-5 text-gray-500" colSpan={5}>
-                      No notification delivery attempts recorded yet.
-                    </td>
+      {siteFeatures.pushNotificationsEnabled ? (
+        <AdminPanel>
+          <AdminPanelHeader
+            title="Recent notification deliveries"
+            description="The latest browser push attempts for published public writings."
+          />
+          <div className="w-full max-w-full overflow-x-scroll overscroll-x-contain px-1 pb-3 [-webkit-overflow-scrolling:touch]">
+            <div className="w-max min-w-[62rem] rounded-xl border border-gray-100">
+              <table className="w-full divide-y divide-gray-100">
+                <thead className="bg-gray-50">
+                  <tr className="text-left text-xs font-semibold uppercase text-gray-500">
+                    <th className="whitespace-nowrap px-4 py-3">Post</th>
+                    <th className="whitespace-nowrap px-4 py-3">Status</th>
+                    <th className="whitespace-nowrap px-4 py-3">Endpoint</th>
+                    <th className="whitespace-nowrap px-4 py-3">Reason</th>
+                    <th className="whitespace-nowrap px-4 py-3">When</th>
                   </tr>
-                ) : (
-                  recentDeliveries.map((delivery) => (
-                    <tr key={delivery.id} className="transition-colors hover:bg-gray-50/70">
-                      <td className="px-4 py-4 font-medium text-gray-950">
-                        {delivery.post?.title ?? "System event"}
-                      </td>
-                      <td className="px-4 py-4">
-                        <StatusPill
-                          tone={
-                            delivery.status === "sent"
-                              ? "success"
-                              : delivery.status === "failed"
-                                ? "danger"
-                                : "warning"
-                          }
-                        >
-                          {delivery.status}
-                        </StatusPill>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="max-w-[18rem] truncate">
-                          {delivery.endpoint ?? "None"}
-                        </div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="max-w-[20rem] truncate">
-                          {delivery.reason ??
-                            (delivery.statusCode ? `HTTP ${delivery.statusCode}` : "Delivered")}
-                        </div>
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-4">
-                        {delivery.createdAt.toLocaleDateString("en-GB", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
+                </thead>
+                <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
+                  {recentDeliveries.length === 0 ? (
+                    <tr>
+                      <td className="px-4 py-5 text-gray-500" colSpan={5}>
+                        No notification delivery attempts recorded yet.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    recentDeliveries.map((delivery) => (
+                      <tr key={delivery.id} className="transition-colors hover:bg-gray-50/70">
+                        <td className="px-4 py-4 font-medium text-gray-950">
+                          {delivery.post?.title ?? "System event"}
+                        </td>
+                        <td className="px-4 py-4">
+                          <StatusPill
+                            tone={
+                              delivery.status === "sent"
+                                ? "success"
+                                : delivery.status === "failed"
+                                  ? "danger"
+                                  : "warning"
+                            }
+                          >
+                            {delivery.status}
+                          </StatusPill>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="max-w-[18rem] truncate">
+                            {delivery.endpoint ?? "None"}
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="max-w-[20rem] truncate">
+                            {delivery.reason ??
+                              (delivery.statusCode ? `HTTP ${delivery.statusCode}` : "Delivered")}
+                          </div>
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-4">
+                          {delivery.createdAt.toLocaleDateString("en-GB", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      </AdminPanel>
+        </AdminPanel>
+      ) : null}
     </div>
   );
 }

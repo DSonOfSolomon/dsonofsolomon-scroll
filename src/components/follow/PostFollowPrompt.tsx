@@ -3,48 +3,27 @@
 import { useEffect, useState } from "react";
 import FollowButton, {
   FOLLOW_STATE_CHANGE_EVENT,
-  LOCAL_TEST_FOLLOWER_KEY,
+  isLocallyFollowing,
 } from "@/components/follow/FollowButton";
-
-async function isFollowing() {
-  if (!("serviceWorker" in navigator)) {
-    return false;
-  }
-
-  const registration = await navigator.serviceWorker.getRegistration("/");
-  const subscription = await registration?.pushManager.getSubscription();
-  const localTestEndpoint = window.localStorage.getItem(
-    LOCAL_TEST_FOLLOWER_KEY,
-  );
-
-  return Boolean(subscription || localTestEndpoint);
-}
 
 export default function PostFollowPrompt() {
   const [following, setFollowing] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function syncFollowing() {
-      const nextFollowing = await isFollowing();
-
-      if (!cancelled) {
-        setFollowing(nextFollowing);
-      }
+    function syncFollowing() {
+      setFollowing(isLocallyFollowing());
     }
 
-    void syncFollowing();
+    syncFollowing();
 
     function handleFollowStateChange() {
-      void syncFollowing();
+      syncFollowing();
     }
 
     window.addEventListener(FOLLOW_STATE_CHANGE_EVENT, handleFollowStateChange);
     window.addEventListener("focus", handleFollowStateChange);
 
     return () => {
-      cancelled = true;
       window.removeEventListener(
         FOLLOW_STATE_CHANGE_EVENT,
         handleFollowStateChange,
@@ -61,7 +40,7 @@ export default function PostFollowPrompt() {
             <>
               Thank you for reading this piece.
               <br />
-              You will be notified when a new chapter drops.
+              New chapters will appear in your reader updates.
             </>
           ) : (
             <>

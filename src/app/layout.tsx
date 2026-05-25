@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import AnalyticsTracker from "@/components/analytics/AnalyticsTracker";
 import FollowerNotifications from "@/components/follow/FollowerNotifications";
 import SiteHeader from "@/components/site/SiteHeader";
+import { siteFeatures } from "@/lib/features";
 import { resolveSocialImage, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
@@ -54,7 +55,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <SiteHeader />
-        <FollowerNotifications />
+        {siteFeatures.pushNotificationsEnabled && <FollowerNotifications />}
         <Suspense fallback={null}>
           <AnalyticsTracker />
         </Suspense>

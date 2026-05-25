@@ -12,6 +12,7 @@ import {
   StatusPill,
 } from "@/components/admin/AdminUI";
 import BackToDashboardLink from "@/components/admin/BackToDashboardLink";
+import { siteFeatures } from "@/lib/features";
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminPostsPage() {
@@ -111,7 +112,9 @@ export default async function AdminPostsPage() {
                         </button>
                       </form>
 
-                      {post.status === "published" && post.universe === "public" ? (
+                      {siteFeatures.pushNotificationsEnabled &&
+                      post.status === "published" &&
+                      post.universe === "public" ? (
                         <form action={notifyFollowersForPost}>
                           <input type="hidden" name="id" value={post.id} />
                           <button

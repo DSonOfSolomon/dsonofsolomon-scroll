@@ -26,7 +26,7 @@ export default async function SiteFooter() {
 
             <div className="flex items-center gap-1.5 text-white">
               <a
-                href="https://x.com/"
+                href="https://x.com/dsonofsolomon"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/8"
@@ -36,7 +36,7 @@ export default async function SiteFooter() {
               </a>
 
               <a
-                href="https://instagram.com/"
+                href="https://instagram.com/dsonofsolomon"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/8"
@@ -46,7 +46,7 @@ export default async function SiteFooter() {
               </a>
 
               <a
-                href="https://facebook.com/"
+                href="https://facebook.com/iamdsonofsolomon"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/8"
@@ -56,7 +56,7 @@ export default async function SiteFooter() {
               </a>
 
               <a
-                href="https://tiktok.com/"
+                href="https://tiktok.com/@dsonofsolomon"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/8"

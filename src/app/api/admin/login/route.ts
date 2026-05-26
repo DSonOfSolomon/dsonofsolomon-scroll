@@ -51,10 +51,13 @@ export async function POST(request: NextRequest) {
   const validPassword = await isValidAdminPassword(password);
 
   if (!sessionToken || username !== adminUsername || !validPassword) {
-    return NextResponse.redirect(new URL("/admin/login?error=1", request.url));
+    return NextResponse.redirect(
+      new URL("/admin/login?error=1", request.url),
+      303
+    );
   }
 
-  const response = NextResponse.redirect(new URL("/admin", request.url));
+  const response = NextResponse.redirect(new URL("/admin", request.url), 303);
 
   response.cookies.set(ADMIN_COOKIE_NAME, sessionToken, adminCookieOptions);
 

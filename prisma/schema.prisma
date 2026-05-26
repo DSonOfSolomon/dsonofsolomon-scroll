@@ -70,6 +70,7 @@ model Series {
 
   @@unique([creatorId, slug])
   @@index([creatorId, createdAt])
+  @@index([updatedAt])
 }
 
 model Post {
@@ -103,7 +104,11 @@ model Post {
   inAppNotifications     InAppNotification[]
 
   @@unique([creatorId, slug])
+  @@index([creatorId, status, universe, publishedAt])
+  @@index([status, universe, publishedAt])
+  @@index([status, universe, slug])
   @@index([seriesId, episodeNumber])
+  @@index([seriesId, status, universe, episodeNumber, publishedAt])
 }
 
 model Subscriber {
@@ -158,6 +163,8 @@ model Follower {
 
   @@unique([creatorId, endpoint])
   @@index([creatorId, createdAt])
+  @@index([creatorId, status])
+  @@index([creatorId, lastNotifiedAt])
 }
 
 model InAppNotification {
@@ -181,6 +188,7 @@ model InAppNotification {
   @@unique([followerId, postId, type])
   @@index([creatorId, createdAt])
   @@index([followerId, readAt])
+  @@index([followerId, createdAt])
   @@index([postId, createdAt])
 }
 
@@ -206,6 +214,7 @@ model NotificationDelivery {
   @@index([postId, createdAt])
   @@index([followerId, createdAt])
   @@index([creatorId, status])
+  @@index([creatorId, endpoint, status, createdAt])
 }
 
 model PageView {

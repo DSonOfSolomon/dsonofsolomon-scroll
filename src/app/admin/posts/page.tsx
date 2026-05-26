@@ -16,7 +16,30 @@ import BackToDashboardLink from "@/components/admin/BackToDashboardLink";
 import { siteFeatures } from "@/lib/features";
 import { prisma } from "@/lib/prisma";
 
-export default async function AdminPostsPage() {
+const PAGE_SIZE = 20;
+
+function normalizePage(page: string | undefined) {
+  const value = Number(page);
+
+  if (!Number.isFinite(value) || value < 1) {
+    return 1;
+  }
+
+  return Math.floor(value);
+}
+
+export default async function AdminPostsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page } = await searchParams;
+  const requestedPage = normalizePage(page);
+  const totalCount = await prisma.post.count();
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const currentPage = Math.min(requestedPage, totalPages);
+  const hasPreviousPage = currentPage > 1;
+  const hasNextPage = currentPage < totalPages;
   const posts = await prisma.post.findMany({
     include: {
       category: true,
@@ -25,6 +48,8 @@ export default async function AdminPostsPage() {
     orderBy: {
       updatedAt: "desc",
     },
+    skip: (currentPage - 1) * PAGE_SIZE,
+    take: PAGE_SIZE,
   });
 
   return (
@@ -142,6 +167,41 @@ export default async function AdminPostsPage() {
             </tbody>
           </table>
         </div>
+        {totalPages > 1 ? (
+          <div className="flex items-center justify-between gap-4 border-t border-gray-100 px-4 py-4">
+            <p className="text-sm text-gray-500">
+              Page {currentPage} of {totalPages}
+            </p>
+
+            <div className="flex gap-3">
+              {hasPreviousPage ? (
+                <Link
+                  href={currentPage - 1 === 1 ? "/admin/posts" : `/admin/posts?page=${currentPage - 1}`}
+                  className="inline-flex rounded-full border border-gray-300 bg-transparent px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:border-gray-900"
+                >
+                  Previous
+                </Link>
+              ) : (
+                <span className="inline-flex rounded-full border border-gray-200 bg-transparent px-4 py-2 text-sm font-medium text-gray-400">
+                  Previous
+                </span>
+              )}
+
+              {hasNextPage ? (
+                <Link
+                  href={`/admin/posts?page=${currentPage + 1}`}
+                  className="inline-flex rounded-full border border-gray-300 bg-transparent px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:border-gray-900"
+                >
+                  Next
+                </Link>
+              ) : (
+                <span className="inline-flex rounded-full border border-gray-200 bg-transparent px-4 py-2 text-sm font-medium text-gray-400">
+                  Next
+                </span>
+              )}
+            </div>
+          </div>
+        ) : null}
       </AdminPanel>
     </div>
   );

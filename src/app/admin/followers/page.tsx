@@ -58,8 +58,35 @@ function formatDate(value: Date | null) {
   });
 }
 
-export default async function AdminFollowersPage() {
+const PAGE_SIZE = 50;
+
+function normalizePage(page: string | undefined) {
+  const value = Number(page);
+
+  if (!Number.isFinite(value) || value < 1) {
+    return 1;
+  }
+
+  return Math.floor(value);
+}
+
+export default async function AdminFollowersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page } = await searchParams;
+  const requestedPage = normalizePage(page);
   const creator = await getPrimaryCreator();
+  const totalFollowerCount = await prisma.follower.count({
+    where: {
+      creatorId: creator.id,
+    },
+  });
+  const totalPages = Math.max(1, Math.ceil(totalFollowerCount / PAGE_SIZE));
+  const currentPage = Math.min(requestedPage, totalPages);
+  const hasPreviousPage = currentPage > 1;
+  const hasNextPage = currentPage < totalPages;
   const [
     followers,
     activeFollowerCount,
@@ -87,6 +114,8 @@ export default async function AdminFollowersPage() {
           },
         },
       },
+      skip: (currentPage - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
     }),
     prisma.follower.count({ where: { creatorId: creator.id, status: "active" } }),
     prisma.follower.count({ where: { creatorId: creator.id, status: "inactive" } }),
@@ -231,6 +260,41 @@ export default async function AdminFollowersPage() {
             </table>
           </div>
         </div>
+        {totalPages > 1 ? (
+          <div className="flex items-center justify-between gap-4 border-t border-gray-100 px-4 py-4">
+            <p className="text-sm text-gray-500">
+              Page {currentPage} of {totalPages}
+            </p>
+
+            <div className="flex gap-3">
+              {hasPreviousPage ? (
+                <a
+                  href={currentPage - 1 === 1 ? "/admin/followers" : `/admin/followers?page=${currentPage - 1}`}
+                  className="inline-flex rounded-full border border-gray-300 bg-transparent px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:border-gray-900"
+                >
+                  Previous
+                </a>
+              ) : (
+                <span className="inline-flex rounded-full border border-gray-200 bg-transparent px-4 py-2 text-sm font-medium text-gray-400">
+                  Previous
+                </span>
+              )}
+
+              {hasNextPage ? (
+                <a
+                  href={`/admin/followers?page=${currentPage + 1}`}
+                  className="inline-flex rounded-full border border-gray-300 bg-transparent px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:border-gray-900"
+                >
+                  Next
+                </a>
+              ) : (
+                <span className="inline-flex rounded-full border border-gray-200 bg-transparent px-4 py-2 text-sm font-medium text-gray-400">
+                  Next
+                </span>
+              )}
+            </div>
+          </div>
+        ) : null}
       </AdminPanel>
 
       {siteFeatures.pushNotificationsEnabled ? (

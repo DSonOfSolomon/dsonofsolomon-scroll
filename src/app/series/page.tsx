@@ -38,24 +38,59 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function SeriesPage() {
-  const seriesList = await prisma.series.findMany({
-    where: {
-      posts: {
-        some: {
-          status: "published",
-          universe: "series",
-        },
-      },
+const PAGE_SIZE = 6;
+
+const publishedSeriesWhere = {
+  posts: {
+    some: {
+      status: "published",
+      universe: "series",
     },
+  },
+};
+
+function normalizePage(page: string | undefined) {
+  const value = Number(page);
+
+  if (!Number.isFinite(value) || value < 1) {
+    return 1;
+  }
+
+  return Math.floor(value);
+}
+
+export default async function SeriesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page } = await searchParams;
+  const requestedPage = normalizePage(page);
+  const totalCount = await prisma.series.count({
+    where: publishedSeriesWhere,
+  });
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const currentPage = Math.min(requestedPage, totalPages);
+  const hasPreviousPage = currentPage > 1;
+  const hasNextPage = currentPage < totalPages;
+  const seriesList = await prisma.series.findMany({
+    where: publishedSeriesWhere,
     include: {
       posts: {
         where: {
           status: "published",
           universe: "series",
         },
-        include: {
-          category: true,
+        select: {
+          title: true,
+          excerpt: true,
+          content: true,
+          episodeNumber: true,
+          category: {
+            select: {
+              name: true,
+            },
+          },
         },
         orderBy: [
           {
@@ -65,11 +100,14 @@ export default async function SeriesPage() {
             publishedAt: "asc",
           },
         ],
+        take: 1,
       },
     },
     orderBy: {
       updatedAt: "desc",
     },
+    skip: (currentPage - 1) * PAGE_SIZE,
+    take: PAGE_SIZE,
   });
 
   return (
@@ -135,6 +173,42 @@ export default async function SeriesPage() {
                 title="No series yet"
                 message="Series will appear here once the first episodic world is ready."
               />
+            )}
+
+            {totalPages > 1 && (
+              <div className="mt-10 flex items-center justify-between gap-4 border-t border-gray-200 pt-6">
+                <p className="text-sm text-gray-500">
+                  Page {currentPage} of {totalPages}
+                </p>
+
+                <div className="flex gap-3">
+                  {hasPreviousPage ? (
+                    <Link
+                      href={currentPage - 1 === 1 ? "/series" : `/series?page=${currentPage - 1}`}
+                      className="inline-flex rounded-full border border-gray-300 bg-transparent px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:border-gray-900"
+                    >
+                      Previous
+                    </Link>
+                  ) : (
+                    <span className="inline-flex rounded-full border border-gray-200 bg-transparent px-4 py-2 text-sm font-medium text-gray-400">
+                      Previous
+                    </span>
+                  )}
+
+                  {hasNextPage ? (
+                    <Link
+                      href={`/series?page=${currentPage + 1}`}
+                      className="inline-flex rounded-full border border-gray-300 bg-transparent px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:border-gray-900"
+                    >
+                      Next
+                    </Link>
+                  ) : (
+                    <span className="inline-flex rounded-full border border-gray-200 bg-transparent px-4 py-2 text-sm font-medium text-gray-400">
+                      Next
+                    </span>
+                  )}
+                </div>
+              </div>
             )}
           </SeriesAccessGate>
         </section>

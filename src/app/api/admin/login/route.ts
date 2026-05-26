@@ -31,6 +31,16 @@ async function isValidAdminPassword(password: string) {
 }
 
 export async function POST(request: NextRequest) {
+  console.log("ADMIN LOGIN ROUTE HIT");
+  console.log("ADMIN_USERNAME exists:", Boolean(process.env.ADMIN_USERNAME));
+  console.log(
+    "ADMIN_PASSWORD_HASH exists:",
+    Boolean(process.env.ADMIN_PASSWORD_HASH)
+  );
+  console.log(
+    "ADMIN_SESSION_SECRET exists:",
+    Boolean(process.env.ADMIN_SESSION_SECRET)
+  );
   const formData = await request.formData();
 
   const username = formData.get("username")?.toString().trim() ?? "";
@@ -41,20 +51,12 @@ export async function POST(request: NextRequest) {
   const validPassword = await isValidAdminPassword(password);
 
   if (!sessionToken || username !== adminUsername || !validPassword) {
-    return NextResponse.redirect(
-      new URL("/admin/login?error=1", request.url),
-    );
+    return NextResponse.redirect(new URL("/admin/login?error=1", request.url));
   }
 
-  const response = NextResponse.redirect(
-    new URL("/admin", request.url),
-  );
+  const response = NextResponse.redirect(new URL("/admin", request.url));
 
-  response.cookies.set(
-    ADMIN_COOKIE_NAME,
-    sessionToken,
-    adminCookieOptions,
-  );
+  response.cookies.set(ADMIN_COOKIE_NAME, sessionToken, adminCookieOptions);
 
   return response;
 }

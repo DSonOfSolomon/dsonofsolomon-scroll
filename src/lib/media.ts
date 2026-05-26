@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
+import { put } from "@vercel/blob";
 
 const UPLOADS_DIR = path.join(process.cwd(), "public", "uploads");
 
@@ -31,12 +32,22 @@ export async function saveUploadedImage(
     throw new Error("Only image uploads are supported.");
   }
 
-  await mkdir(UPLOADS_DIR, { recursive: true });
-
   const extension = getFileExtension(file);
   const filename = `${prefix}-${Date.now()}-${randomUUID()}.${extension}`;
-  const filePath = path.join(UPLOADS_DIR, filename);
   const buffer = Buffer.from(await file.arrayBuffer());
+
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    const blob = await put(`uploads/${filename}`, buffer, {
+      access: "public",
+      contentType: file.type,
+    });
+
+    return blob.url;
+  }
+
+  await mkdir(UPLOADS_DIR, { recursive: true });
+
+  const filePath = path.join(UPLOADS_DIR, filename);
 
   await writeFile(filePath, buffer);
 

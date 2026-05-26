@@ -25,6 +25,7 @@ Required deployment variables:
 - `ADMIN_USERNAME`: admin login username.
 - `ADMIN_PASSWORD_HASH`: bcrypt hash for the admin password.
 - `ADMIN_SESSION_SECRET`: long random value used to sign the admin session cookie.
+- `BLOB_READ_WRITE_TOKEN`: Vercel Blob token for persistent hero and post image uploads.
 
 Generate an admin password hash with:
 
@@ -33,6 +34,24 @@ npm run hash:admin-password -- "your-admin-password"
 ```
 
 `ADMIN_PASSWORD` is still supported for local development, but production should use `ADMIN_PASSWORD_HASH` and `ADMIN_SESSION_SECRET`.
+
+Image uploads use Vercel Blob when `BLOB_READ_WRITE_TOKEN` is present. Without it, uploads fall back to `public/uploads` for local development only.
+
+Before deploying, copy the shape from `.env.example` into your hosting provider's environment variable settings. Do not commit real production secrets.
+
+## Deployment Checks
+
+Run these before a release:
+
+```bash
+npx prisma migrate status
+npm audit --audit-level=moderate
+npx tsc --noEmit
+npm run lint
+npm run build
+```
+
+The deployment build runs `prisma generate` automatically through the `build` and `postinstall` scripts.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

@@ -13,6 +13,7 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "@vercel/blob": "^2.4.0",
     "bcryptjs": "^3.0.3",
     "next": "16.2.6",
     "pg": "^8.20.0",
@@ -33,5 +34,9 @@
     "tailwindcss": "^4",
     "tsx": "^4.22.0",
     "typescript": "^5"
+  },
+  "overrides": {
+    "@hono/node-server": "1.19.13",
+    "postcss": "8.5.15"
   }
 }

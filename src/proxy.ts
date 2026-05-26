@@ -15,6 +15,24 @@ function getAdminSessionToken() {
   return secret ? encodeURIComponent(secret) : null;
 }
 
+function adminSessionMatches(cookieValue: string | undefined) {
+  const sessionSecret = getAdminSessionSecret();
+  const sessionToken = getAdminSessionToken();
+
+  if (!cookieValue || !sessionSecret || !sessionToken) {
+    return false;
+  }
+
+  const decodedCookieValue = decodeURIComponent(cookieValue);
+
+  return (
+    cookieValue === sessionToken ||
+    cookieValue === sessionSecret ||
+    decodedCookieValue === sessionToken ||
+    decodedCookieValue === sessionSecret
+  );
+}
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -26,15 +44,9 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const sessionToken = getAdminSessionToken();
-  const sessionSecret = getAdminSessionSecret();
   const sessionCookie = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
 
-  if (
-    sessionToken &&
-    sessionCookie &&
-    (sessionCookie === sessionToken || sessionCookie === sessionSecret)
-  ) {
+  if (adminSessionMatches(sessionCookie)) {
     return NextResponse.next();
   }
 

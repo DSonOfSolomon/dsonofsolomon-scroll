@@ -65,6 +65,7 @@ const adminCookieOptions = {
   sameSite: "lax" as const,
   secure: process.env.NODE_ENV === "production",
   path: "/",
+  maxAge: 60 * 60 * 24 * 7,
 };
 
 function getAdminSessionSecret() {
@@ -78,6 +79,24 @@ function getAdminSessionSecret() {
 function getAdminSessionToken() {
   const secret = getAdminSessionSecret();
   return secret ? encodeURIComponent(secret) : null;
+}
+
+function adminSessionMatches(cookieValue: string | undefined) {
+  const sessionSecret = getAdminSessionSecret();
+  const sessionToken = getAdminSessionToken();
+
+  if (!cookieValue || !sessionSecret || !sessionToken) {
+    return false;
+  }
+
+  const decodedCookieValue = decodeURIComponent(cookieValue);
+
+  return (
+    cookieValue === sessionToken ||
+    cookieValue === sessionSecret ||
+    decodedCookieValue === sessionToken ||
+    decodedCookieValue === sessionSecret
+  );
 }
 
 async function refreshAdminSessionCookie() {
@@ -148,16 +167,10 @@ export async function logoutAdmin() {
 }
 
 async function requireAdminSession() {
-  const sessionToken = getAdminSessionToken();
-  const sessionSecret = getAdminSessionSecret();
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
 
-  if (
-    !sessionToken ||
-    !sessionCookie ||
-    (sessionCookie !== sessionToken && sessionCookie !== sessionSecret)
-  ) {
+  if (!adminSessionMatches(sessionCookie)) {
     redirect("/admin/login");
   }
 }

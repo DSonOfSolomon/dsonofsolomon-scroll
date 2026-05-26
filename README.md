@@ -44,7 +44,7 @@ Before deploying, copy the shape from `.env.example` into your hosting provider'
 Run these before a release:
 
 ```bash
-npx prisma migrate status
+npm run db:status
 npm audit --audit-level=moderate
 npx tsc --noEmit
 npm run lint
@@ -52,6 +52,12 @@ npm run build
 ```
 
 The deployment build runs `prisma generate` automatically through the `build` and `postinstall` scripts.
+
+Run production database migrations with:
+
+```bash
+npm run db:deploy
+```
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

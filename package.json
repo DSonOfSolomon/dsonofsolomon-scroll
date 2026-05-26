@@ -7,6 +7,8 @@
     "build": "prisma generate && next build",
     "postinstall": "prisma generate",
     "start": "next start",
+    "db:deploy": "prisma migrate deploy",
+    "db:status": "prisma migrate status",
     "hash:admin-password": "node scripts/hash-admin-password.mjs",
     "lint": "eslint"
   },

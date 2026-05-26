@@ -6,6 +6,7 @@ import PostReadingTracker from "@/components/analytics/PostReadingTracker";
 import PostFollowPrompt from "@/components/follow/PostFollowPrompt";
 import Container from "@/components/site/Container";
 import PageWrapper from "@/components/site/PageWrapper";
+import ShareButton from "@/components/site/ShareButton";
 import SeriesAccessGate from "@/components/series/SeriesAccessGate";
 import CategoryBadge from "@/components/writings/CategoryBadge";
 import { siteFeatures } from "@/lib/features";
@@ -51,21 +52,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
+  const episodeLabel = post.episodeNumber ? `Episode ${post.episodeNumber}` : "Episode";
   const title = post.series?.title
-    ? `${post.series.title}: ${post.title}`
+    ? `${post.series.title} - ${episodeLabel}: ${post.title}`
     : post.title;
   const description = getPostPreview(post.excerpt, post.content);
+  const shareDescription = `${description}...immerse`;
   const url = absoluteUrl(`/series/${slug}/${post.slug}`);
 
   return {
     title,
-    description,
+    description: shareDescription,
     alternates: {
       canonical: url,
     },
     openGraph: {
       title,
-      description,
+      description: shareDescription,
       url,
       type: "article",
       publishedTime: (post.publishedAt ?? post.createdAt).toISOString(),
@@ -79,7 +82,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: {
       card: "summary_large_image",
       title,
-      description,
+      description: shareDescription,
       images: [resolveSocialImage(post.coverImage)],
     },
   };
@@ -103,6 +106,10 @@ export default async function SeriesEpisodePage({ params }: Props) {
   );
   const wordCount = post.content.trim().split(/\s+/).length;
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+  const episodeLabel = post.episodeNumber ? `Episode ${post.episodeNumber}` : "Episode";
+  const shareTitle = `${post.series.title} - ${episodeLabel}: ${post.title}`;
+  const shareText = `${getPostPreview(post.excerpt, post.content)}...immerse`;
+  const shareUrl = absoluteUrl(`/series/${post.series.slug}/${post.slug}`);
   const coverImageIsSvg = post.coverImage?.toLowerCase().endsWith(".svg");
   const paragraphs = post.content
     .replace(/\r\n/g, "\n")
@@ -148,6 +155,10 @@ export default async function SeriesEpisodePage({ params }: Props) {
                 <span>{formattedDate}</span>
                 <span>•</span>
                 <span>{readingTime} min read</span>
+              </div>
+
+              <div className="mt-7">
+                <ShareButton title={shareTitle} text={shareText} url={shareUrl} />
               </div>
             </div>
 

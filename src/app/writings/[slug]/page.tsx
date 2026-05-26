@@ -6,6 +6,7 @@ import PostReadingTracker from "@/components/analytics/PostReadingTracker";
 import Container from "@/components/site/Container";
 import PostFollowPrompt from "@/components/follow/PostFollowPrompt";
 import PageWrapper from "@/components/site/PageWrapper";
+import ShareButton from "@/components/site/ShareButton";
 import WritingCard from "@/components/writings/WritingCard";
 import CategoryBadge from "@/components/writings/CategoryBadge";
 import { siteFeatures } from "@/lib/features";
@@ -47,18 +48,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const description = getPostPreview(post.excerpt, post.content);
-  const title = post.title;
+  const title = post.chapterLabel ? `${post.chapterLabel}: ${post.title}` : post.title;
+  const shareDescription = `${description}...immerse`;
   const url = absoluteUrl(`/writings/${post.slug}`);
 
   return {
     title,
-    description,
+    description: shareDescription,
     alternates: {
       canonical: url,
     },
     openGraph: {
       title,
-      description,
+      description: shareDescription,
       url,
       type: "article",
       publishedTime: (post.publishedAt ?? post.createdAt).toISOString(),
@@ -72,7 +74,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: {
       card: "summary_large_image",
       title,
-      description,
+      description: shareDescription,
       images: [resolveSocialImage(post.coverImage)],
     },
   };
@@ -98,6 +100,11 @@ export default async function WritingPage({ params }: Props) {
 
   const wordCount = post.content.trim().split(/\s+/).length;
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+  const shareTitle = post.chapterLabel
+    ? `${post.chapterLabel}: ${post.title}`
+    : post.title;
+  const shareText = `${getPostPreview(post.excerpt, post.content)}...immerse`;
+  const shareUrl = absoluteUrl(`/writings/${post.slug}`);
   const coverImageIsSvg = post.coverImage?.toLowerCase().endsWith(".svg");
   const paragraphs = post.content
     .replace(/\r\n/g, "\n")
@@ -191,6 +198,10 @@ export default async function WritingPage({ params }: Props) {
                   <span>•</span>
                   <span>{readingTime} min read</span>
                 </div>
+
+                <div className="mt-7">
+                  <ShareButton title={shareTitle} text={shareText} url={shareUrl} />
+                </div>
               </div>
 
               <div className="overflow-hidden rounded-[2rem] border border-gray-200 bg-[#f7f5ef]">
@@ -226,6 +237,10 @@ export default async function WritingPage({ params }: Props) {
                 <span>{formattedDate}</span>
                 <span>•</span>
                 <span>{readingTime} min read</span>
+              </div>
+
+              <div className="mt-7">
+                <ShareButton title={shareTitle} text={shareText} url={shareUrl} />
               </div>
             </div>
           )}

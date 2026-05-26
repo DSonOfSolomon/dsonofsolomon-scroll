@@ -23,10 +23,16 @@ export async function getPrimaryCreator() {
     return existing;
   }
 
-  return prisma.creator.create({
-    data: {
+  const slug = fallbackSlug("dsonofsolomon");
+
+  return prisma.creator.upsert({
+    where: {
+      slug,
+    },
+    update: {},
+    create: {
       name: "D•sonofSolomon",
-      slug: fallbackSlug("dsonofsolomon"),
+      slug,
       bio: "Love, life, laughter and systems.",
       heroImage: "/admin-hero-sample.svg",
       heroImageAlt: "D•sonofSolomon hero cover",

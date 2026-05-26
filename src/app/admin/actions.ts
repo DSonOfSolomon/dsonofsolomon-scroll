@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { recordSubscriberAnalyticsEvent } from "@/lib/analytics";
@@ -13,6 +13,7 @@ import {
 import { createInAppNotificationsForPublishedPost } from "@/lib/inAppNotifications";
 import { prisma } from "@/lib/prisma";
 import { siteFeatures } from "@/lib/features";
+import { enforceRateLimitForIdentifier } from "@/lib/rateLimit";
 import {
   getPrimaryCreator,
   getUniquePostSlug,
@@ -79,6 +80,26 @@ async function isValidAdminPassword(password: string) {
 }
 
 export async function loginAdmin(formData: FormData) {
+  const headerStore = await headers();
+  const forwardedFor = headerStore.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const identifier =
+    forwardedFor ||
+    headerStore.get("x-real-ip") ||
+    headerStore.get("cf-connecting-ip") ||
+    "admin-login";
+  const limited = await enforceRateLimitForIdentifier(
+    identifier,
+    {
+      prefix: "admin-login",
+      limit: 5,
+      window: "10 m",
+    },
+  );
+
+  if (limited) {
+    redirect("/admin/login?error=rate-limit");
+  }
+
   const username = normalizeRequired(formData.get("username"));
   const password = normalizeRequired(formData.get("password"));
   const adminUsername = process.env.ADMIN_USERNAME ?? "admin";

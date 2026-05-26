@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrimaryCreator } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
+import { enforceRateLimit } from "@/lib/rateLimit";
 
 type NotificationRequestBody = {
   endpoint?: string;
@@ -9,6 +10,16 @@ type NotificationRequestBody = {
 };
 
 export async function POST(request: NextRequest) {
+  const limited = await enforceRateLimit(request, {
+    prefix: "notifications",
+    limit: 60,
+    window: "1 m",
+  });
+
+  if (limited) {
+    return limited;
+  }
+
   const creator = await getPrimaryCreator();
   let body: NotificationRequestBody;
 

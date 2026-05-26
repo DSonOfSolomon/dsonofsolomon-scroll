@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrimaryCreator } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
+import { enforceRateLimit } from "@/lib/rateLimit";
 
 export async function POST(request: NextRequest) {
+  const limited = await enforceRateLimit(request, {
+    prefix: "followers-unsubscribe",
+    limit: 10,
+    window: "10 m",
+  });
+
+  if (limited) {
+    return limited;
+  }
+
   const creator = await getPrimaryCreator();
   let body: { endpoint?: string };
 

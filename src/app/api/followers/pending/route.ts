@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPrimaryCreator } from "@/lib/admin";
 import { getNotificationBody } from "@/lib/followers";
 import { prisma } from "@/lib/prisma";
+import { enforceRateLimit } from "@/lib/rateLimit";
 
 type PendingRequestBody = {
   endpoint?: string;
@@ -9,6 +10,16 @@ type PendingRequestBody = {
 };
 
 export async function POST(request: NextRequest) {
+  const limited = await enforceRateLimit(request, {
+    prefix: "followers-pending",
+    limit: 60,
+    window: "1 m",
+  });
+
+  if (limited) {
+    return limited;
+  }
+
   const creator = await getPrimaryCreator();
   let body: PendingRequestBody;
 

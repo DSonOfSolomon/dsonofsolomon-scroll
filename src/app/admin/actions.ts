@@ -14,10 +14,7 @@ import { createInAppNotificationsForPublishedPost } from "@/lib/inAppNotificatio
 import { prisma } from "@/lib/prisma";
 import { siteFeatures } from "@/lib/features";
 import { enforceRateLimitForIdentifier } from "@/lib/rateLimit";
-import {
-  getPrimaryCreator,
-  getUniquePostSlug,
-} from "@/lib/admin";
+import { getPrimaryCreator, getUniquePostSlug } from "@/lib/admin";
 import { fallbackSlug } from "@/lib/slugs";
 
 function normalizeOptional(value: FormDataEntryValue | null) {
@@ -69,11 +66,7 @@ const adminCookieOptions = {
 };
 
 function getAdminSessionSecret() {
-  return (
-    process.env.ADMIN_SESSION_SECRET ??
-    process.env.ADMIN_PASSWORD_HASH ??
-    process.env.ADMIN_PASSWORD
-  );
+  return process.env.ADMIN_SESSION_SECRET;
 }
 
 function getAdminSessionToken() {
@@ -117,25 +110,27 @@ async function isValidAdminPassword(password: string) {
     return bcrypt.compare(password, adminPasswordHash);
   }
 
-  return Boolean(process.env.ADMIN_PASSWORD && password === process.env.ADMIN_PASSWORD);
+  return Boolean(
+    process.env.ADMIN_PASSWORD && password === process.env.ADMIN_PASSWORD
+  );
 }
 
 export async function loginAdmin(formData: FormData) {
   const headerStore = await headers();
-  const forwardedFor = headerStore.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const forwardedFor = headerStore
+    .get("x-forwarded-for")
+    ?.split(",")[0]
+    ?.trim();
   const identifier =
     forwardedFor ||
     headerStore.get("x-real-ip") ||
     headerStore.get("cf-connecting-ip") ||
     "admin-login";
-  const limited = await enforceRateLimitForIdentifier(
-    identifier,
-    {
-      prefix: "admin-login",
-      limit: 5,
-      window: "10 m",
-    },
-  );
+  const limited = await enforceRateLimitForIdentifier(identifier, {
+    prefix: "admin-login",
+    limit: 5,
+    window: "10 m",
+  });
 
   if (limited) {
     redirect("/admin/login?error=rate-limit");
@@ -147,11 +142,7 @@ export async function loginAdmin(formData: FormData) {
   const sessionToken = getAdminSessionToken();
   const validPassword = await isValidAdminPassword(password);
 
-  if (
-    !sessionToken ||
-    username !== adminUsername ||
-    !validPassword
-  ) {
+  if (!sessionToken || username !== adminUsername || !validPassword) {
     redirect("/admin/login?error=1");
   }
 
@@ -201,7 +192,7 @@ async function refreshAdminViewsSafely(context: string) {
 
 async function revalidateSeriesPostPaths(
   postSlug: string,
-  seriesId?: string | null,
+  seriesId?: string | null
 ) {
   revalidatePath("/series", "page");
 
@@ -229,7 +220,7 @@ async function revalidateSeriesPostPaths(
 async function revalidatePostPublicPath(
   universe: string,
   slug: string,
-  seriesId?: string | null,
+  seriesId?: string | null
 ) {
   if (universe === "series") {
     await revalidateSeriesPostPaths(slug, seriesId);
@@ -237,14 +228,14 @@ async function revalidatePostPublicPath(
   }
 
   revalidatePath(
-    universe === "public" ? `/writings/${slug}` : `/unfiltered/${slug}`,
+    universe === "public" ? `/writings/${slug}` : `/unfiltered/${slug}`
   );
 }
 
 async function getUniqueSeriesSlug(
   creatorId: string,
   value: string,
-  currentSeriesId?: string,
+  currentSeriesId?: string
 ) {
   const baseSlug = fallbackSlug(value);
   let candidate = baseSlug;
@@ -275,7 +266,7 @@ async function getUniqueSeriesSlug(
 async function resolveSeriesPlacement(
   formData: FormData,
   creatorId: string,
-  universe: string,
+  universe: string
 ) {
   if (universe !== "series") {
     return {
@@ -287,7 +278,9 @@ async function resolveSeriesPlacement(
   const selectedSeriesId = normalizeOptional(formData.get("seriesId"));
   const newSeriesTitle = normalizeOptional(formData.get("newSeriesTitle"));
   const newSeriesSlug = normalizeOptional(formData.get("newSeriesSlug"));
-  const newSeriesDescription = normalizeOptional(formData.get("newSeriesDescription"));
+  const newSeriesDescription = normalizeOptional(
+    formData.get("newSeriesDescription")
+  );
   const episodeNumber = normalizeOptionalNumber(formData.get("episodeNumber"));
 
   if (selectedSeriesId) {
@@ -317,7 +310,7 @@ async function resolveSeriesPlacement(
 
   const slug = await getUniqueSeriesSlug(
     creatorId,
-    newSeriesSlug ?? newSeriesTitle,
+    newSeriesSlug ?? newSeriesTitle
   );
   const series = await prisma.series.create({
     data: {
@@ -338,7 +331,7 @@ async function resolveSeriesPlacement(
 }
 
 async function safeNotifyFollowersOfPublishedPost(
-  post: Parameters<typeof notifyFollowersOfPublishedPost>[0],
+  post: Parameters<typeof notifyFollowersOfPublishedPost>[0]
 ) {
   if (!siteFeatures.pushNotificationsEnabled) {
     return;
@@ -356,7 +349,7 @@ async function safeNotifyFollowersOfPublishedPost(
         failed: summary.failed,
         skipped: summary.skipped,
         reason: summary.reason,
-      }),
+      })
     );
   } catch (error) {
     console.error("Follower notification failed", error);
@@ -364,7 +357,7 @@ async function safeNotifyFollowersOfPublishedPost(
 }
 
 async function safeCreateInAppNotificationsForPublishedPost(
-  post: Parameters<typeof createInAppNotificationsForPublishedPost>[0],
+  post: Parameters<typeof createInAppNotificationsForPublishedPost>[0]
 ) {
   try {
     const summary = await createInAppNotificationsForPublishedPost(post);
@@ -375,7 +368,7 @@ async function safeCreateInAppNotificationsForPublishedPost(
         title: post.title,
         created: summary.created,
         skipped: summary.skipped,
-      }),
+      })
     );
   } catch (error) {
     console.error("In-app notification creation failed", error);
@@ -397,7 +390,7 @@ export async function createPost(formData: FormData) {
     normalizeOptional(formData.get("coverImage"));
   const coverImageUpload = await saveUploadedImage(
     formData.get("coverImageFile"),
-    "post-cover",
+    "post-cover"
   );
   const coverImage = coverImageUpload ?? coverImageInput;
 
@@ -409,7 +402,7 @@ export async function createPost(formData: FormData) {
   const seriesPlacement = await resolveSeriesPlacement(
     formData,
     creator.id,
-    universe,
+    universe
   );
 
   const post = await prisma.post.create({
@@ -489,7 +482,7 @@ export async function updatePost(formData: FormData) {
     normalizeOptional(formData.get("coverImage"));
   const coverImageUpload = await saveUploadedImage(
     formData.get("coverImageFile"),
-    "post-cover",
+    "post-cover"
   );
   const coverImage = coverImageUpload ?? coverImageInput;
 
@@ -513,12 +506,12 @@ export async function updatePost(formData: FormData) {
   const nextSlug = manualSlug
     ? await getUniquePostSlug(creator.id, manualSlug, id)
     : existing.status === "published"
-      ? existing.slug
-      : await getUniquePostSlug(creator.id, title, id);
+    ? existing.slug
+    : await getUniquePostSlug(creator.id, title, id);
   const seriesPlacement = await resolveSeriesPlacement(
     formData,
     creator.id,
-    universe,
+    universe
   );
 
   const updatedPost = await prisma.post.update({
@@ -536,16 +529,15 @@ export async function updatePost(formData: FormData) {
       seriesId: seriesPlacement.seriesId,
       episodeNumber: seriesPlacement.episodeNumber,
       publishedAt:
-        status === "published"
-          ? existing.publishedAt ?? new Date()
-          : null,
+        status === "published" ? existing.publishedAt ?? new Date() : null,
     },
   });
 
   const shouldCreateReaderNotifications =
     updatedPost.status === "published" &&
     (updatedPost.universe === "public" || updatedPost.universe === "series") &&
-    (existing.status !== "published" || existing.universe !== updatedPost.universe);
+    (existing.status !== "published" ||
+      existing.universe !== updatedPost.universe);
 
   if (shouldCreateReaderNotifications) {
     await safeCreateInAppNotificationsForPublishedPost({
@@ -578,12 +570,12 @@ export async function updatePost(formData: FormData) {
   await revalidatePostPublicPath(
     existing.universe,
     existing.slug,
-    existing.seriesId,
+    existing.seriesId
   );
   await revalidatePostPublicPath(
     updatedPost.universe,
     updatedPost.slug,
-    updatedPost.seriesId,
+    updatedPost.seriesId
   );
   redirect("/admin/posts");
 }
@@ -608,7 +600,7 @@ export async function deletePost(formData: FormData) {
     await revalidatePostPublicPath(
       existing.universe,
       existing.slug,
-      existing.seriesId,
+      existing.seriesId
     );
   }
 }
@@ -684,7 +676,7 @@ export async function togglePostStatus(formData: FormData) {
   await revalidatePostPublicPath(
     existing.universe,
     existing.slug,
-    existing.seriesId,
+    existing.seriesId
   );
 }
 
@@ -745,7 +737,7 @@ export async function testFollowerNotification(formData: FormData) {
       failed: summary.failed,
       skipped: summary.skipped,
       reason: summary.reason,
-    }),
+    })
   );
   await refreshAdminViews();
 }
@@ -946,8 +938,8 @@ export async function subscribeToLetters(formData: FormData) {
       tier === "premium" && existingSubscriber?.tier !== "premium"
         ? "premium_signup"
         : existingSubscriber
-          ? "subscriber_updated"
-          : "subscriber_created",
+        ? "subscriber_updated"
+        : "subscriber_created",
   });
 
   const cookieStore = await cookies();
@@ -975,7 +967,10 @@ export async function updateCreatorBranding(formData: FormData) {
   let heroImageUpload: string | null;
 
   try {
-    heroImageUpload = await saveUploadedImage(formData.get("heroImageFile"), "hero");
+    heroImageUpload = await saveUploadedImage(
+      formData.get("heroImageFile"),
+      "hero"
+    );
   } catch (error) {
     console.error("Homepage image upload failed", error);
     await refreshAdminSessionCookie();
@@ -1007,7 +1002,9 @@ export async function updateCreatorBranding(formData: FormData) {
 
   const revalidated = await refreshAdminViewsSafely("Homepage save");
   await refreshAdminSessionCookie();
-  redirect(revalidated ? "/admin?homepage=saved" : "/admin?homepage=refresh-error");
+  redirect(
+    revalidated ? "/admin?homepage=saved" : "/admin?homepage=refresh-error"
+  );
 }
 
 export async function updateCreatorFooter(formData: FormData) {

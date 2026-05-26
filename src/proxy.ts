@@ -10,6 +10,11 @@ function getAdminSessionSecret() {
   );
 }
 
+function getAdminSessionToken() {
+  const secret = getAdminSessionSecret();
+  return secret ? encodeURIComponent(secret) : null;
+}
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -21,10 +26,15 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  const sessionToken = getAdminSessionToken();
   const sessionSecret = getAdminSessionSecret();
   const sessionCookie = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
 
-  if (sessionSecret && sessionCookie === sessionSecret) {
+  if (
+    sessionToken &&
+    sessionCookie &&
+    (sessionCookie === sessionToken || sessionCookie === sessionSecret)
+  ) {
     return NextResponse.next();
   }
 

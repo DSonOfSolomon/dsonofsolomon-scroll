@@ -60,6 +60,12 @@ function normalizeUniverse(value: FormDataEntryValue | null) {
 }
 
 const ADMIN_COOKIE_NAME = "dsonofsolomon_admin";
+const adminCookieOptions = {
+  httpOnly: true,
+  sameSite: "lax" as const,
+  secure: process.env.NODE_ENV === "production",
+  path: "/",
+};
 
 function getAdminSessionSecret() {
   return (
@@ -67,6 +73,22 @@ function getAdminSessionSecret() {
     process.env.ADMIN_PASSWORD_HASH ??
     process.env.ADMIN_PASSWORD
   );
+}
+
+function getAdminSessionToken() {
+  const secret = getAdminSessionSecret();
+  return secret ? encodeURIComponent(secret) : null;
+}
+
+async function refreshAdminSessionCookie() {
+  const sessionToken = getAdminSessionToken();
+
+  if (!sessionToken) {
+    return;
+  }
+
+  const cookieStore = await cookies();
+  cookieStore.set(ADMIN_COOKIE_NAME, sessionToken, adminCookieOptions);
 }
 
 async function isValidAdminPassword(password: string) {
@@ -103,24 +125,18 @@ export async function loginAdmin(formData: FormData) {
   const username = normalizeRequired(formData.get("username"));
   const password = normalizeRequired(formData.get("password"));
   const adminUsername = process.env.ADMIN_USERNAME ?? "admin";
-  const sessionSecret = getAdminSessionSecret();
+  const sessionToken = getAdminSessionToken();
   const validPassword = await isValidAdminPassword(password);
 
   if (
-    !sessionSecret ||
+    !sessionToken ||
     username !== adminUsername ||
     !validPassword
   ) {
     redirect("/admin/login?error=1");
   }
 
-  const cookieStore = await cookies();
-  cookieStore.set(ADMIN_COOKIE_NAME, sessionSecret, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-  });
+  await refreshAdminSessionCookie();
 
   redirect("/admin");
 }
@@ -129,6 +145,21 @@ export async function logoutAdmin() {
   const cookieStore = await cookies();
   cookieStore.delete(ADMIN_COOKIE_NAME);
   redirect("/admin/login");
+}
+
+async function requireAdminSession() {
+  const sessionToken = getAdminSessionToken();
+  const sessionSecret = getAdminSessionSecret();
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
+
+  if (
+    !sessionToken ||
+    !sessionCookie ||
+    (sessionCookie !== sessionToken && sessionCookie !== sessionSecret)
+  ) {
+    redirect("/admin/login");
+  }
 }
 
 async function refreshAdminViews() {
@@ -143,6 +174,16 @@ async function refreshAdminViews() {
   revalidatePath("/series", "page");
   revalidatePath("/unfiltered");
   revalidatePath("/request-a-letter");
+}
+
+async function refreshAdminViewsSafely(context: string) {
+  try {
+    await refreshAdminViews();
+    return true;
+  } catch (error) {
+    console.error(`${context} revalidation failed`, error);
+    return false;
+  }
 }
 
 async function revalidateSeriesPostPaths(
@@ -913,6 +954,7 @@ export async function subscribeToLetters(formData: FormData) {
 }
 
 export async function updateCreatorBranding(formData: FormData) {
+  await requireAdminSession();
   const creator = await getPrimaryCreator();
   const heroImageInput =
     normalizeOptional(formData.get("heroImageOverride")) ??
@@ -923,6 +965,7 @@ export async function updateCreatorBranding(formData: FormData) {
     heroImageUpload = await saveUploadedImage(formData.get("heroImageFile"), "hero");
   } catch (error) {
     console.error("Homepage image upload failed", error);
+    await refreshAdminSessionCookie();
     redirect("/admin?homepage=upload-error");
   }
 
@@ -932,34 +975,49 @@ export async function updateCreatorBranding(formData: FormData) {
   const heroTitle = normalizeOptional(formData.get("heroTitle"));
   const heroSubtitle = normalizeOptional(formData.get("heroSubtitle"));
 
-  await prisma.creator.update({
-    where: { id: creator.id },
-    data: {
-      heroImage,
-      heroImageAlt,
-      heroEyebrow,
-      heroTitle,
-      heroSubtitle,
-    },
-  });
+  try {
+    await prisma.creator.update({
+      where: { id: creator.id },
+      data: {
+        heroImage,
+        heroImageAlt,
+        heroEyebrow,
+        heroTitle,
+        heroSubtitle,
+      },
+    });
+  } catch (error) {
+    console.error("Homepage save failed", error);
+    await refreshAdminSessionCookie();
+    redirect("/admin?homepage=save-error");
+  }
 
-  await refreshAdminViews();
-  redirect("/admin?homepage=saved");
+  const revalidated = await refreshAdminViewsSafely("Homepage save");
+  await refreshAdminSessionCookie();
+  redirect(revalidated ? "/admin?homepage=saved" : "/admin?homepage=refresh-error");
 }
 
 export async function updateCreatorFooter(formData: FormData) {
+  await requireAdminSession();
   const creator = await getPrimaryCreator();
   const currentWorkingOn = normalizeOptional(formData.get("currentWorkingOn"));
 
-  await prisma.creator.update({
-    where: { id: creator.id },
-    data: {
-      currentWorkingOn,
-    },
-  });
+  try {
+    await prisma.creator.update({
+      where: { id: creator.id },
+      data: {
+        currentWorkingOn,
+      },
+    });
+  } catch (error) {
+    console.error("Footer save failed", error);
+    await refreshAdminSessionCookie();
+    redirect("/admin?footer=save-error");
+  }
 
-  await refreshAdminViews();
-  redirect("/admin?footer=saved");
+  const revalidated = await refreshAdminViewsSafely("Footer save");
+  await refreshAdminSessionCookie();
+  redirect(revalidated ? "/admin?footer=saved" : "/admin?footer=refresh-error");
 }
 
 export async function suggestSlug(formData: FormData) {

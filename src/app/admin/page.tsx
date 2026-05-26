@@ -187,9 +187,37 @@ export default async function AdminDashboardPage({
         </div>
       ) : null}
 
+      {status.homepage === "save-error" ? (
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-800">
+          Homepage could not be saved. Check the Vercel function log for the
+          exact database error.
+        </div>
+      ) : null}
+
+      {status.homepage === "refresh-error" ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-900">
+          Homepage saved, but the public page cache did not refresh. Redeploy or
+          check the Vercel function log.
+        </div>
+      ) : null}
+
       {status.footer === "saved" ? (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-800">
           Footer saved.
+        </div>
+      ) : null}
+
+      {status.footer === "save-error" ? (
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-800">
+          Footer could not be saved. Check the Vercel function log for the exact
+          database error.
+        </div>
+      ) : null}
+
+      {status.footer === "refresh-error" ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-900">
+          Footer saved, but the public page cache did not refresh. Redeploy or
+          check the Vercel function log.
         </div>
       ) : null}
 

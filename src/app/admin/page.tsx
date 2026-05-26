@@ -28,7 +28,12 @@ function analyticsDelegatesAvailable() {
   );
 }
 
-export default async function AdminDashboardPage() {
+export default async function AdminDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ homepage?: string; footer?: string }>;
+}) {
+  const status = await searchParams;
   await ensureDefaultCategories();
   const creator = await getPrimaryCreator();
   const heroPreviewSrc = creator.heroImage
@@ -168,6 +173,25 @@ export default async function AdminDashboardPage() {
           </Link>
         }
       />
+
+      {status.homepage === "saved" ? (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-800">
+          Homepage saved.
+        </div>
+      ) : null}
+
+      {status.homepage === "upload-error" ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-900">
+          Homepage text was not saved because the image upload failed. Use an image
+          under 8MB, then try again.
+        </div>
+      ) : null}
+
+      {status.footer === "saved" ? (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-800">
+          Footer saved.
+        </div>
+      ) : null}
 
       <AdminPanel>
         <AdminPanelHeader

@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { put } from "@vercel/blob";
 
 const UPLOADS_DIR = path.join(process.cwd(), "public", "uploads");
+const MAX_IMAGE_UPLOAD_SIZE = 8 * 1024 * 1024;
 
 function getFileExtension(file: File) {
   const fromType = file.type.split("/")[1]?.toLowerCase().split("+")[0];
@@ -30,6 +31,10 @@ export async function saveUploadedImage(
 
   if (!file.type.startsWith("image/")) {
     throw new Error("Only image uploads are supported.");
+  }
+
+  if (file.size > MAX_IMAGE_UPLOAD_SIZE) {
+    throw new Error("Image uploads must be 8MB or smaller.");
   }
 
   const extension = getFileExtension(file);

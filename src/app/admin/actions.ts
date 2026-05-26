@@ -917,10 +917,15 @@ export async function updateCreatorBranding(formData: FormData) {
   const heroImageInput =
     normalizeOptional(formData.get("heroImageOverride")) ??
     normalizeOptional(formData.get("heroImage"));
-  const heroImageUpload = await saveUploadedImage(
-    formData.get("heroImageFile"),
-    "hero",
-  );
+  let heroImageUpload: string | null;
+
+  try {
+    heroImageUpload = await saveUploadedImage(formData.get("heroImageFile"), "hero");
+  } catch (error) {
+    console.error("Homepage image upload failed", error);
+    redirect("/admin?homepage=upload-error");
+  }
+
   const heroImage = heroImageUpload ?? heroImageInput;
   const heroImageAlt = normalizeOptional(formData.get("heroImageAlt"));
   const heroEyebrow = normalizeOptional(formData.get("heroEyebrow"));
@@ -939,7 +944,7 @@ export async function updateCreatorBranding(formData: FormData) {
   });
 
   await refreshAdminViews();
-  redirect("/admin");
+  redirect("/admin?homepage=saved");
 }
 
 export async function updateCreatorFooter(formData: FormData) {
@@ -954,7 +959,7 @@ export async function updateCreatorFooter(formData: FormData) {
   });
 
   await refreshAdminViews();
-  redirect("/admin");
+  redirect("/admin?footer=saved");
 }
 
 export async function suggestSlug(formData: FormData) {

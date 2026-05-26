@@ -16,6 +16,24 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Production Environment
+
+Required deployment variables:
+
+- `DATABASE_URL`: production Postgres connection string.
+- `NEXT_PUBLIC_SITE_URL`: public site URL, for example `https://dsonofsolomon.com`.
+- `ADMIN_USERNAME`: admin login username.
+- `ADMIN_PASSWORD_HASH`: bcrypt hash for the admin password.
+- `ADMIN_SESSION_SECRET`: long random value used to sign the admin session cookie.
+
+Generate an admin password hash with:
+
+```bash
+npm run hash:admin-password -- "your-admin-password"
+```
+
+`ADMIN_PASSWORD` is still supported for local development, but production should use `ADMIN_PASSWORD_HASH` and `ADMIN_SESSION_SECRET`.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

@@ -3,7 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 const ADMIN_COOKIE_NAME = "dsonofsolomon_admin";
 
 function getAdminSessionSecret() {
-  return process.env.ADMIN_SESSION_SECRET ?? process.env.ADMIN_PASSWORD;
+  return (
+    process.env.ADMIN_SESSION_SECRET ??
+    process.env.ADMIN_PASSWORD_HASH ??
+    process.env.ADMIN_PASSWORD
+  );
 }
 
 export function proxy(request: NextRequest) {

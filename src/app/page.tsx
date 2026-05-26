@@ -205,18 +205,27 @@ export default async function HomePage() {
               <SouloverseMenuButton />
             </div>
 
-            <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {featuredWritings.map((writing) => (
-                <WritingCard
-                  key={writing.slug}
-                  title={writing.title}
-                  excerpt={getPostPreview(writing.excerpt, writing.content)}
-                  slug={writing.slug}
-                  category={writing.category?.name ?? "Writing"}
-                  chapterLabel={writing.chapterLabel ?? undefined}
+            {featuredWritings.length > 0 ? (
+              <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                {featuredWritings.map((writing) => (
+                  <WritingCard
+                    key={writing.slug}
+                    title={writing.title}
+                    excerpt={getPostPreview(writing.excerpt, writing.content)}
+                    slug={writing.slug}
+                    category={writing.category?.name ?? "Writing"}
+                    chapterLabel={writing.chapterLabel ?? undefined}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="mt-8">
+                <EmptyState
+                  title="No chapters yet"
+                  message="The first public chapters will appear here after they are published."
                 />
-              ))}
-            </div>
+              </div>
+            )}
 
             <div className="mt-7">
               <Link

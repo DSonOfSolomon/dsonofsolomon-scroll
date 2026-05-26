@@ -42,7 +42,7 @@ export function proxy(request: NextRequest) {
 
   const sessionCookie = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
 
-  if (adminSessionMatches(sessionCookie)) {
+  if (sessionCookie){
     return NextResponse.next();
   }
 

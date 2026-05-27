@@ -158,7 +158,7 @@ export default async function HomePage() {
                     {heroTitle}
                   </h1>
 
-                  <p className="mt-3 max-w-full whitespace-nowrap text-[0.74rem] leading-4 text-white/82 sm:mt-5 sm:max-w-xl sm:whitespace-normal sm:text-lg sm:leading-8 md:max-w-2xl md:text-xl md:leading-9">
+                  <p className="mt-3 max-w-full whitespace-nowrap text-[0.84rem] leading-4 text-white/82 sm:mt-5 sm:max-w-xl sm:whitespace-normal sm:text-lg sm:leading-8 md:max-w-2xl md:text-xl md:leading-9">
                     {heroSubtitle}
                   </p>
                 </div>

@@ -71,7 +71,7 @@ export default function SiteHeader() {
       <div className="mx-auto flex h-[4.25rem] w-full max-w-[96rem] items-center justify-between px-6 lg:px-10 2xl:px-14">
         <Link
           href={brandHref}
-          className="text-base font-semibold tracking-tight !text-[#8a6a2f] transition-colors hover:!text-[#b28a45]"
+          className="text-base font-semibold tracking-tight !text-[#f4ead7] transition-colors hover:!text-white"
         >
           D•sonofSolomon
         </Link>

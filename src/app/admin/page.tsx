@@ -31,7 +31,11 @@ function analyticsDelegatesAvailable() {
 export default async function AdminDashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ homepage?: string; footer?: string }>;
+  searchParams: Promise<{
+    footer?: string;
+    homepage?: string;
+    reason?: string;
+  }>;
 }) {
   const status = await searchParams;
   await ensureDefaultCategories();
@@ -182,8 +186,11 @@ export default async function AdminDashboardPage({
 
       {status.homepage === "upload-error" ? (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-900">
-          Homepage text was not saved because the image upload failed. Use an image
-          under 8MB, then try again.
+          {status.reason === "size"
+            ? "Homepage text was not saved because the image is over 8MB."
+            : status.reason === "type"
+              ? "Homepage text was not saved because the upload is not a supported image file."
+              : "Homepage text was not saved because image storage failed. Check the upload storage configuration, then try again."}
         </div>
       ) : null}
 
@@ -384,8 +391,7 @@ export default async function AdminDashboardPage({
             </summary>
             <input
               name="heroImageOverride"
-              defaultValue={creator.heroImage ?? ""}
-              placeholder="/admin-hero-sample.svg"
+              placeholder={creator.heroImage ?? "/admin-hero-sample.svg"}
               className={adminInputClass}
             />
           </details>

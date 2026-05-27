@@ -5,7 +5,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { recordSubscriberAnalyticsEvent } from "@/lib/analytics";
-import { saveUploadedImage } from "@/lib/media";
+import { ImageUploadError, saveUploadedImage } from "@/lib/media";
 import {
   notifyFollowersOfPublishedPost,
   sendFollowerTestNotification,
@@ -961,9 +961,8 @@ export async function subscribeToLetters(formData: FormData) {
 export async function updateCreatorBranding(formData: FormData) {
   await requireAdminSession();
   const creator = await getPrimaryCreator();
-  const heroImageInput =
-    normalizeOptional(formData.get("heroImageOverride")) ??
-    normalizeOptional(formData.get("heroImage"));
+  const heroImageInput = normalizeOptional(formData.get("heroImage"));
+  const heroImageOverride = normalizeOptional(formData.get("heroImageOverride"));
   let heroImageUpload: string | null;
 
   try {
@@ -974,10 +973,12 @@ export async function updateCreatorBranding(formData: FormData) {
   } catch (error) {
     console.error("Homepage image upload failed", error);
     await refreshAdminSessionCookie();
-    redirect("/admin?homepage=upload-error");
+    const reason =
+      error instanceof ImageUploadError ? error.code : "storage";
+    redirect(`/admin?homepage=upload-error&reason=${reason}`);
   }
 
-  const heroImage = heroImageUpload ?? heroImageInput;
+  const heroImage = heroImageUpload ?? heroImageOverride ?? heroImageInput;
   const heroImageAlt = normalizeOptional(formData.get("heroImageAlt"));
   const heroEyebrow = normalizeOptional(formData.get("heroEyebrow"));
   const heroTitle = normalizeOptional(formData.get("heroTitle"));

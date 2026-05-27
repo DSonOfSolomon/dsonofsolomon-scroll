@@ -17,7 +17,7 @@ function getAdminSessionSecret() {
 
 function getAdminSessionToken() {
   const secret = getAdminSessionSecret();
-  return secret ? encodeURIComponent(secret) : null;
+  return secret || null;
 }
 
 async function isValidAdminPassword(password: string) {
@@ -49,8 +49,11 @@ export async function POST(request: NextRequest) {
   const adminUsername = process.env.ADMIN_USERNAME;
   const sessionToken = getAdminSessionToken();
   const validPassword = await isValidAdminPassword(password);
+  const validUsername = username === adminUsername;
 
-  if (!sessionToken || username !== adminUsername || !validPassword) {
+  console.log("ADMIN LOGIN success:", Boolean(sessionToken && validUsername && validPassword));
+
+  if (!sessionToken || !validUsername || !validPassword) {
     return NextResponse.redirect(
       new URL("/admin/login?error=1", request.url),
       303

@@ -116,13 +116,17 @@ export default function FollowButton({
 
     void (async () => {
       try {
-        await fetch("/api/followers/unsubscribe", {
+        const response = await fetch("/api/followers/unsubscribe", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ endpoint }),
         });
+
+        if (!response.ok) {
+          throw new Error("Unable to remove follower.");
+        }
 
         window.localStorage.removeItem(LOCAL_TEST_FOLLOWER_KEY);
         setState("idle");

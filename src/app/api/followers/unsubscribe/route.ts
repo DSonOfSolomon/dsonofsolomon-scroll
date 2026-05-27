@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getPrimaryCreator } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rateLimit";
@@ -38,6 +39,10 @@ export async function POST(request: NextRequest) {
       status: "inactive",
     },
   });
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/admin/followers");
 
   return NextResponse.json({ ok: true });
 }

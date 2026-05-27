@@ -8,7 +8,7 @@ function getAdminSessionSecret() {
 
 function getAdminSessionToken() {
   const secret = getAdminSessionSecret();
-  return secret ? encodeURIComponent(secret) : null;
+  return secret || null;
 }
 
 function adminSessionMatches(cookieValue: string | undefined) {

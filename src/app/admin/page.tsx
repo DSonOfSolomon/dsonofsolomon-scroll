@@ -224,7 +224,7 @@ export default async function AdminDashboardPage({
       <AdminPanel>
         <AdminPanelHeader
           eyebrow="Overview"
-          title="Content and audience snapshot"
+          title=""
           description=""
         />
         <div className="grid gap-4 p-5 sm:grid-cols-2 xl:grid-cols-4">
@@ -258,12 +258,12 @@ export default async function AdminDashboardPage({
           <AdminMetricCard
             label="Series"
             value={seriesCount}
-            note="Serialized worlds"
+            note="Souloverse"
           />
           <AdminMetricCard
             label="Episodes"
             value={seriesEpisodeCount}
-            note="Published series posts"
+            note="Episodes in series"
           />
 
           <AdminMetricCard
@@ -296,8 +296,8 @@ export default async function AdminDashboardPage({
       <AdminPanel>
         <AdminPanelHeader
           eyebrow="Analytics"
-          title="Website, reading and subscriber activity"
-          description="A compact read on traffic, attention, and audience movement."
+          title=""
+          description=""
         />
 
         <div className="grid gap-4 p-5 sm:grid-cols-2 xl:grid-cols-4">
@@ -365,9 +365,9 @@ export default async function AdminDashboardPage({
 
       <AdminPanel>
         <AdminPanelHeader
-          eyebrow="Homepage"
-          title="Homepage hero"
-          description="Control the hero image and copy readers see first on the public homepage."
+          eyebrow="Homepage Hero"
+          title=""
+          description=""
         />
 
         <form action={updateCreatorBranding} className="grid gap-4 p-5">
@@ -457,9 +457,9 @@ export default async function AdminDashboardPage({
 
       <AdminPanel>
         <AdminPanelHeader
-          eyebrow="Footer"
-          title="Currently working on"
-          description="Update the short status line that appears in the public footer."
+          eyebrow="Footer (Currently working on)"
+          title=""
+          description=""
         />
 
         <form action={updateCreatorFooter} className="grid gap-4 p-5">
@@ -483,7 +483,7 @@ export default async function AdminDashboardPage({
       <AdminPanel>
         <AdminPanelHeader
           eyebrow="Recent activity"
-          title="Recently updated posts"
+          title=""
         />
 
         <div className="overflow-x-auto">

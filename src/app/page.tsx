@@ -121,20 +121,22 @@ export default async function HomePage() {
         <Container>
           <section>
             <div
-              className={`relative overflow-hidden rounded-[1.35rem] sm:rounded-[2rem] ${
+              className={`relative overflow-hidden rounded-[1.35rem] bg-cover bg-center sm:rounded-[2rem] ${
                 creator.heroImage
                   ? "min-h-[22rem] sm:min-h-[28rem] md:aspect-[5/3] md:min-h-0"
                   : "hero-cover-blend min-h-[24rem] md:min-h-[28rem]"
               }`}
+              style={
+                heroImageSrc ? { backgroundImage: `url(${heroImageSrc})` } : undefined
+              }
             >
               {heroImageSrc ? (
                 <Image
                   src={heroImageSrc}
                   alt={creator.heroImageAlt?.trim() || heroTitle}
+                  fill
                   priority
                   unoptimized={heroImageIsSvg}
-                  width={2000}
-                  height={1200}
                   className="absolute inset-0 h-full w-full object-cover object-center"
                   sizes="(max-width: 768px) 100vw, 80rem"
                 />
@@ -147,7 +149,7 @@ export default async function HomePage() {
                 }
               />
               <div className="absolute inset-x-0 bottom-0 p-4 sm:p-7 md:p-10">
-                <div className="max-w-[17rem] sm:max-w-[24rem] md:max-w-3xl">
+                <div className="max-w-full sm:max-w-[24rem] md:max-w-3xl">
                   <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-white/72 sm:text-xs sm:tracking-[0.28em]">
                     {heroEyebrow}
                   </p>
@@ -156,7 +158,7 @@ export default async function HomePage() {
                     {heroTitle}
                   </h1>
 
-                  <p className="mt-3 max-w-full text-[1.05rem] leading-6 text-white/82 sm:mt-5 sm:max-w-xl sm:text-lg sm:leading-8 md:max-w-2xl md:text-xl md:leading-9">
+                  <p className="mt-3 max-w-full whitespace-nowrap text-[0.74rem] leading-4 text-white/82 sm:mt-5 sm:max-w-xl sm:whitespace-normal sm:text-lg sm:leading-8 md:max-w-2xl md:text-xl md:leading-9">
                     {heroSubtitle}
                   </p>
                 </div>

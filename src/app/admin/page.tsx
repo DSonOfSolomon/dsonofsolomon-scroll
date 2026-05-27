@@ -24,7 +24,7 @@ function analyticsDelegatesAvailable() {
     prisma.pageView &&
       prisma.postView &&
       prisma.readingSession &&
-      prisma.subscriberAnalyticsEvent,
+      prisma.subscriberAnalyticsEvent
   );
 }
 
@@ -57,7 +57,10 @@ export default async function AdminDashboardPage({
     prisma.post.count({
       where: { ...creatorWhere, status: "published", universe: "unfiltered" },
     }),
-    prisma.category.count({ where: creatorWhere }),
+    prisma.post.count({
+      where: { ...creatorWhere, status: "published", universe: "series" },
+    }),
+    prisma.series.count({ where: creatorWhere }),
     prisma.follower.count({ where: { ...creatorWhere, status: "active" } }),
     prisma.subscriber.count({ where: { ...creatorWhere, tier: "premium" } }),
     prisma.letterRequest.count({ where: creatorWhere }),
@@ -75,7 +78,8 @@ export default async function AdminDashboardPage({
     draftCount,
     publicCount,
     unfilteredCount,
-    categoryCount,
+    seriesEpisodeCount,
+    seriesCount,
     followerCount,
     premiumCount,
     letterRequestCount,
@@ -145,17 +149,7 @@ export default async function AdminDashboardPage({
           },
         }),
       ])
-    : [
-        0,
-        0,
-        0,
-        0,
-        0,
-        { _avg: { maxProgress: 0, secondsSpent: 0 } },
-        0,
-        0,
-        [],
-      ];
+    : [0, 0, 0, 0, 0, { _avg: { maxProgress: 0, secondsSpent: 0 } }, 0, 0, []];
   const averageProgress = Math.round(readingStats._avg.maxProgress ?? 0);
   const averageSecondsSpent = Math.round(readingStats._avg.secondsSpent ?? 0);
   const topViewedPosts = analyticsPosts
@@ -169,11 +163,8 @@ export default async function AdminDashboardPage({
         title="Dashboard"
         description=""
         action={
-          <Link
-            href="/admin/posts/new"
-            className={adminPrimaryButtonClass}
-          >
-            Create post
+          <Link href="/admin/posts/new" className={adminPrimaryButtonClass}>
+            +
           </Link>
         }
       />
@@ -189,10 +180,10 @@ export default async function AdminDashboardPage({
           {status.reason === "size"
             ? "Homepage text was not saved because the image is over 8MB."
             : status.reason === "type"
-              ? "Homepage text was not saved because the upload is not a supported image file."
-              : status.reason === "blob"
-                ? "Homepage text was not saved because Vercel Blob rejected the upload. Check the function logs for the Blob error."
-              : "Homepage text was not saved because image storage failed. Check the upload storage configuration, then try again."}
+            ? "Homepage text was not saved because the upload is not a supported image file."
+            : status.reason === "blob"
+            ? "Homepage text was not saved because Vercel Blob rejected the upload. Check the function logs for the Blob error."
+            : "Homepage text was not saved because image storage failed. Check the upload storage configuration, then try again."}
         </div>
       ) : null}
 
@@ -237,25 +228,70 @@ export default async function AdminDashboardPage({
           description=""
         />
         <div className="grid gap-4 p-5 sm:grid-cols-2 xl:grid-cols-4">
-          <AdminMetricCard label="Posts" value={postCount} note="Total writings" />
-          <AdminMetricCard label="Published" value={publishedCount} note="Across both universes" />
-          <AdminMetricCard label="Drafts" value={draftCount} note="Still in progress" />
-          <AdminMetricCard label="Writings" value={publicCount} note="Souloverse" />
+          <AdminMetricCard
+            label="Posts"
+            value={postCount}
+            note="Total writings"
+          />
+          <AdminMetricCard
+            label="Published"
+            value={publishedCount}
+            note="Across both universes"
+          />
+          <AdminMetricCard
+            label="Drafts"
+            value={draftCount}
+            note="Still in progress"
+          />
+          <AdminMetricCard
+            label="Writings"
+            value={publicCount}
+            note="Souloverse"
+          />
           {siteFeatures.unfilteredEnabled ? (
-            <AdminMetricCard label="Unfiltered" value={unfilteredCount} note="Premium universe" />
+            <AdminMetricCard
+              label="Unfiltered"
+              value={unfilteredCount}
+              note="Premium universe"
+            />
           ) : null}
-          <AdminMetricCard label="Categories" value={categoryCount} note="Controlled taxonomy" />
-          <AdminMetricCard label="Followers" value={followerCount} note="Push audience" />
+          <AdminMetricCard
+            label="Series"
+            value={seriesCount}
+            note="Serialized worlds"
+          />
+          <AdminMetricCard
+            label="Episodes"
+            value={seriesEpisodeCount}
+            note="Published series posts"
+          />
+
+          <AdminMetricCard
+            label="Followers"
+            value={followerCount}
+            note="Push audience"
+          />
           {siteFeatures.premiumEnabled ? (
-            <AdminMetricCard label="Premium" value={premiumCount} note="Premium members" />
+            <AdminMetricCard
+              label="Premium"
+              value={premiumCount}
+              note="Premium members"
+            />
           ) : null}
           {siteFeatures.letterRequestsEnabled ? (
-            <AdminMetricCard label="Letters" value={letterRequestCount} note="Request queue" />
+            <AdminMetricCard
+              label="Letters"
+              value={letterRequestCount}
+              note="Request queue"
+            />
           ) : null}
-          <AdminMetricCard label="Audience" value={followerCount + premiumCount} note="Combined reach" />
+          <AdminMetricCard
+            label="Audience"
+            value={followerCount + premiumCount}
+            note="Combined reach"
+          />
         </div>
       </AdminPanel>
-
 
       <AdminPanel>
         <AdminPanelHeader
@@ -327,7 +363,6 @@ export default async function AdminDashboardPage({
         </p>
       </AdminPanel>
 
-
       <AdminPanel>
         <AdminPanelHeader
           eyebrow="Homepage"
@@ -354,7 +389,11 @@ export default async function AdminDashboardPage({
             placeholder="Love, life, laughter and systems."
             className={adminInputClass}
           />
-          <input type="hidden" name="heroImage" value={creator.heroImage ?? ""} />
+          <input
+            type="hidden"
+            name="heroImage"
+            value={creator.heroImage ?? ""}
+          />
           {heroPreviewSrc ? (
             <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
               <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
@@ -379,7 +418,9 @@ export default async function AdminDashboardPage({
             </div>
           ) : null}
           <label className="block">
-            <span className="text-sm font-medium text-gray-900">Upload hero image</span>
+            <span className="text-sm font-medium text-gray-900">
+              Upload hero image
+            </span>
             <input
               type="file"
               name="heroImageFile"
@@ -459,17 +500,26 @@ export default async function AdminDashboardPage({
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white text-sm text-gray-700">
               {recentPosts.map((post) => (
-                <tr key={post.id} className="transition-colors hover:bg-gray-50/70">
-                  <td className="w-[13rem] px-4 py-4 font-medium text-gray-950">{post.title}</td>
+                <tr
+                  key={post.id}
+                  className="transition-colors hover:bg-gray-50/70"
+                >
+                  <td className="w-[13rem] px-4 py-4 font-medium text-gray-950">
+                    {post.title}
+                  </td>
                   <td className="whitespace-nowrap px-4 py-4">
-                    <StatusPill tone={post.status === "published" ? "success" : "warning"}>
+                    <StatusPill
+                      tone={post.status === "published" ? "success" : "warning"}
+                    >
                       {post.status}
                     </StatusPill>
                   </td>
                   <td className="whitespace-nowrap px-4 py-4">
                     <StatusPill>{post.universe}</StatusPill>
                   </td>
-                  <td className="whitespace-nowrap px-4 py-4">{post.category?.name ?? "Unassigned"}</td>
+                  <td className="whitespace-nowrap px-4 py-4">
+                    {post.category?.name ?? "Unassigned"}
+                  </td>
                   <td className="whitespace-nowrap px-4 py-4">
                     {post.updatedAt.toLocaleDateString("en-GB", {
                       day: "numeric",

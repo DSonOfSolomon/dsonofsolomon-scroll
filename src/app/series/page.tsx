@@ -122,7 +122,7 @@ export default async function SeriesPage({
           </Link>
         </div>
 
-        <section className="overflow-hidden rounded-[1.75rem] bg-[#081421] text-white">
+        <section className="overflow-hidden rounded-[1.50 rem] bg-[#081421] text-white">
           <div className="px-6 py-8 md:px-9 md:py-10 lg:px-11">
             <div>
               <p className="text-sm font-medium uppercase tracking-[0.2em] text-white/45">
@@ -134,8 +134,7 @@ export default async function SeriesPage({
               </h1>
 
               <p className="mt-5 max-w-2xl text-lg leading-8 text-white/68">
-                Episodic writings live here as connected worlds. Enter a series,
-                then choose the episode you want to read.
+                Immerse yourself in this episodic souloverse.
               </p>
             </div>
           </div>

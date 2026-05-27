@@ -109,7 +109,7 @@ export default async function WritingsPage({
           </Link>
         </div>
 
-        <section className="overflow-hidden rounded-[1.75rem] bg-[#081421] text-white">
+        <section className="overflow-hidden rounded-[1.50 rem] bg-[#081421] text-white">
           <div className="px-6 py-8 md:px-9 md:py-10 lg:px-11">
             <div>
               <p className="text-sm font-medium uppercase tracking-[0.2em] text-white/45">
@@ -121,8 +121,7 @@ export default async function WritingsPage({
               </h1>
 
               <p className="mt-5 max-w-2xl text-lg leading-8 text-white/68">
-                Single pieces arranged as chapters: complete thoughts on love,
-                life, laughter and systems.
+                Immerse yourself in these single pieces 
               </p>
             </div>
           </div>

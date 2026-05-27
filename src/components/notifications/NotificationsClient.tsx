@@ -109,7 +109,7 @@ export default function NotificationsClient() {
       </div>
 
       {loaded && notifications.length === 0 ? (
-        <div className="rounded-[1.25rem] border border-gray-200 bg-white px-6 py-10 text-center">
+        <div className="rounded-[1.25 rem] border border-gray-200 bg-white px-6 py-10 text-center">
           <h2 className="text-lg font-semibold tracking-tight text-gray-950">
             No updates yet
           </h2>

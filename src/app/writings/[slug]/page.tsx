@@ -262,7 +262,7 @@ export default async function WritingPage({ params }: Props) {
           <section className="mt-16 border-t border-gray-200 pb-20 pt-10 md:pb-24">
             <div className="mb-8">
               <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
-                Continue the universe
+                Continue the souloverse
               </p>
 
               <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-950">

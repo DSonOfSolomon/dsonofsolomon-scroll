@@ -188,10 +188,12 @@ export default async function HomePage() {
           </section>
 
           <section className="mt-20 border-t border-gray-200 pb-16 pt-12 md:pb-20">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
+
+            <SouloverseMenuButton />
               <div>
                 <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
-                  Souloverse
+                  Writings
                 </p>
 
                 <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-950 md:text-3xl">
@@ -199,12 +201,11 @@ export default async function HomePage() {
                 </h2>
 
                 <p className="mt-3 max-w-2xl text-base leading-7 text-gray-600">
-                  Begin with the latest chapter, or move deeper into the
-                  Souloverse as the writing keeps unfolding.
+                  
                 </p>
               </div>
 
-              <SouloverseMenuButton />
+              
             </div>
 
             {featuredWritings.length > 0 ? (
@@ -245,7 +246,7 @@ export default async function HomePage() {
                 </p>
 
                 <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-950 md:text-3xl">
-                  Latest series
+                  Latest episodes
                 </h2>
               </div>
 

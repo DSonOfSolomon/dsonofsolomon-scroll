@@ -20,7 +20,7 @@ export default function NotificationsPage() {
   return (
     <PageWrapper>
       <Container className="max-w-[58rem]">
-        <section className="rounded-[1.75rem] bg-[#081421] px-6 py-8 text-white md:px-9 md:py-10">
+        <section className="rounded-[1.75 rem] bg-[#081421] px-6 py-8 text-white md:px-9 md:py-10">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-white/45">
             Reader updates
           </p>

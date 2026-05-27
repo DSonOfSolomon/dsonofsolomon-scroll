@@ -18,7 +18,7 @@ const IMAGE_CONTENT_TYPES: Record<string, string> = {
 export class ImageUploadError extends Error {
   constructor(
     message: string,
-    readonly code: "type" | "size" | "storage",
+    readonly code: "type" | "size" | "storage" | "blob",
   ) {
     super(message);
     this.name = "ImageUploadError";
@@ -73,13 +73,14 @@ export async function saveUploadedImage(
       const blob = await put(`uploads/${filename}`, buffer, {
         access: "public",
         contentType,
+        token: blobToken,
       });
 
       return blob.url;
     } catch (error) {
       throw new ImageUploadError(
         error instanceof Error ? error.message : "Blob upload failed.",
-        "storage",
+        "blob",
       );
     }
   }

@@ -190,6 +190,8 @@ export default async function AdminDashboardPage({
             ? "Homepage text was not saved because the image is over 8MB."
             : status.reason === "type"
               ? "Homepage text was not saved because the upload is not a supported image file."
+              : status.reason === "blob"
+                ? "Homepage text was not saved because Vercel Blob rejected the upload. Check the function logs for the Blob error."
               : "Homepage text was not saved because image storage failed. Check the upload storage configuration, then try again."}
         </div>
       ) : null}

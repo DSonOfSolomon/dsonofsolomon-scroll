@@ -16,6 +16,13 @@ import { siteFeatures } from "@/lib/features";
 import { enforceRateLimitForIdentifier } from "@/lib/rateLimit";
 import { getPrimaryCreator, getUniquePostSlug } from "@/lib/admin";
 import { fallbackSlug } from "@/lib/slugs";
+import {
+  ADMIN_COOKIE_NAME,
+  adminCookieDeleteOptions,
+  adminCookieOptions,
+  adminSessionMatches,
+  getAdminSessionToken,
+} from "@/lib/adminAuth";
 
 function normalizeOptional(value: FormDataEntryValue | null) {
   const normalized = value?.toString().trim();
@@ -56,44 +63,8 @@ function normalizeUniverse(value: FormDataEntryValue | null) {
   return "public";
 }
 
-const ADMIN_COOKIE_NAME = "dsonofsolomon_admin";
-const adminCookieOptions = {
-  httpOnly: true,
-  sameSite: "lax" as const,
-  secure: process.env.NODE_ENV === "production",
-  path: "/",
-  maxAge: 60 * 60 * 24 * 7,
-};
-
-function getAdminSessionSecret() {
-  return process.env.ADMIN_SESSION_SECRET;
-}
-
-function getAdminSessionToken() {
-  const secret = getAdminSessionSecret();
-  return secret || null;
-}
-
-function adminSessionMatches(cookieValue: string | undefined) {
-  const sessionSecret = getAdminSessionSecret();
-  const sessionToken = getAdminSessionToken();
-
-  if (!cookieValue || !sessionSecret || !sessionToken) {
-    return false;
-  }
-
-  const decodedCookieValue = decodeURIComponent(cookieValue);
-
-  return (
-    cookieValue === sessionToken ||
-    cookieValue === sessionSecret ||
-    decodedCookieValue === sessionToken ||
-    decodedCookieValue === sessionSecret
-  );
-}
-
 async function refreshAdminSessionCookie() {
-  const sessionToken = getAdminSessionToken();
+  const sessionToken = await getAdminSessionToken();
 
   if (!sessionToken) {
     return;
@@ -139,7 +110,7 @@ export async function loginAdmin(formData: FormData) {
   const username = normalizeRequired(formData.get("username"));
   const password = normalizeRequired(formData.get("password"));
   const adminUsername = process.env.ADMIN_USERNAME ?? "admin";
-  const sessionToken = getAdminSessionToken();
+  const sessionToken = await getAdminSessionToken();
   const validPassword = await isValidAdminPassword(password);
 
   if (!sessionToken || username !== adminUsername || !validPassword) {
@@ -153,7 +124,10 @@ export async function loginAdmin(formData: FormData) {
 
 export async function logoutAdmin() {
   const cookieStore = await cookies();
-  cookieStore.delete(ADMIN_COOKIE_NAME);
+  cookieStore.delete({
+    name: ADMIN_COOKIE_NAME,
+    ...adminCookieDeleteOptions,
+  });
   redirect("/admin/login");
 }
 
@@ -161,7 +135,7 @@ async function requireAdminSession() {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
 
-  if (!adminSessionMatches(sessionCookie)) {
+  if (!(await adminSessionMatches(sessionCookie))) {
     redirect("/admin/login");
   }
 }
@@ -376,6 +350,7 @@ async function safeCreateInAppNotificationsForPublishedPost(
 }
 
 export async function createPost(formData: FormData) {
+  await requireAdminSession();
   const creator = await getPrimaryCreator();
   const title = normalizeRequired(formData.get("title"));
   const manualSlug = normalizeOptional(formData.get("slug"));
@@ -467,6 +442,7 @@ export async function createPost(formData: FormData) {
 }
 
 export async function updatePost(formData: FormData) {
+  await requireAdminSession();
   const creator = await getPrimaryCreator();
   const id = normalizeRequired(formData.get("id"));
   const title = normalizeRequired(formData.get("title"));
@@ -581,6 +557,7 @@ export async function updatePost(formData: FormData) {
 }
 
 export async function deletePost(formData: FormData) {
+  await requireAdminSession();
   const id = normalizeRequired(formData.get("id"));
   const existing = await prisma.post.findUnique({
     where: { id },
@@ -606,6 +583,7 @@ export async function deletePost(formData: FormData) {
 }
 
 export async function togglePostStatus(formData: FormData) {
+  await requireAdminSession();
   const id = normalizeRequired(formData.get("id"));
   const nextStatus = normalizeRequired(formData.get("nextStatus"));
 
@@ -681,6 +659,7 @@ export async function togglePostStatus(formData: FormData) {
 }
 
 export async function notifyFollowersForPost(formData: FormData) {
+  await requireAdminSession();
   const id = normalizeRequired(formData.get("id"));
 
   const post = await prisma.post.findUnique({
@@ -706,6 +685,7 @@ export async function notifyFollowersForPost(formData: FormData) {
 }
 
 export async function testFollowerNotification(formData: FormData) {
+  await requireAdminSession();
   const creator = await getPrimaryCreator();
   const id = normalizeRequired(formData.get("id"));
 
@@ -743,6 +723,7 @@ export async function testFollowerNotification(formData: FormData) {
 }
 
 export async function deactivateFollower(formData: FormData) {
+  await requireAdminSession();
   const creator = await getPrimaryCreator();
   const id = normalizeRequired(formData.get("id"));
 
@@ -760,6 +741,7 @@ export async function deactivateFollower(formData: FormData) {
 }
 
 export async function createSubscriber(formData: FormData) {
+  await requireAdminSession();
   const creator = await getPrimaryCreator();
   const email = normalizeRequired(formData.get("email")).toLowerCase();
   const name = normalizeOptional(formData.get("name"));
@@ -812,6 +794,7 @@ export async function createSubscriber(formData: FormData) {
 }
 
 export async function deleteSubscriber(formData: FormData) {
+  await requireAdminSession();
   const id = normalizeRequired(formData.get("id"));
   const subscriber = await prisma.subscriber.findUnique({
     where: { id },
@@ -865,6 +848,7 @@ export async function createLetterRequest(formData: FormData) {
 }
 
 export async function updateLetterRequestStatus(formData: FormData) {
+  await requireAdminSession();
   const id = normalizeRequired(formData.get("id"));
   const status = normalizeRequired(formData.get("status"));
 
@@ -877,6 +861,7 @@ export async function updateLetterRequestStatus(formData: FormData) {
 }
 
 export async function deleteLetterRequest(formData: FormData) {
+  await requireAdminSession();
   const id = normalizeRequired(formData.get("id"));
 
   await prisma.letterRequest.delete({
@@ -1032,5 +1017,6 @@ export async function updateCreatorFooter(formData: FormData) {
 }
 
 export async function suggestSlug(formData: FormData) {
+  await requireAdminSession();
   return fallbackSlug(normalizeRequired(formData.get("title")));
 }

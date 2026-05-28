@@ -1,4 +1,5 @@
 import AdminSubmitButton from "@/components/admin/AdminSubmitButton";
+import { loginAdmin } from "@/app/admin/actions";
 
 export default async function AdminLoginPage({
   searchParams,
@@ -15,8 +16,7 @@ export default async function AdminLoginPage({
         </p>
         <h1 className="mt-2 text-2xl font-semibold">Admin login</h1>
         <form
-          action="/api/admin/login"
-          method="post"
+          action={loginAdmin}
           className="mt-6 space-y-4"
         >
           <label className="block">
@@ -43,6 +43,12 @@ export default async function AdminLoginPage({
 
           {error === "1" ? (
             <p className="text-sm text-red-600">Invalid admin login.</p>
+          ) : null}
+
+          {error === "rate-limit" ? (
+            <p className="text-sm text-red-600">
+              Too many attempts. Try again shortly.
+            </p>
           ) : null}
 
           <AdminSubmitButton

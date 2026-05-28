@@ -61,10 +61,10 @@ export default async function AdminPostsPage({
       <AdminPageHeader
         eyebrow="Content"
         title="Manage Souloverse"
-        description="Review writings, series episodes, universe placement, taxonomy, and publishing state from one focused table."
+        description=""
         action={
           <Link href="/admin/posts/new" className={adminPrimaryButtonClass}>
-            Create post
+            +
           </Link>
         }
       />

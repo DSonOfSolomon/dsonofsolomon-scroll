@@ -1,11 +1,11 @@
 import AdminSubmitButton from "@/components/admin/AdminSubmitButton";
 
-export default async function AdminLoginPage({
+export default function AdminLoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: { error?: string };
 }) {
-  const { error } = await searchParams;
+  const { error } = searchParams;
 
   return (
     <main className="min-h-screen bg-[#071220] px-6 py-16 text-white">
@@ -18,7 +18,6 @@ export default async function AdminLoginPage({
           action="/api/admin/login"
           method="post"
           className="mt-6 space-y-4"
-          onSubmit={() => console.log("FORM SUBMITTED")}
         >
           <label className="block">
             <span className="text-sm font-medium text-gray-700">Username</span>

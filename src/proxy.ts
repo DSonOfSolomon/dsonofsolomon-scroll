@@ -5,9 +5,12 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (
+    pathname.startsWith("/api/admin/login") ||
+    pathname.startsWith("/api/admin/logout") ||
     !pathname.startsWith("/admin") ||
     pathname.startsWith("/admin/login") ||
-    pathname.startsWith("/admin/logout")
+    pathname.startsWith("/admin/logout") 
+    
   ) {
     return NextResponse.next();
   }
@@ -25,5 +28,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/api/admin/:path*"],
 };

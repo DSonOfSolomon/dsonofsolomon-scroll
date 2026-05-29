@@ -28,10 +28,7 @@ export async function POST(request: NextRequest) {
   });
 
   if (limited) {
-    return NextResponse.redirect(
-      new URL("/admin/login?error=rate-limit", request.url),
-      303
-    );
+    return NextResponse.redirect(new URL("/admin/login?error=rate-limit", request.nextUrl.origin), 303);
   }
 
   const formData = await request.formData();
@@ -42,13 +39,10 @@ export async function POST(request: NextRequest) {
   const validPassword = await isValidAdminPassword(password);
 
   if (!sessionToken || username !== adminUsername || !validPassword) {
-    return NextResponse.redirect(
-      new URL("/admin/login?error=1", request.url),
-      303
-    );
+    return NextResponse.redirect(new URL("/admin/login?error=1", request.nextUrl.origin), 303);
   }
 
-  const response = NextResponse.redirect(new URL("/admin", request.url), 303);
+  const response = NextResponse.redirect(new URL("/admin", request.nextUrl.origin), 303);
   response.cookies.set(ADMIN_COOKIE_NAME, sessionToken, adminCookieOptions);
 
   return response;

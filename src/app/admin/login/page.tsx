@@ -18,6 +18,7 @@ export default async function AdminLoginPage({
           action="/api/admin/login"
           method="post"
           className="mt-6 space-y-4"
+          onSubmit={() => console.log("FORM SUBMITTED")}
         >
           <label className="block">
             <span className="text-sm font-medium text-gray-700">Username</span>

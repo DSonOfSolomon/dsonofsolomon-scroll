@@ -18,6 +18,7 @@ async function isValidAdminPassword(password: string) {
     process.env.ADMIN_PASSWORD && password === process.env.ADMIN_PASSWORD
   );
 }
+export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   const limited = await enforceRateLimit(request, {
@@ -39,14 +40,6 @@ export async function POST(request: NextRequest) {
   const adminUsername = process.env.ADMIN_USERNAME ?? "admin";
   const sessionToken = await getAdminSessionToken();
   const validPassword = await isValidAdminPassword(password);
-
-  console.log(
-    "ADMIN_SESSION_SECRET exists:",
-    !!process.env.ADMIN_SESSION_SECRET
-  );
-  console.log("Session token generated:", !!sessionToken);
-  console.log("Username match:", username === adminUsername);
-  console.log("Password valid:", validPassword);
 
   if (!sessionToken || username !== adminUsername || !validPassword) {
     return NextResponse.redirect(

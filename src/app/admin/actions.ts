@@ -1,9 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import bcrypt from "bcryptjs";
 import { recordSubscriberAnalyticsEvent } from "@/lib/analytics";
 import { ImageUploadError, saveUploadedImage } from "@/lib/media";
 import {
@@ -13,7 +12,6 @@ import {
 import { createInAppNotificationsForPublishedPost } from "@/lib/inAppNotifications";
 import { prisma } from "@/lib/prisma";
 import { siteFeatures } from "@/lib/features";
-import { enforceRateLimitForIdentifier } from "@/lib/rateLimit";
 import { getPrimaryCreator, getUniquePostSlug } from "@/lib/admin";
 import { fallbackSlug } from "@/lib/slugs";
 import {
@@ -72,54 +70,6 @@ async function refreshAdminSessionCookie() {
 
   const cookieStore = await cookies();
   cookieStore.set(ADMIN_COOKIE_NAME, sessionToken, adminCookieOptions);
-}
-
-async function isValidAdminPassword(password: string) {
-  const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
-
-  if (adminPasswordHash) {
-    return bcrypt.compare(password, adminPasswordHash);
-  }
-
-  return Boolean(
-    process.env.ADMIN_PASSWORD && password === process.env.ADMIN_PASSWORD
-  );
-}
-
-export async function loginAdmin(formData: FormData) {
-  const headerStore = await headers();
-  const forwardedFor = headerStore
-    .get("x-forwarded-for")
-    ?.split(",")[0]
-    ?.trim();
-  const identifier =
-    forwardedFor ||
-    headerStore.get("x-real-ip") ||
-    headerStore.get("cf-connecting-ip") ||
-    "admin-login";
-  const limited = await enforceRateLimitForIdentifier(identifier, {
-    prefix: "admin-login",
-    limit: 5,
-    window: "10 m",
-  });
-
-  if (limited) {
-    redirect("/admin/login?error=rate-limit");
-  }
-
-  const username = normalizeRequired(formData.get("username"));
-  const password = normalizeRequired(formData.get("password"));
-  const adminUsername = process.env.ADMIN_USERNAME ?? "admin";
-  const sessionToken = await getAdminSessionToken();
-  const validPassword = await isValidAdminPassword(password);
-
-  if (!sessionToken || username !== adminUsername || !validPassword) {
-    redirect("/admin/login?error=1");
-  }
-
-  await refreshAdminSessionCookie();
-
-  redirect("/admin");
 }
 
 export async function logoutAdmin() {

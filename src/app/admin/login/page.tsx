@@ -1,5 +1,4 @@
 import AdminSubmitButton from "@/components/admin/AdminSubmitButton";
-import { loginAdmin } from "@/app/admin/actions";
 
 export default async function AdminLoginPage({
   searchParams,
@@ -16,7 +15,8 @@ export default async function AdminLoginPage({
         </p>
         <h1 className="mt-2 text-2xl font-semibold">Admin login</h1>
         <form
-          action={loginAdmin}
+          action="/api/admin/login"
+          method="post"
           className="mt-6 space-y-4"
         >
           <label className="block">

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { recordSubscriberAnalyticsEvent } from "@/lib/analytics";
 import { ImageUploadError, saveUploadedImage } from "@/lib/media";
@@ -16,8 +16,8 @@ import { getPrimaryCreator, getUniquePostSlug } from "@/lib/admin";
 import { fallbackSlug } from "@/lib/slugs";
 import {
   ADMIN_COOKIE_NAME,
-  adminCookieDeleteOptions,
-  adminCookieOptions,
+  getAdminCookieDeleteOptions,
+  getAdminCookieOptions,
   adminSessionMatches,
   getAdminSessionToken,
 } from "@/lib/adminAuth";
@@ -69,14 +69,24 @@ async function refreshAdminSessionCookie() {
   }
 
   const cookieStore = await cookies();
-  cookieStore.set(ADMIN_COOKIE_NAME, sessionToken, adminCookieOptions);
+  const headerStore = await headers();
+  const hostname = headerStore.get("host")?.split(":")[0];
+
+  cookieStore.set(
+    ADMIN_COOKIE_NAME,
+    sessionToken,
+    getAdminCookieOptions(hostname)
+  );
 }
 
 export async function logoutAdmin() {
   const cookieStore = await cookies();
+  const headerStore = await headers();
+  const hostname = headerStore.get("host")?.split(":")[0];
+
   cookieStore.delete({
     name: ADMIN_COOKIE_NAME,
-    ...adminCookieDeleteOptions,
+    ...getAdminCookieDeleteOptions(hostname),
   });
   redirect("/admin/login");
 }

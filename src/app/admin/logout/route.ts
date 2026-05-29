@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   ADMIN_COOKIE_NAME,
-  adminCookieDeleteOptions,
+  getAdminCookieDeleteOptions,
 } from "@/lib/adminAuth";
 
 export async function GET(request: NextRequest) {
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
 
   response.cookies.delete({
     name: ADMIN_COOKIE_NAME,
-    ...adminCookieDeleteOptions,
+    ...getAdminCookieDeleteOptions(request.nextUrl.hostname),
   });
 
   return response;

@@ -12,6 +12,31 @@ export const adminCookieDeleteOptions = {
   path: adminCookieOptions.path,
 };
 
+function getCookieDomain(hostname?: string | null) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    (hostname === "dsonofsolomon.com" || hostname === "www.dsonofsolomon.com")
+  ) {
+    return ".dsonofsolomon.com";
+  }
+
+  return undefined;
+}
+
+export function getAdminCookieOptions(hostname?: string | null) {
+  return {
+    ...adminCookieOptions,
+    domain: getCookieDomain(hostname),
+  };
+}
+
+export function getAdminCookieDeleteOptions(hostname?: string | null) {
+  return {
+    ...adminCookieDeleteOptions,
+    domain: getCookieDomain(hostname),
+  };
+}
+
 function getAdminSessionSecret() {
   return process.env.ADMIN_SESSION_SECRET;
 }

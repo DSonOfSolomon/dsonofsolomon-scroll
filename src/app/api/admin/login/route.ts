@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import {
   ADMIN_COOKIE_NAME,
-  adminCookieOptions,
+  getAdminCookieOptions,
   getAdminSessionToken,
 } from "@/lib/adminAuth";
 import { enforceRateLimit } from "@/lib/rateLimit";
@@ -43,7 +43,11 @@ export async function POST(request: NextRequest) {
   }
 
   const response = NextResponse.redirect(new URL("/admin", request.nextUrl.origin), 303);
-  response.cookies.set(ADMIN_COOKIE_NAME, sessionToken, adminCookieOptions);
+  response.cookies.set(
+    ADMIN_COOKIE_NAME,
+    sessionToken,
+    getAdminCookieOptions(request.nextUrl.hostname)
+  );
 
   return response;
 }

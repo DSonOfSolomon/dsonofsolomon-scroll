@@ -40,6 +40,14 @@ export async function POST(request: NextRequest) {
   const sessionToken = await getAdminSessionToken();
   const validPassword = await isValidAdminPassword(password);
 
+  console.log(
+    "ADMIN_SESSION_SECRET exists:",
+    !!process.env.ADMIN_SESSION_SECRET
+  );
+  console.log("Session token generated:", !!sessionToken);
+  console.log("Username match:", username === adminUsername);
+  console.log("Password valid:", validPassword);
+
   if (!sessionToken || username !== adminUsername || !validPassword) {
     return NextResponse.redirect(
       new URL("/admin/login?error=1", request.url),

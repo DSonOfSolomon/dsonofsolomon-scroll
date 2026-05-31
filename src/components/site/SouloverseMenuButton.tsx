@@ -29,7 +29,7 @@ export default function SouloverseMenuButton() {
       >
         Enter Souloverse
         <span aria-hidden="true" className="text-xs text-white/70">
-          {isOpen ? "^" : "v"}
+          {isOpen ? "⌃" : "⌵"}
         </span>
       </button>
 

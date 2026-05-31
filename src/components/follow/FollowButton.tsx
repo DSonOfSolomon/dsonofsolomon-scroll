@@ -166,6 +166,11 @@ export default function FollowButton({
         aria-pressed={state === "following"}
       >
         {label}
+        {state == "following" && !isPending ? (
+          <span aria-hidden="true" className="ml-1">
+            ⌵
+          </span>
+        ) : null}
       </button>
 
       {open && state === "following" && (

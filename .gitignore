@@ -45,5 +45,6 @@ next-env.d.ts
 
 BUILD_LOG.md
 DEPLOYMENT_GUIDE.md
+ADMIN_AUTH_INCIDENT_NOTES.md
 
 /src/generated/prisma

@@ -1,6 +1,8 @@
 import Container from "@/components/site/Container";
 import PageWrapper from "@/components/site/PageWrapper";
 
+export const dynamic = "force-dynamic";
+
 export default function AdminLayout({
   children,
 }: Readonly<{

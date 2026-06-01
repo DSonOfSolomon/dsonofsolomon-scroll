@@ -91,3 +91,13 @@ export async function createInAppNotificationsForPublishedPost(
 
   return { created: result.count, skipped: false };
 }
+
+export async function deleteInAppNotificationsForPost(postId: string) {
+  const result = await prisma.inAppNotification.deleteMany({
+    where: {
+      postId,
+    },
+  });
+
+  return { deleted: result.count };
+}

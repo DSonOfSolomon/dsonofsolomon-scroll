@@ -63,6 +63,21 @@ export async function POST(request: NextRequest) {
       where: {
         followerId: follower.id,
         readAt: null,
+        OR: [
+          {
+            postId: null,
+          },
+          {
+            post: {
+              is: {
+                status: "published",
+                universe: {
+                  in: ["public", "series"],
+                },
+              },
+            },
+          },
+        ],
       },
       data: {
         readAt: new Date(),
@@ -73,6 +88,21 @@ export async function POST(request: NextRequest) {
       where: {
         id: body.markReadId,
         followerId: follower.id,
+        OR: [
+          {
+            postId: null,
+          },
+          {
+            post: {
+              is: {
+                status: "published",
+                universe: {
+                  in: ["public", "series"],
+                },
+              },
+            },
+          },
+        ],
       },
       data: {
         readAt: new Date(),
@@ -84,6 +114,21 @@ export async function POST(request: NextRequest) {
     prisma.inAppNotification.findMany({
       where: {
         followerId: follower.id,
+        OR: [
+          {
+            postId: null,
+          },
+          {
+            post: {
+              is: {
+                status: "published",
+                universe: {
+                  in: ["public", "series"],
+                },
+              },
+            },
+          },
+        ],
       },
       orderBy: {
         createdAt: "desc",
@@ -102,6 +147,21 @@ export async function POST(request: NextRequest) {
       where: {
         followerId: follower.id,
         readAt: null,
+        OR: [
+          {
+            postId: null,
+          },
+          {
+            post: {
+              is: {
+                status: "published",
+                universe: {
+                  in: ["public", "series"],
+                },
+              },
+            },
+          },
+        ],
       },
     }),
   ]);

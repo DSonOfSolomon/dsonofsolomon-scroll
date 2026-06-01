@@ -9,7 +9,10 @@ import {
   notifyFollowersOfPublishedPost,
   sendFollowerTestNotification,
 } from "@/lib/notifications";
-import { createInAppNotificationsForPublishedPost } from "@/lib/inAppNotifications";
+import {
+  createInAppNotificationsForPublishedPost,
+  deleteInAppNotificationsForPost,
+} from "@/lib/inAppNotifications";
 import { prisma } from "@/lib/prisma";
 import { siteFeatures } from "@/lib/features";
 import { getPrimaryCreator, getUniquePostSlug } from "@/lib/admin";
@@ -309,6 +312,21 @@ async function safeCreateInAppNotificationsForPublishedPost(
   }
 }
 
+async function safeDeleteInAppNotificationsForPost(postId: string) {
+  try {
+    const summary = await deleteInAppNotificationsForPost(postId);
+    console.info(
+      "In-app notification cleanup summary",
+      JSON.stringify({
+        postId,
+        deleted: summary.deleted,
+      })
+    );
+  } catch (error) {
+    console.error("In-app notification cleanup failed", error);
+  }
+}
+
 export async function createPost(formData: FormData) {
   await requireAdminSession();
   const creator = await getPrimaryCreator();
@@ -469,11 +487,23 @@ export async function updatePost(formData: FormData) {
     },
   });
 
-  const shouldCreateReaderNotifications =
+  const existingWasReaderVisible =
+    existing.status === "published" &&
+    (existing.universe === "public" || existing.universe === "series");
+  const updatedIsReaderVisible =
     updatedPost.status === "published" &&
-    (updatedPost.universe === "public" || updatedPost.universe === "series") &&
+    (updatedPost.universe === "public" || updatedPost.universe === "series");
+  const shouldDeleteReaderNotifications =
+    existingWasReaderVisible &&
+    (!updatedIsReaderVisible || existing.universe !== updatedPost.universe);
+  const shouldCreateReaderNotifications =
+    updatedIsReaderVisible &&
     (existing.status !== "published" ||
       existing.universe !== updatedPost.universe);
+
+  if (shouldDeleteReaderNotifications) {
+    await safeDeleteInAppNotificationsForPost(updatedPost.id);
+  }
 
   if (shouldCreateReaderNotifications) {
     await safeCreateInAppNotificationsForPublishedPost({
@@ -574,6 +604,14 @@ export async function togglePostStatus(formData: FormData) {
       publishedAt: nextStatus === "published" ? new Date() : null,
     },
   });
+
+  if (
+    existing.status === "published" &&
+    updatedPost.status !== "published" &&
+    (existing.universe === "public" || existing.universe === "series")
+  ) {
+    await safeDeleteInAppNotificationsForPost(existing.id);
+  }
 
   if (
     existing.status !== "published" &&

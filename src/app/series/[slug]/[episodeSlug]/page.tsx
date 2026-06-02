@@ -157,9 +157,6 @@ export default async function SeriesEpisodePage({ params }: Props) {
                 <span>{readingTime} min read</span>
               </div>
 
-              <div className="mt-7">
-                <ShareButton title={shareTitle} text={shareText} url={shareUrl} />
-              </div>
             </div>
 
             {post.coverImage ? (
@@ -188,7 +185,13 @@ export default async function SeriesEpisodePage({ params }: Props) {
             </div>
           </article>
 
-          {siteFeatures.followEnabled && <PostFollowPrompt />}
+          {siteFeatures.followEnabled && (
+            <PostFollowPrompt
+              shareAction={
+                <ShareButton title={shareTitle} text={shareText} url={shareUrl} />
+              }
+            />
+          )}
           <div className="pb-20 md:pb-24" />
         </SeriesAccessGate>
       </Container>

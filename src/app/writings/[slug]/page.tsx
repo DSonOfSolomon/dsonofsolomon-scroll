@@ -199,9 +199,6 @@ export default async function WritingPage({ params }: Props) {
                   <span>{readingTime} min read</span>
                 </div>
 
-                <div className="mt-7">
-                  <ShareButton title={shareTitle} text={shareText} url={shareUrl} />
-                </div>
               </div>
 
               <div className="overflow-hidden rounded-[2rem] border border-gray-200 bg-[#f7f5ef]">
@@ -239,9 +236,6 @@ export default async function WritingPage({ params }: Props) {
                 <span>{readingTime} min read</span>
               </div>
 
-              <div className="mt-7">
-                <ShareButton title={shareTitle} text={shareText} url={shareUrl} />
-              </div>
             </div>
           )}
 
@@ -256,7 +250,13 @@ export default async function WritingPage({ params }: Props) {
           </div>
         </article>
 
-        {siteFeatures.followEnabled && <PostFollowPrompt />}
+        {siteFeatures.followEnabled && (
+          <PostFollowPrompt
+            shareAction={
+              <ShareButton title={shareTitle} text={shareText} url={shareUrl} />
+            }
+          />
+        )}
 
         {(primaryContinuation || continuationWritings.length > 0) && (
           <section className="mt-16 border-t border-gray-200 pb-20 pt-10 md:pb-24">

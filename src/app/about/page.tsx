@@ -18,7 +18,7 @@ export default function AboutPage() {
           </h1>
 
           <p className="mt-4 leading-8 text-gray-700">
-            Welcome to my writing system.
+            Welcome to my Souloverse.
           </p>
         </Container>
       </PageWrapper>

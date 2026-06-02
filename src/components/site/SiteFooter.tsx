@@ -20,8 +20,7 @@ export default async function SiteFooter() {
             </p>
 
             <p className="max-w-2xl text-sm leading-7 text-white/72">
-              A quieter place for considered writing on life, pattern, and
-              perspective.
+            
             </p>
 
             <div className="flex items-center gap-1.5 text-white">

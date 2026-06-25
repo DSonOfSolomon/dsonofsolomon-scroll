@@ -91,7 +91,7 @@ export default async function SiteFooter() {
               text={creator.currentWorkingOn ?? "The D•sonofSolomon writing system."}
             />
           </p>
-          <p>© {currentYear} D•sonofSolomon</p>
+          <p>© {currentYear} Souloscroll</p>
         </div>
       </div>
     </footer>

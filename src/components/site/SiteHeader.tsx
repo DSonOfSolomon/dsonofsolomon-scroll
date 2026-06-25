@@ -73,7 +73,7 @@ export default function SiteHeader() {
           href={brandHref}
           className="text-base font-semibold tracking-tight !text-[#f4ead7] transition-colors hover:!text-white"
         >
-          D•sonofSolomon
+          Souloscroll
         </Link>
 
         {/* Desktop nav */}
